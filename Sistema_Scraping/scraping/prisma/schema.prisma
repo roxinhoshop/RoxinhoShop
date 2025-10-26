@@ -11,13 +11,16 @@ datasource db {
 }
 
 // Define o modelo de Produto para armazenamento de dados coletados.
-model Product {
-  id          String    @id @default(cuid())
-  title       String    @db.LongText
-  price       String
-  description String?   @db.LongText
-  avaliation  String?   
-  link        String    @db.LongText
-  image       String?   @db.LongText
+model Produto {
+id_prdt Int @id @default(autoincrement())
+titulo_prdt String
+preco_prdt Float
+descricao_prdt String @db.Text
+avaliacao_prdt Float?
+imagem_prdt Bytes?
+link_prdt String?
+data_coleta DateTime @default(now())
+@@index([titulo_prdt])
+@@index([preco_prdt])
+@@index([avaliacao_prdt])
 }
-

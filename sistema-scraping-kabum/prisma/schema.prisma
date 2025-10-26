@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "mysql://root:neFMagcBhfWUyBoRNMCBBTCZsTeyeBja@switchback.proxy.rlwy.net:46156/railway"
+}
+
+model Produto {
+id_prdt Int @id @default(autoincrement())
+titulo_prdt String
+preco_prdt Float
+descricao_prdt String @db.Text
+avaliacao_prdt Float?
+imagem_prdt String?
+link_prdt String?
+data_coleta DateTime @default(now())
+@@index([titulo_prdt])
+@@index([preco_prdt])
+@@index([avaliacao_prdt])
+}

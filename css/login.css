@@ -1,0 +1,239 @@
+/* ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== */
+/* Desenvolvido por Gabriel (gabwvr) */
+/* Este arquivo contém estilos para [SEÇÃO] */
+/* Cores principais: Roxo (#7c3aed) e Amarelo (#eab308) */
+
+
+/* ==============================
+   🔹 RESET BÁSICO
+============================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Nunito Sans", sans-serif;
+}
+
+body {
+  background: #ffffff; /* fundo branco sólido */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* Cabeçalho em cima, rodapé embaixo */
+}
+
+/* ==============================
+   🔹 CONTAINER DO LOGIN
+============================== */
+.container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.login-section {
+  width: 100%;
+  max-width: 500px; /* centraliza sem "espremer" */
+}
+
+.login-card {
+  background: #ffffff;
+  width: 100%;              /* ocupa o espaço até o limite do section */
+  max-width: 500px;         /* largura máxima da caixinha */
+  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* ==============================
+   🔹 TÍTULO
+============================== */
+.welcome-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.3rem;
+}
+
+.welcome-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+/* ==============================
+   🔹 INPUTS
+============================== */
+/* ====== FLOATING LABEL STYLES ====== */
+.form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 0.9rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+}
+
+/* 🔹 Label flutuante */
+.floating-label {
+  font-family: Nunito Sans, sans-serif;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* O * obrigatório em vermelho */
+.floating-label .required {
+  color: #e63946; /* Vermelho destaque */
+}
+
+/* 🔹 Quando o campo está em foco ou já tem valor preenchido */
+.form-input:focus + .floating-label,
+.form-input:valid + .floating-label {
+  top: -6px;
+  left: 8px;
+  font-size: 0.8rem;
+  color: #7c3aed;
+  background: #fff;
+  padding: 0 4px;
+}
+
+/* ==========================
+   🔹 ERROS NOS INPUTS
+========================== */
+.error-message {
+  color: #e63946;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.error-message.ativo {
+  display: block;
+  opacity: 1;
+}
+
+.form-input.error {
+  border-color: #e63946 !important;
+  background: #fff5f5;
+}
+
+
+/* ==============================
+   🔹 LINKS
+============================== */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #7c3aed;;
+  margin-top: 1.5rem;
+}
+
+.forgot-password a {
+  color: #7c3aed;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+
+/* ==============================
+   🔹 AVISO BETA
+============================== */
+.beta-notice {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  padding: 0.7rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #856404;
+  margin-bottom: 1.2rem;
+}
+
+/* ==============================
+   🔹 BOTÃO LOGIN
+============================== */
+.login-button {
+  width: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border: none;
+  padding: 0.9rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(90deg, #6d28d9, #a78bfa);
+  transform: translateY(-2px);
+}
+
+/* ==============================
+   🔹 BOTÃO GOOGLE
+============================== */
+.g_id_signin,
+.google-btn {
+  margin-top: 1rem;
+  width: 100% !important;
+  border-radius: 25px !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+}
+
+/* ==============================
+   🔹 LINK CADASTRO
+============================== */
+.register-link {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 1.5rem;
+}
+
+.register-link a {
+  color: #7c3aed;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* ==============================
+   🔹 RESPONSIVIDADE
+============================== */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .welcome-text {
+    font-size: 1.5rem;
+  }
+}

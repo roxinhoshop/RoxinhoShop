@@ -1,0 +1,597 @@
+/* ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== */
+/* Desenvolvido por Gabriel (gabwvr) */
+/* Este arquivo contém estilos para [SEÇÃO] */
+/* Cores principais: Roxo (#7c3aed) e Amarelo (#eab308) */
+
+
+* {
+    margin: 0;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: "Nunito Sans", sans-serif;
+}
+
+body {
+  display: block;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #5b5bf6;
+    --secondary-color: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --error-color: #ef4444;
+    --warning-color: #f59e0b;
+    --success-color: #10b981;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Container principal */
+.container { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Seção de cadastro */
+.secao-cadastro {
+    flex: 1;
+    max-width: 500px;
+}
+
+/* Cartão de cadastro */
+.cartao-cadastro {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    width: 500px;
+}
+
+.cartao-cadastro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+/* Título */
+.texto-titulo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+/* Subtítulo */
+.texto-subtitulo {
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+/* ====== ESTRUTURA PADRONIZADA ====== */
+.linha-formulario {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.grupo-formulario {
+    position: relative;
+}
+
+.grupo-formulario.coluna-completa {
+    grid-column: 1 / -1;
+    margin-bottom: 1.5rem;
+}
+
+/* ====== FLOATING LABEL STYLES ====== */
+.floating-label-container {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.floating-label {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: #fff;
+    padding: 0 0.25rem;
+}
+
+.entrada-formulario:focus + .floating-label,
+.entrada-formulario:not(:placeholder-shown) + .floating-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: #7c3aed;
+    background: #fff;
+    padding: 0 0.5rem;
+}
+
+/* ====== INPUTS PADRONIZADOS ====== */
+.entrada-formulario {
+    width: 100%;
+    height: 52px;
+    padding: 16px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 1rem;
+    line-height: 1.2;
+    background: transparent;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.entrada-formulario:focus {
+    border-color: #d1d5db;
+    box-shadow: none;
+    outline: none;
+    transform: none;
+}
+
+.entrada-formulario::placeholder {
+    color: transparent;
+}
+
+.entrada-formulario.invalido {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.entrada-formulario.valido {
+    border-color: #d1d5db;
+    box-shadow: none;
+}
+
+.entrada-formulario.invalido + .floating-label {
+    color: var(--error-color);
+}
+
+/* ====== FEEDBACK DA SENHA ====== */
+.feedback-senha {
+    margin: 0;             /* não deixa espaço fixo */
+    position: relative;
+}
+
+/* só adiciona espaço quando estiver visível */
+.feedback-senha.visivel {
+    margin-top: 0.5rem;
+}
+
+/* container do indicador no fluxo normal */
+.indicador-senha-container {
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    position: relative;  /* não mais absolute */
+    height: 0;           /* sem ocupar espaço */
+    overflow: hidden;    /* oculta conteúdo */
+}
+
+/* quando visível ocupa espaço */
+.indicador-senha-container.visivel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    height: auto;        /* ocupa altura do conteúdo */
+    overflow: visible;
+}
+
+.barra-forca-senha {
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progresso-forca-senha {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.progresso-forca-senha::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: brilho 2s infinite;
+}
+
+@keyframes brilho {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.texto-forca-senha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nivel-forca {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pontuacao-forca {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* Cores para diferentes níveis de força */
+.forca-fraca .progresso-forca-senha {
+    background: linear-gradient(90deg, #ff0000, #ff0000);
+}
+.forca-fraca .nivel-forca {
+    color: #ff0000;
+}
+
+.forca-moderada .progresso-forca-senha {
+    background: linear-gradient(90deg, #eab308, #facc15);
+}
+.forca-moderada .nivel-forca {
+    color: #eab308;
+}
+
+.forca-forte .progresso-forca-senha {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.forca-forte .nivel-forca {
+    color: #22c55e;
+}
+
+/* Mensagem de aviso para senhas curtas */
+.aviso-senha-curta {
+    color: var(--error-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin-top: -0.5em;
+}
+
+.aviso-senha-curta.visivel {
+    display: block;
+}
+
+/* Mensagens de erro */
+.mensagem-erro {
+    color: var(--error-color);
+    font-weight: 500;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: none;
+    animation: aparecerErro 0.3s ease forwards;
+}
+
+.mensagem-erro.visivel {
+    display: block;
+}
+
+@keyframes aparecerErro {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.icone-aviso {
+    font-size: 0.875rem;
+    animation: pulsoAviso 2s infinite;
+}
+
+@keyframes pulsoAviso {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Botão */
+.botao-cadastro {
+    width: 100%;
+    height: 52px;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    color: white;
+    border: none;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 25px;
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.botao-cadastro:hover {
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    transform: translateY(-1px);
+}
+
+.botao-cadastro:active {
+    transform: translateY(0);
+}
+
+.link-login {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.link-login a {
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.link-login a:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+}
+
+/* Mensagens de sucesso */
+.mensagem-sucesso {
+    color: var(--success-color);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+    animation: deslizarParaBaixo 0.3s ease;
+}
+
+.mensagem-sucesso-formulario {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-left: 4px solid var(--success-color);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    animation: deslizarParaBaixo 0.4s ease;
+}
+
+.mensagem-erro-formulario {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-left: 4px solid var(--error-color);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    animation: deslizarParaBaixo 0.4s ease;
+}
+
+.icone-sucesso {
+    font-size: 1.5rem;
+    animation: sucessoPulso 0.6s ease;
+}
+
+.icone-erro {
+    font-size: 1.5rem;
+    animation: erroPulso 0.6s ease;
+}
+
+.texto-sucesso h3 {
+    color: var(--success-color);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.texto-sucesso p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.texto-erro {
+    color: var(--error-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+@keyframes deslizarParaBaixo {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes sucessoPulso {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes erroPulso {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Estado de carregamento */
+.botao-cadastro.carregando {
+    pointer-events: none;
+    position: relative;
+}
+
+.botao-cadastro.carregando::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: rotacao 1s linear infinite;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes rotacao {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Design responsivo */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .secao-marca {
+        order: 2;
+    }
+
+    .secao-cadastro {
+        order: 1;
+        width: 100%;
+    }
+
+    .cartao-cadastro {
+        padding: 2rem;
+    }
+
+    .linha-formulario {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .titulo-marca {
+        font-size: 2rem;
+    }
+
+    .logo-marca {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.5rem;
+    }
+
+    .cartao-cadastro {
+        padding: 1.5rem;
+    }
+
+    .texto-titulo {
+        font-size: 1.5rem;
+    }
+
+    .entrada-formulario,
+    .botao-cadastro {
+        height: 48px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.apenas-leitura-tela {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.floating-label .required {
+    color: #e63946;
+}
+/* ===== ANIMAÇÕES PARA NOTIFICAÇÕES ===== */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+

@@ -1,0 +1,1535 @@
+/* ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== */
+/* Desenvolvido por Gabriel (gabwvr) */
+/* Este arquivo contém estilos para [SEÇÃO] */
+/* Cores principais: Roxo (#7c3aed) e Amarelo (#eab308) */
+
+
+/* ======================= FONTES ======================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Epunda+Sans:ital,wght@0,300..900;1,300..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Roboto&display=swap');
+
+*{
+  margin: 0;
+  padding: 0;
+  font-family: "Nunito Sans", sans-serif;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+body {
+  background: #fdfdfd;
+  color: #1f1f1f;
+}
+
+/* ======================= CABEÇALHO ======================= */
+.cabecalho {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.08);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.container-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+
+/* Logo com imagem */
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-imagem {
+  margin-left: 10px;
+  margin-bottom: -5px;
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  transition: filter 0.3s ease;
+}
+
+.logo:hover .logo-imagem {
+  filter: brightness(1.1);
+}
+
+
+/* ======================= PESQUISA ======================= */
+.caixa-pesquisa {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+  margin: 0 auto; /* Centraliza */
+  display: flex;
+  justify-content: center;
+}
+
+
+.caixa-pesquisa input {
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  border-radius: 30px;
+  border: 1px solid #ececec;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.caixa-pesquisa input::placeholder {
+  color: #bbb; /* placeholder cinza claro */
+}
+
+.caixa-pesquisa input:focus {
+  box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
+}
+
+/* Ícone */
+.caixa-pesquisa i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #883fd8; /* roxo */
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.caixa-pesquisa i:hover {
+  color: #883fd8; /* roxo mais claro no hover */
+}
+
+/* ======================= ICONES HEADER ======================= */
+.icones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Caixa Entre */
+.caixa-entre {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  color: #1f1f1f;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  gap: 0.8rem;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+  border: 1px solid #dddddd;
+}
+.caixa-entre:hover {
+  box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
+}
+.caixa-entre .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #883fd8;
+}
+.caixa-entre .seta {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: #883fd8;
+}
+
+/* Caixa Carrinho */
+.caixa-carrinho {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #dddddd;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.caixa-carrinho:hover {
+  box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
+  transform: scale(1.05);
+}
+.caixa-carrinho i {
+  font-size: 1.2rem;
+  color: #883fd8;
+}
+.caixa-carrinho .contador-carrinho {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #fab709;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* ======================= CATEGORIAS GRID ======================= */
+.categorias {
+  padding: 2rem;
+  text-align: center;
+}
+.categorias h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #883fd8;
+}
+.grid-categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e0d7ff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(167, 139, 250, 0.3);
+}
+.card i {
+  font-size: 2rem;
+  color: #883fd8;
+  margin-bottom: 0.8rem;
+}
+.card h3 {
+  font-size: 1.2rem;
+}
+
+/* ======================= BARRA DE CATEGORIAS ======================= */
+.barra-categorias {
+  display: flex;
+  justify-content: center;
+  background: #1e1e1e;
+  padding: 0.7rem 2rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 100;
+}
+
+.barra-categorias ul {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+}
+
+.barra-categorias ul li {
+  position: relative;
+}
+
+/* LINKS PRINCIPAIS */
+.barra-categorias ul li a {
+  color: #e0e0e0;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.barra-categorias ul li a:hover {
+  background: rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
+}
+
+/* 🔶 DESTAQUE PARA DEPARTAMENTOS */
+.barra-categorias ul li.dropdown > a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #eab308, #f59e0b);
+  color: white;
+  padding: 0.8rem 1.4rem;
+  border-radius: 12px;
+  font-weight: bold;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.barra-categorias ul li.dropdown > a:hover {
+  background: linear-gradient(135deg, #967206, #835505);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 234, 149, 0.4);
+}
+
+/* 🔽 SUBMENU */
+.barra-categorias .submenu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: #1e1e1e;
+  min-width: 220px;
+  border-radius: 10px;
+  padding: 0.5rem 0;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.35s ease;
+}
+
+/* itens do submenu */
+.barra-categorias .submenu li a {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: #ccc;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.barra-categorias .submenu li a:hover {
+  background: rgba(104, 104, 104, 0.15);
+  color: #883fd8;
+}
+
+/* Ativar animação ao hover */
+.barra-categorias ul li.dropdown:hover .submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.barra-categorias li.dropdown.open > .submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ======================= BARRA DE CATEGORIAS ======================= */
+.barra-categorias ul {
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  background: #1e1e1e;
+}
+
+.barra-categorias li {
+  position: relative;
+}
+
+.barra-categorias > ul > li > a {
+  display: block;
+  padding: 12px 18px;
+  color: #ffffff;  /* texto sempre branco */
+  text-decoration: none;
+}
+
+.barra-categorias > ul > li > a:hover {
+  background: #272727; /* roxo no hover */
+  color: #ffffff; /* garante que não some */
+}
+
+/* Submenu escondido por padrão */
+.barra-categorias .submenu {
+  display: none;
+  position: absolute;
+  background: #fdfdfd;
+  top: calc(100% + 8px); /* empurra 8px pra baixo */
+  left: 0;
+  min-width: 200px;
+  border-radius: 6px;
+  z-index: 999;
+}
+
+.barra-categorias li.open > .submenu {
+  display: block;
+}
+
+/* Submenu de 2º nível (Hardware, Periféricos...) */
+.barra-categorias li.tem-submenu .submenu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+}
+
+/* Hover para abrir apenas submenus */
+.barra-categorias li.tem-submenu:hover > .submenu {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.barra-categorias .submenu li a {
+  padding: 10px 15px;
+  color: #000000;
+  text-decoration: none;
+  display: flex;   
+  justify-content: space-between;  
+  align-items: center;
+}
+
+.barra-categorias .submenu li a:hover {
+  background: a78bfa;
+  color: #000000;
+}
+
+/* ======================= RODAPÉ ======================= */
+.rodape {
+  background: #1e1e1e;
+  color: #eee;
+  padding: 3rem 2rem 1.5rem;
+}
+
+/* ======================= RODAPÉ HORIZONTAL ======================= */
+.rodape-container {
+  display: flex;            /* transforma em linha */
+  flex-wrap: wrap;          /* permite quebrar linha em telas pequenas */
+  justify-content: space-between; /* espaço entre colunas */
+  align-items: flex-start;
+  gap: 40px;                /* espaço entre seções */
+}
+
+.rodape-logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rodape-container > div {
+  flex: 1;                  /* cada coluna ocupa espaço igual */
+}
+
+.rodape-logo h2 {
+  margin-bottom: 0.5rem;
+  text-align: center;         /* centralizar logo */
+}
+
+.rodape-container h3 {
+  margin-bottom: 0.5rem;
+  text-align: left;         /* títulos alinhados à esquerda */
+}
+
+.rodape-container ul li a {
+  display: inline-block;
+  text-align: left;         /* links alinhados à esquerda */
+}
+
+.copy {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-top: 10px;
+}
+
+
+.rodape img {
+  max-width: 180px;
+}
+
+.copy {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* ======================= RODAPÉ MINIMALISTA ======================= */
+.rodape-minimalista {
+  background: #1e1e1e;
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+}
+
+.rodape-logo h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #883fd8; /* Roxo */
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.copy {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.rodape-redes {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.rodape-redes a {
+  font-size: 1.4rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.rodape-redes a:hover {
+  color: #883fd8; /* Roxo no hover */
+  transform: scale(1.2);
+}
+
+.newsletter {
+  margin-top: 15px;
+}
+
+.newsletter h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #fff;
+  padding-bottom: 6px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.newsletter-form input::placeholder {
+  color: #ccc;
+}
+
+.newsletter-form button {
+  background: #883fd8; /* amarelo do print */
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.3s ease;
+}
+
+.newsletter-form button:hover {
+  background: #ffd500;
+}
+
+.payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* espaço entre os ícones */
+}
+
+.payment-icons img {
+  height: 40px;  /* deixa todos com mesmo tamanho */
+  width: auto;
+  object-fit: contain;
+}
+
+.rodape {
+  background: #1e1e1e;
+  color: #fff;
+  padding: 40px 20px;
+}
+
+.rodape-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr; /* 5 colunas equilibradas */
+  gap: 40px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.rodape-logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rodape-logo h2 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.rodape-logo span {
+  color: #7c3aed; /* destaque roxo */
+}
+
+.rodape-redes {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.rodape-redes a {
+  font-size: 1.2rem;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.rodape-redes a:hover {
+  color: #7c3aed;
+}
+
+.rodape-container h3 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #7c3aed;
+}
+
+.rodape-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.rodape-container ul li {
+  margin-bottom: 8px;
+}
+
+.rodape-container ul li a {
+  color: #ddd;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.rodape-container ul li a:hover {
+  color: #fff;
+}
+
+.copy {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-top: 10px;
+  grid-column: 1 / -1;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+/* Formas de pagamento */
+.payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.payment-icons img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Newsletter */
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #fff;
+  padding-bottom: 6px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.newsletter-form input::placeholder {
+  color: #ccc;
+}
+
+.newsletter-form button {
+  background: #7c3aed;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.3s ease;
+  color: white;
+}
+
+.newsletter-form button:hover {
+  background: #6d28d9;
+}
+
+/* Responsividade do rodapé */
+@media (max-width: 1024px) {
+  .rodape-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .rodape-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+  
+  .rodape {
+    padding: 30px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rodape-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .payment-icons {
+    justify-content: center;
+  }
+  
+  .rodape-redes {
+    justify-content: center;
+  }
+}
+
+/* Newsletter */
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #fff;
+  padding-bottom: 6px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.newsletter-form input::placeholder {
+  color: #aaa;
+}
+
+.newsletter-form button {
+  background: #883fd8;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.3s ease;
+}
+
+.newsletter-form button:hover {
+  background: #7c3aed;
+}
+
+/* Ícones de pagamento */
+.payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.payment-icons img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+
+/* ======================= CALCULADOR DE CEP ======================= */
+.caixa-cep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.caixa-cep:hover {
+  border-color: #883fd8;
+  background: #faf5ff;
+}
+
+.icone-cep {
+  color: #883fd8;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.caixa-cep .texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.input-cep {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  outline: none;
+  padding: 0;
+  width: 100%;
+}
+
+.input-cep::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.resultado-cep {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.resultado-cep.loading {
+  color: #883fd8;
+}
+
+.resultado-cep.success {
+  color: #10b981;
+}
+
+.resultado-cep.error {
+  color: #ef4444;
+}
+
+/* Responsividade para o CEP */
+@media (max-width: 768px) {
+  .caixa-cep {
+    min-width: 150px;
+    padding: 6px 8px;
+  }
+  
+  .input-cep {
+    font-size: 11px;
+  }
+  
+  .resultado-cep {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .caixa-cep {
+    display: none; /* Ocultar em telas muito pequenas */
+  }
+}
+
+
+/* ======================= CAIXA DE CEP ======================= */
+.caixa-cep {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  gap: 0.8rem;
+  border: 1px solid #dddddd;
+  transition: box-shadow 0.3s ease;
+  min-width: 180px;
+}
+
+.caixa-cep:hover {
+  box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
+}
+
+.icone-cep {
+  color: #883fd8;
+  font-size: 1.1rem;
+}
+
+.caixa-cep .texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.input-cep {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  width: 100px;
+  padding: 0;
+}
+
+.input-cep::placeholder {
+  color: #999;
+}
+
+.resultado-cep {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.resultado-cep.loading {
+  color: #883fd8;
+}
+
+.resultado-cep.success {
+  color: #10b981;
+}
+
+.resultado-cep.error {
+  color: #ef4444;
+}
+
+/* ======================= LISTA DE DESEJOS ======================= */
+.caixa-desejos {
+  position: relative;
+}
+
+.botao-desejos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #dddddd;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  text-decoration: none;
+  position: relative;
+}
+
+.botao-desejos:hover {
+  box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
+  transform: scale(1.05);
+}
+
+.icone-desejos {
+  font-size: 1.2rem;
+  color: #883fd8;
+}
+
+.contador-desejos {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #fab709;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  min-width: 20px;
+}
+
+.dropdown-desejos {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.cabecalho-desejos {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cabecalho-desejos h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.cabecalho-desejos span {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.lista-desejos-conteudo {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.lista-vazia {
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+  margin: 0;
+}
+
+.rodape-desejos {
+  padding: 1rem;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.ver-todos-desejos {
+  color: #883fd8;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.ver-todos-desejos:hover {
+  text-decoration: underline;
+}
+
+/* ======================= MELHORIAS NA CAIXINHA DE LOGIN ======================= */
+.caixa-entre {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-usuario {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 200px;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.opcoes-usuario {
+  padding: 0.5rem 0;
+}
+
+.opcoes-usuario a {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.opcoes-usuario a:hover {
+  background-color: #f8f9fa;
+}
+
+.opcoes-usuario a i {
+  color: #883fd8;
+  width: 16px;
+}
+
+/* ======================= CONTADOR DO CARRINHO ======================= */
+/* Caixa do carrinho (precisa ser relative para posicionar o contador) */
+.caixa-carrinho {
+  position: relative;
+  text-decoration: none; /* tira sublinhado do link */
+  color: inherit;        /* mantém cor padrão */
+}
+
+/* Ícone do carrinho */
+.icone-carrinho {
+  font-size: 24px;
+}
+
+/* Contador do carrinho */
+.contador-carrinho {
+  position: absolute;
+  top: -8px;   /* sobe */
+  right: -10px; /* desloca para a direita */
+  background: #fab709;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0 5px;
+  box-sizing: border-box;
+}
+
+/* ======================= TEMA ESCURO PARA O CABEÇALHO ======================= */
+[data-theme="dark"] .cabecalho {
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .caixa-pesquisa-centralizada input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+[data-theme="dark"] .caixa-pesquisa-centralizada input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .caixa-entre,
+[data-theme="dark"] .caixa-carrinho,
+[data-theme="dark"] .botao-desejos,
+[data-theme="dark"] .caixa-cep {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+[data-theme="dark"] .caixa-entre .texto strong,
+[data-theme="dark"] .caixa-entre .texto span {
+  color: white;
+}
+
+[data-theme="dark"] .input-cep {
+  color: white;
+}
+
+[data-theme="dark"] .input-cep::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .dropdown-usuario,
+[data-theme="dark"] .dropdown-desejos {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .opcoes-usuario a,
+[data-theme="dark"] .cabecalho-desejos h4,
+[data-theme="dark"] .cabecalho-desejos span {
+  color: white;
+}
+
+[data-theme="dark"] .opcoes-usuario a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ======================= RESPONSIVIDADE MELHORADA ======================= */
+@media (max-width: 768px) {
+  .icones {
+    gap: 0.5rem;
+  }
+  
+  .caixa-cep {
+    min-width: 140px;
+  }
+  
+  .input-cep {
+    width: 80px;
+    font-size: 0.8rem;
+  }
+  
+  .dropdown-desejos,
+  .dropdown-usuario {
+    width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .caixa-cep {
+    display: none;
+  }
+  
+  .caixa-entre .texto {
+    display: none;
+  }
+  
+  .caixa-entre {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    justify-content: center;
+  }
+  
+  .seta {
+    display: none;
+  }
+}
+
+
+/* ======================= ESTILOS PARA ITENS DA LISTA DE DESEJOS ======================= */
+.item-desejo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.item-desejo:hover {
+  background-color: #f8f9fa;
+}
+
+.item-desejo:last-child {
+  border-bottom: none;
+}
+
+.thumb-desejo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.info-desejo {
+  flex: 1;
+}
+
+.info-desejo h5 {
+  margin: 0 0 0.2rem 0;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.3;
+}
+
+.preco-desejo {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #883fd8;
+  font-weight: 600;
+}
+
+.remover-desejo {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.remover-desejo:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+/* ======================= ESTILOS PARA SUGESTÕES DE BUSCA ======================= */
+.caixa-pesquisa-centralizada {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+  margin: 0 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.caixa-pesquisa-centralizada input {
+  width: 100%;
+  padding: 0.8rem 3rem 0.8rem 1.2rem;
+  border-radius: 25px;
+  border: 1px solid #e5e5e5;
+  outline: none;
+  background: white;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.caixa-pesquisa-centralizada input:focus {
+  border-color: #883fd8;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.caixa-pesquisa-centralizada input::placeholder {
+  color: #999;
+}
+
+.botao-busca {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #883fd8;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.botao-busca:hover {
+  background: #9333ea;
+}
+
+.botao-busca i {
+  color: white;
+  font-size: 0.9rem;
+}
+
+.sugestoes-busca {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.sugestao-item {
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sugestao-item:hover {
+  background-color: #f8f9fa;
+}
+
+.sugestao-item:last-child {
+  border-bottom: none;
+}
+
+/* ======================= MELHORIAS NO MEGA MENU ======================= */
+.mega-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  margin-top: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  min-width: 800px;
+}
+
+.mega-dropdown.open .mega-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.mega-menu-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.categoria-coluna h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.categoria-coluna h4 i {
+  color: #883fd8;
+}
+
+.subcategorias-grid {
+  margin-bottom: 1.5rem;
+}
+
+.subcategoria-grupo h5 {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subcategoria-grupo ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.subcategoria-grupo ul li {
+  margin-bottom: 0.3rem;
+}
+
+.subcategoria-grupo ul li a {
+  color: #555;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.subcategoria-grupo ul li a:hover {
+  color: #883fd8;
+}
+
+.marcas-populares {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1rem;
+}
+
+.marcas-titulo {
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.marcas-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.marcas-lista a {
+  background: #f8f9fa;
+  color: #666;
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  text-decoration: none;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.marcas-lista a:hover {
+  background: #883fd8;
+  color: white;
+}
+
+.mega-menu-banner {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #883fd8 0%, #7c3aed 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.banner-content h3 {
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.banner-content p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+.btn-banner {
+  background: white;
+  color: #7c3aed;
+  padding: 0.6rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.btn-banner:hover {
+  transform: translateY(-2px);
+}
+
+/* ======================= RESPONSIVIDADE ADICIONAL ======================= */
+@media (max-width: 1024px) {
+  .mega-menu-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .mega-menu {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mega-menu-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .mega-menu {
+    min-width: 300px;
+    left: -100px;
+  }
+  
+  .caixa-pesquisa-centralizada {
+    margin: 0 1rem;
+    max-width: 300px;
+  }
+}
+

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
+<!-- Desenvolvido por Gabriel (gabwvr) -->
+<!-- Página: [NOME DA PÁGINA] -->
+<!-- Design responsivo com identidade visual roxo e amarelo -->
+
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuário | Roxinho Shop</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/cabecalhorodape.css">
+  <link rel="stylesheet" href="./css/painelusuario.css">
+  <link rel="stylesheet" href="./css/painel-melhorado.css">
+  <link rel="stylesheet" href="./css/tema-escuro-2025.css">
+  <link rel="stylesheet" href="./css/sistema-xp.css">
+
+    <!-- Placeholder para Header -->
+  <div id="header-placeholder"></div>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+</head>
+<body>
+
+
+  <div class="container-painel">
+    <div class="container">
+        <div class="wrapper-conteudo">
+            <!-- Sidebar -->
+            <nav class="coluna-esquerda">
+                <div class="barra-filtros">
+                    <div class="cabecalho-filtros">
+                        <h3>Menu Principal</h3>
+                    </div>
+                    
+                    <ul class="menu-navegacao">
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao active" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao" data-section="orders">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Meus Pedidos</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao" data-section="profile">
+                                <i class="fas fa-user"></i>
+                                <span>Perfil</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao" data-section="wishlist">
+                                <i class="fas fa-heart"></i>
+                                <span>Lista de Desejos</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao" data-section="addresses">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Endereços</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao" data-section="settings">
+                                <i class="fas fa-cog"></i>
+                                <span>Configurações</span>
+                            </a>
+                        </li>
+                        <li class="item-navegacao">
+                            <a href="#" class="link-navegacao">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sair</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Área Principal -->
+            <main class="area-produtos">
+                <!-- Banner de Categoria -->
+           <div class="breadcrumb-dinamico">
+                    <span class="texto-voce-esta-em">Você está em:</span>
+                    <div class="caminho">
+                        <span class="item-caminho">Painel</span>
+                        <span class="separador">></span>
+                        <span class="item-caminho ativo" id="breadcrumb-atual">Dashboard</span>
+                    </div>
+                </div> 
+                
+                
+                <div class="banner-categoria">
+                    <div class="conteudo-banner">
+                        <h2 class="titulo-categoria" id="titulo-secao">Dashboard</h2>
+                    </div>
+                </div>
+
+                <!-- Breadcrumb -->
+               
+
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="secao-conteudo active">
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Total de Pedidos</h3>
+                                <i class="fas fa-shopping-cart stat-icon"></i>
+                            </div>
+                            <div class="stat-value">24</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>+12% este mês</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Total Gasto</h3>
+                                <i class="fas fa-money-bill-wave stat-icon"></i>
+                            </div>
+                            <div class="stat-value">R$ 2.847,00</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>+8% este mês</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Nível XP</h3>
+                                <i class="fas fa-star stat-icon"></i>
+                            </div>
+                            <div class="stat-value" id="nivel-xp-dashboard">1</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-trophy"></i>
+                                <span id="titulo-nivel-dashboard">Novato</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>XP Total</h3>
+                                <i class="fas fa-gamepad stat-icon"></i>
+                            </div>
+                            <div class="stat-value" id="xp-total-dashboard">0</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="xp-proximo-nivel">100 para próximo nível</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de XP detalhada -->
+                    <div class="secao-xp">
+                        <div class="cabecalho-secao-xp">
+                            <h3>Sistema de Experiência</h3>
+                            <div class="info-nivel">
+                                <span class="nivel-atual" id="nivel-atual-detalhado">Nível 1</span>
+                                <span class="titulo-nivel" id="titulo-nivel-detalhado">Novato</span>
+                            </div>
+                        </div>
+                        
+                        <div class="barra-progresso-xp">
+                            <div class="progresso-xp" id="barra-xp" style="width: 0%"></div>
+                            <div class="info-progresso">
+                                <span id="xp-atual">0 XP</span>
+                                <span id="xp-necessario">/ 100 XP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="historico-xp">
+                            <h4>Últimas Atividades</h4>
+                            <div class="lista-atividades" id="lista-atividades-xp">
+                                <div class="atividade-vazia">
+                                    <i class="fas fa-star"></i>
+                                    <span>Faça sua primeira compra para ganhar XP!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabela-container">
+                        <div class="cabecalho-tabela">
+                            <h3>Pedidos Recentes</h3>
+                            <button class="botao-secundario">Ver Todos</button>
+                        </div>
+                        <table class="tabela-pedidos">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#ROX-2024-001</td>
+                                    <td>15/09/2024</td>
+                                    <td><span class="badge status-delivered">Entregue</span></td>
+                                    <td>R$ 299,90</td>
+                                    <td><button class="botao-secundario botao-pequeno">Ver Detalhes</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ROX-2024-002</td>
+                                    <td>18/09/2024</td>
+                                    <td><span class="badge status-pending">Pendente</span></td>
+                                    <td>R$ 156,50</td>
+                                    <td><button class="botao-secundario botao-pequeno">Ver Detalhes</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#ROX-2024-003</td>
+                                    <td>20/09/2024</td>
+                                    <td><span class="badge status-cancelled">Cancelado</span></td>
+                                    <td>R$ 89,90</td>
+                                    <td><button class="botao-secundario botao-pequeno">Ver Detalhes</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="orders" class="secao-conteudo">
+                    <div class="barra-ordenacao-simples">
+                        <div class="contador-produtos-simples">
+                            <i class="fas fa-list"></i>
+                            <span>Mostrando <span class="numero">8</span> pedidos</span>
+                        </div>
+                        <div class="grupo-ordenacao-simples">
+                            <label for="ordenar-pedidos">Ordenar por:</label>
+                            <select id="ordenar-pedidos" class="seletor-filtro">
+                                <option value="data-desc">Mais Recentes</option>
+                                <option value="data-asc">Mais Antigos</option>
+                                <option value="valor-desc">Maior Valor</option>
+                                <option value="valor-asc">Menor Valor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grade-produtos pedidos-lista">
+                        <!-- Os pedidos serão carregados aqui via JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profile" class="secao-conteudo">
+                    <div class="formulario-perfil">
+                        <h3>Informações Pessoais</h3>
+                        <form id="form-perfil">
+                            <div class="grupo-formulario linha-dupla">
+                                <div class="campo-formulario">
+                                    <label for="nome">Nome</label>
+                                    <input type="text" id="nome" name="nome" value="Gabriel" class="input-preco">
+                                </div>
+                                <div class="campo-formulario">
+                                    <label for="sobrenome">Sobrenome</label>
+                                    <input type="text" id="sobrenome" name="sobrenome" value="Wagner" class="input-preco">
+                                </div>
+                            </div>
+                            
+                            <div class="campo-formulario">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="gabriel@rooxyce.com" class="input-preco">
+                            </div>
+                            
+                            <div class="grupo-formulario linha-dupla">
+                                <div class="campo-formulario">
+                                    <label for="telefone">Telefone</label>
+                                    <input type="tel" id="telefone" name="telefone" value="+55 11 99999-9999" class="input-preco">
+                                </div>
+                                <div class="campo-formulario">
+                                    <label for="data-nascimento">Data de Nascimento</label>
+                                    <input type="date" id="data-nascimento" name="data-nascimento" value="1990-01-01" class="input-preco">
+                                </div>
+                            </div>
+                            
+                            <div class="campo-formulario">
+                                <label for="bio">Sobre mim</label>
+                                <textarea id="bio" name="bio" rows="4" class="input-preco" placeholder="Conte um pouco sobre você...">Desenvolvedor apaixonado por tecnologia e inovação.</textarea>
+                            </div>
+                            
+                            <div class="acoes-formulario">
+                                <button type="submit" class="botao-primario">Salvar Alterações</button>
+                                <button type="button" class="botao-secundario">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Wishlist Section -->
+                <section id="wishlist" class="secao-conteudo">
+                    <div class="grade-produtos" id="grade-desejos">
+                        <!-- Items da lista de desejos serão carregados via JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Addresses Section -->
+                <section id="addresses" class="secao-conteudo">
+                    <div class="barra-ordenacao-simples">
+                        <h3>Meus Endereços</h3>
+                        <button class="botao-primario" onclick="mostrarModalEndereco()">
+                            <i class="fas fa-plus"></i> Novo Endereço
+                        </button>
+                    </div>
+                    <div id="lista-enderecos" class="lista-enderecos">
+                        <!-- Endereços serão carregados aqui -->
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="secao-conteudo">
+                    <div class="configuracoes-container">
+                        <div class="configuracao-item">
+                            <div class="configuracao-info">
+                                <h4>Notificações por Email</h4>
+                                <p>Receber atualizações sobre pedidos e promoções</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="alternarConfiguracao(this)"></div>
+                        </div>
+                        
+                        <div class="configuracao-item">
+                            <div class="configuracao-info">
+                                <h4>Notificações Push</h4>
+                                <p>Receber notificações no navegador</p>
+                            </div>
+                            <div class="toggle-switch" onclick="alternarConfiguracao(this)"></div>
+                        </div>
+                        
+                        <div class="configuracao-item">
+                            <div class="configuracao-info">
+                                <h4>Marketing</h4>
+                                <p>Receber ofertas especiais e novidades</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="alternarConfiguracao(this)"></div>
+                        </div>
+                        
+                        <div class="configuracao-item">
+                            <div class="configuracao-info">
+                                <h4>Tema Escuro</h4>
+                                <p>Ativar modo escuro da interface</p>
+                            </div>
+                            <div class="toggle-switch" onclick="alternarConfiguracao(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="formulario-perfil">
+                        <h3>Alterar Senha</h3>
+                        <form id="form-senha">
+                            <div class="campo-formulario">
+                                <label for="senha-atual">Senha Atual</label>
+                                <input type="password" id="senha-atual" name="senha-atual" class="input-preco">
+                            </div>
+                            <div class="grupo-formulario linha-dupla">
+                                <div class="campo-formulario">
+                                    <label for="nova-senha">Nova Senha</label>
+                                    <input type="password" id="nova-senha" name="nova-senha" class="input-preco">
+                                </div>
+                                <div class="campo-formulario">
+                                    <label for="confirmar-senha">Confirmar Nova Senha</label>
+                                    <input type="password" id="confirmar-senha" name="confirmar-senha" class="input-preco">
+                                </div>
+                            </div>
+                            <button type="submit" class="botao-primario">Alterar Senha</button>
+                        </form>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Endereço -->
+    <div id="modal-endereco" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Adicionar Endereço</h3>
+                <button class="fechar-modal" onclick="fecharModalEndereco()">&times;</button>
+            </div>
+            <form id="form-endereco">
+                <div class="campo-formulario">
+                    <label for="nome-endereco">Nome do Endereço</label>
+                    <input type="text" id="nome-endereco" name="nome-endereco" class="input-preco" placeholder="Ex: Casa, Trabalho">
+                </div>
+                <div class="grupo-formulario linha-dupla">
+                    <div class="campo-formulario">
+                        <label for="cep">CEP</label>
+                        <input type="text" id="cep" name="cep" class="input-preco" placeholder="00000-000">
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="rua">Rua</label>
+                        <input type="text" id="rua" name="rua" class="input-preco">
+                    </div>
+                </div>
+                <div class="grupo-formulario linha-dupla">
+                    <div class="campo-formulario">
+                        <label for="numero">Número</label>
+                        <input type="text" id="numero" name="numero" class="input-preco">
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="complemento">Complemento</label>
+                        <input type="text" id="complemento" name="complemento" class="input-preco">
+                    </div>
+                </div>
+                <div class="grupo-formulario linha-dupla">
+                    <div class="campo-formulario">
+                        <label for="bairro">Bairro</label>
+                        <input type="text" id="bairro" name="bairro" class="input-preco">
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="cidade">Cidade</label>
+                        <input type="text" id="cidade" name="cidade" class="input-preco">
+                    </div>
+                </div>
+                <div class="campo-formulario">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado" class="seletor-filtro">
+                        <option value="">Selecione o Estado</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="MG">Minas Gerais</option>
+                        <!-- Outros estados... -->
+                    </select>
+                </div>
+                <div class="acoes-formulario">
+                    <button type="submit" class="botao-primario">Salvar Endereço</button>
+                    <button type="button" class="botao-secundario" onclick="fecharModalEndereco()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+  <!-- Placeholder para Footer -->
+  <div id="footer-placeholder"></div>
+
+    <script src="/js/sistema-xp.js"></script>
+    <script src="/js/painelusuario.js"></script>
+    <script src="js/cabecalho-melhorado.js"></script>
+
+      <script>
+  fetch('cabecalhorodape.html')
+    .then(response => response.text())
+    .then(data => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(data, 'text/html');
+
+      const header = doc.querySelector('nav.cabecalho');
+      const categorias = doc.querySelector('.barra-categorias');
+      const footer = doc.querySelector('footer.rodape');
+
+      if (header) document.getElementById('header-placeholder').appendChild(header);
+      if (categorias) document.getElementById('header-placeholder').appendChild(categorias);
+      if (footer) document.getElementById('footer-placeholder').appendChild(footer);
+
+      // Executar scripts do cabecalho/rodape
+      doc.querySelectorAll("script").forEach(oldScript => {
+        const newScript = document.createElement("script");
+        if (oldScript.src) newScript.src = oldScript.src;
+        else newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
+      });
+    });
+  </script>
+    <script src="./js/sistema-xp.js"></script>
+</body>
+</html>

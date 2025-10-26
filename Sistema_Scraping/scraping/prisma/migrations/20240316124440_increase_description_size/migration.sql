@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `product` MODIFY `title` LONGTEXT NOT NULL,
+    MODIFY `link` LONGTEXT NOT NULL;

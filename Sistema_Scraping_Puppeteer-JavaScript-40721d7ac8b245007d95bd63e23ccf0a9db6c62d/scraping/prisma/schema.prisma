@@ -1,0 +1,23 @@
+// DEFINE o esquema do banco de dados Prisma para o armazenamento de produtos coletados.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define MySQL como o provedor de banco de dados.
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define o modelo de Produto para armazenamento de dados coletados.
+model Product {
+  id          String    @id @default(cuid())
+  title       String    @db.LongText
+  price       String
+  description String?   @db.LongText
+  avaliation  String?   
+  link        String    @db.LongText
+  image       String?   @db.LongText
+}
+

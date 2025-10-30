@@ -108,6 +108,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ ok: true, status: 'healthy' })
 })
 
+// Rota de saúde também sob /api para facilitar testes via proxy do frontend
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ ok: true, status: 'healthy' })
+})
+
 // 404 JSON para rotas /api não mapeadas
 app.use('/api', (req, res) => {
   return res.status(404).json({

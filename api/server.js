@@ -8,6 +8,7 @@ const { connectDB, sequelize } = require('./config/db')
 const { DataTypes } = require('sequelize')
 require('./models/Product')
 require('./models/SearchHistory')
+require('./models/ContactMessage')
 
 const app = express()
 
@@ -93,6 +94,7 @@ app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/price-history', require('./routes/price-history'))
 app.use('/api/vendors', require('./routes/vendors'))
+app.use('/api/contact', require('./routes/contact'))
 
 // Raiz e saúde do serviço (JSON)
 app.get('/', (req, res) => {
@@ -162,9 +164,11 @@ const initOnce = () => {
       await ensureProductManualFields()
       await ensureUserSobrenomeColumn()
       await ensureUserRoleColumn()
+      await ensureUserAvatarColumn()
       await ensureVendorTable()
       await ensureVendorProductsTable()
       await ensureSearchHistoryTable()
+      await ensureContactMessageTable()
     })()
   }
   return readyPromise
@@ -256,6 +260,20 @@ const ensureUserRoleColumn = async () => {
   }
 }
 
+// Garante que a coluna "avatar_base64" exista na tabela usuario (LONGTEXT)
+const ensureUserAvatarColumn = async () => {
+  try {
+    const qi = sequelize.getQueryInterface()
+    const desc = await qi.describeTable('usuario')
+    if (!desc.avatar_base64) {
+      await qi.addColumn('usuario', 'avatar_base64', { type: DataTypes.TEXT('long'), allowNull: true })
+      console.log('Coluna "avatar_base64" adicionada à tabela "usuario".')
+    }
+  } catch (e) {
+    console.log('Tabela "usuario" não existe; pulando criação de coluna "avatar_base64".')
+  }
+}
+
 // Garante que a tabela vendedor exista
 const ensureVendorTable = async () => {
   const qi = sequelize.getQueryInterface()
@@ -316,6 +334,25 @@ const ensureSearchHistoryTable = async () => {
       created_at: { type: DataTypes.DATE, allowNull: true }
     })
     console.log('Tabela "search_history" criada.')
+  }
+}
+
+// Garante que a tabela de mensagens de contato exista
+const ensureContactMessageTable = async () => {
+  const qi = sequelize.getQueryInterface()
+  try {
+    await qi.describeTable('contact_message')
+  } catch (e) {
+    console.log('Criando tabela "contact_message"...')
+    await qi.createTable('contact_message', {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      nome: { type: DataTypes.STRING(150), allowNull: false },
+      email: { type: DataTypes.STRING(255), allowNull: false },
+      mensagem: { type: DataTypes.TEXT, allowNull: false },
+      userId: { type: DataTypes.INTEGER, allowNull: true },
+      created_at: { type: DataTypes.DATE, allowNull: true }
+    })
+    console.log('Tabela "contact_message" criada.')
   }
 }
 // 301 permanente: *.html -> caminho sem extensão (compatibilidade quando UI é servida aqui)

@@ -54,7 +54,8 @@ router.put('/profile', auth, async (req, res) => {
         nome: user.nome,
         sobrenome: user.sobrenome,
         email: user.email,
-        foto_perfil: user.foto_perfil
+        foto_perfil: user.foto_perfil,
+        avatar_base64: user.avatar_base64
       }
     });
   } catch (error) {
@@ -98,22 +99,10 @@ router.post('/avatar', auth, async (req, res) => {
 
     // Guardar referência do avatar anterior para eventual exclusão
     const oldUrl = (typeof req.user.foto_perfil === 'string' ? req.user.foto_perfil.trim() : null);
-
-    const [meta, base64Data] = imageBase64.split(',');
-    const mime = meta.match(/data:(image\/[^;]+);base64/);
-    const extRaw = mime ? mime[1].split('/')[1] : 'png';
-    const ext = (extRaw === 'jpg') ? 'jpeg' : extRaw;
-    const allowed = ['png', 'jpeg', 'webp'];
-    const finalExt = allowed.includes(ext) ? ext : 'png';
-
-    const filename = `user-${req.user.id}-${Date.now()}.${finalExt}`;
-    const avatarsDir = path.join(__dirname, '../../imagens/avatars');
-    await fs.promises.mkdir(avatarsDir, { recursive: true });
-    const filePath = path.join(avatarsDir, filename);
-    await fs.promises.writeFile(filePath, Buffer.from(base64Data, 'base64'));
-
-    const publicUrl = `/imagens/avatars/${filename}`;
-    req.user.foto_perfil = publicUrl;
+    // Persistir diretamente no banco (LONGTEXT) ao invés de salvar em arquivo
+    req.user.avatar_base64 = imageBase64;
+    // Limpar URL de arquivo para preferir base64
+    req.user.foto_perfil = null;
     await req.user.save();
 
     // Excluir arquivo anterior se era local em /imagens/avatars
@@ -121,22 +110,20 @@ router.post('/avatar', auth, async (req, res) => {
       if (oldUrl && /^\/?imagens\/avatars\//.test(oldUrl)) {
         const normalized = oldUrl.replace(/^\//, '');
         const oldPath = path.join(__dirname, '../../', normalized);
-        // Evitar deletar o mesmo arquivo recém-criado
-        if (oldPath !== filePath) {
-          await fs.promises.unlink(oldPath).catch(() => {});
-        }
+        await fs.promises.unlink(oldPath).catch(() => {});
       }
     } catch (_) {}
 
     res.status(200).json({
       success: true,
-      foto_perfil: publicUrl,
+      avatar_base64: req.user.avatar_base64,
       user: {
         id: req.user.id,
         nome: req.user.nome,
         sobrenome: req.user.sobrenome,
         email: req.user.email,
-        foto_perfil: publicUrl
+        foto_perfil: null,
+        avatar_base64: req.user.avatar_base64
       }
     });
   } catch (error) {
@@ -161,11 +148,12 @@ router.delete('/avatar', auth, async (req, res) => {
       }
     } catch (_) {}
 
-    // Limpar referência no banco
+    // Limpar referência no banco (arquivo e base64)
     req.user.foto_perfil = null;
+    req.user.avatar_base64 = null;
     await req.user.save();
 
-    return res.status(200).json({ success: true, foto_perfil: null });
+    return res.status(200).json({ success: true, foto_perfil: null, avatar_base64: null });
   } catch (error) {
     console.error('Erro ao remover avatar:', error);
     return res.status(500).json({ success: false, message: 'Erro ao remover avatar' });

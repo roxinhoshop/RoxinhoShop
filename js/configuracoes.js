@@ -166,18 +166,26 @@ document.addEventListener('DOMContentLoaded', () => {
       perfilOriginal = { nome: campoNome ? campoNome.value : '', sobrenome: campoSobrenome ? campoSobrenome.value : '', email: campoEmail ? campoEmail.value : '' };
 
       if (avatarAtual) {
-        avatarAtual.src = (typeof u.foto_perfil === 'string' && u.foto_perfil.trim())
-          ? u.foto_perfil
-: '/imagens/logos/avatar-roxo.svg';
+        let src = '/imagens/logos/avatar-roxo.svg';
+        if (typeof u.avatar_base64 === 'string' && u.avatar_base64.startsWith('data:image/')) {
+          src = u.avatar_base64;
+        } else if (typeof u.foto_perfil === 'string' && u.foto_perfil.trim()) {
+          src = u.foto_perfil;
+        }
+        avatarAtual.src = src;
         avatarAnteriorSrc = avatarAtual.src;
       }
 
       // Atualizar avatar no cabeçalho
       const headerAvatar = document.getElementById('avatar-usuario');
       if (headerAvatar) {
-        headerAvatar.src = (typeof u.foto_perfil === 'string' && u.foto_perfil.trim())
-          ? u.foto_perfil
-: '/imagens/logos/avatar-roxo.svg';
+        let src = '/imagens/logos/avatar-roxo.svg';
+        if (typeof u.avatar_base64 === 'string' && u.avatar_base64.startsWith('data:image/')) {
+          src = u.avatar_base64;
+        } else if (typeof u.foto_perfil === 'string' && u.foto_perfil.trim()) {
+          src = u.foto_perfil;
+        }
+        headerAvatar.src = src;
       }
 
       // Finalizar estado de carregamento (sem mensagem persistente)
@@ -211,7 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(resp.ok ? 'Resposta inválida do servidor.' : `Erro ${resp.status}: ${txt.slice(0,120)}`);
       }
       if (!resp.ok || !data?.success) throw new Error((data && data.message) || 'Falha ao enviar avatar');
-      const url = data.foto_perfil;
+      const fallback = '/imagens/logos/avatar-roxo.svg';
+      const url = data.avatar_base64 || data.foto_perfil || fallback;
       if (avatarAtual) avatarAtual.src = url;
       const headerAvatar = document.getElementById('avatar-usuario');
       if (headerAvatar) headerAvatar.src = url;

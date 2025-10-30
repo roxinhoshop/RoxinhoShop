@@ -65,6 +65,27 @@
     } catch (_) {}
   }
   
+  // ===== Garantir carregamento do Chatbot globalmente =====
+  function ensureChatbotLoaded() {
+    try {
+      if (document.querySelector('.chatbot-fab')) return;
+      if (!document.querySelector('link[href*="/css/chatbot.css"]')) {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = '/css/chatbot.css';
+        document.head.appendChild(l);
+      }
+      if (window.__CHATBOT_LOADING) return;
+      window.__CHATBOT_LOADING = true;
+      const s = document.createElement('script');
+      s.src = '/js/chatbot.js';
+      s.defer = true;
+      s.onload = () => { window.__CHATBOT_LOADING = false; };
+      s.onerror = () => { window.__CHATBOT_LOADING = false; };
+      document.body.appendChild(s);
+    } catch (_) {}
+  }
+  
   // ==================== CORREÇÃO DOS DEPARTAMENTOS ====================
   function corrigirDepartamentos() {
     const dropdownPrincipal = document.querySelector('.barra-categorias li.mega-dropdown') || document.querySelector('.barra-categorias li.dropdown');
@@ -543,6 +564,7 @@
   function inicializar() {
     // Aguardar um pouco para garantir que o DOM esteja completamente carregado
     setTimeout(() => {
+      ensureChatbotLoaded();
       corrigirDepartamentos();
       corrigirLinksCategoria();
       melhorarSubmenus();
@@ -756,9 +778,12 @@ function inicializarLoginBox() {
     // Atualizar avatar no cabeçalho, se disponível
     const avatarEl = document.getElementById('avatar-usuario');
     if (avatarEl) {
-      const src = (usuario && typeof usuario.foto_perfil === 'string' && usuario.foto_perfil.trim())
-        ? usuario.foto_perfil
-        : '/imagens/logos/avatar-roxo.svg';
+      let src = '/imagens/logos/avatar-roxo.svg';
+      if (usuario && typeof usuario.avatar_base64 === 'string' && usuario.avatar_base64.startsWith('data:image/')) {
+        src = usuario.avatar_base64;
+      } else if (usuario && typeof usuario.foto_perfil === 'string' && usuario.foto_perfil.trim()) {
+        src = usuario.foto_perfil;
+      }
       avatarEl.src = src;
     }
     // Alterar seta para baixo indicando dropdown

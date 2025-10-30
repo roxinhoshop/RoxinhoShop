@@ -97,6 +97,7 @@ router.post('/register', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
+        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });
@@ -161,6 +162,7 @@ router.post('/login', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
+        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });
@@ -222,6 +224,7 @@ router.get('/me', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
+        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });

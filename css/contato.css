@@ -26,6 +26,7 @@
       padding: 1.5rem;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      color: #000000; /* texto preto no modo claro */
     }
 
     .informacoes-contato h1, .formulario-contato h2 {
@@ -106,7 +107,7 @@
       background: #0b0b0b;
       border: 1px solid #2c2c2f;
       box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-      color: #e5e7eb;
+      color: #ffffff; /* texto branco no modo escuro */
     }
     html.dark .informacoes-contato i {
       color: #a78bfa;

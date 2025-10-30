@@ -1,19 +1,35 @@
-// Configuração global de API com fallback automático
+// Configuração global de API com fallback automático e variável central
 (function(){
-  try {
-    // Se já estiver definida externamente, respeite
-    if (typeof window.API_BASE === 'string' && window.API_BASE) return;
+  // Ajuste rápido: altere esta constante para apontar o backend desejado
+  // Ex.: 'http://sd-br1.blazebr.com:26365'
+  const CONFIG_API_BASE = 'http://sd-br1.blazebr.com:26365';
 
-    const origin = window.location.origin;
-    const host = window.location.hostname || '';
-    // Em produção, usar sempre same-origin com caminho /api,
-    // o vercel.json do frontend faz o proxy para o backend.
-    // Isso elimina CORS no navegador.
-    const isProdFrontend = /roxinhoshop\.(?:vercel\.app)$/i.test(host);
-    window.API_BASE = origin;
+  try {
+    // Respeita valor já definido externamente, senão usa a constante acima
+    const pre = (typeof window.API_BASE === 'string' && window.API_BASE.trim()) ? window.API_BASE.trim() : null;
+    const origin = (pre || CONFIG_API_BASE || (window.location && window.location.origin) || '').replace(/\/+$/,'');
+    Object.defineProperty(window, 'API_BASE', { value: origin, configurable: true });
   } catch {
-    try { window.API_BASE = window.location.origin; } catch {}
+    try { window.API_BASE = (CONFIG_API_BASE || window.location.origin || '').replace(/\/+$/,''); } catch {}
   }
+
+  // Patch global de fetch: quando chamado com caminho relativo '/api',
+  // prefixa automaticamente com API_BASE para centralizar a configuração
+  try {
+    const origFetch = window.fetch;
+    if (typeof origFetch === 'function' && !window.__fetchApiPatched) {
+      window.fetch = function(input, init) {
+        try {
+          if (typeof input === 'string' && input.startsWith('/api')) {
+            const url = `${window.API_BASE}${input}`;
+            return origFetch.call(this, url, init);
+          }
+        } catch {}
+        return origFetch.call(this, input, init);
+      };
+      window.__fetchApiPatched = true;
+    }
+  } catch {}
 })();
 
 // ===== Helper global para ícone da Amazon conforme tema =====

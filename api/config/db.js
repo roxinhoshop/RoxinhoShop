@@ -1,5 +1,8 @@
 // Configuração da conexão com banco de dados (MySQL com fallback opcional para SQLite em desenvolvimento)
 const { Sequelize } = require('sequelize');
+// Garante que o bundler da Vercel inclua o driver mysql2
+// (Sequelize carrega dinamicamente, mas em serverless pode não ser detectado)
+require('mysql2');
 const path = require('path');
 // Carrega .env do root do projeto para garantir disponibilidade em scripts executados dentro de /api
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });

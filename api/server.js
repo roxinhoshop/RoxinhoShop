@@ -147,7 +147,8 @@ const initOnce = () => {
 }
 
 // Garante init antes de rotas da API (serverless)
-app.use(async (req, res, next) => {
+// Inicializa banco e migrações apenas para rotas da API
+app.use('/api', async (req, res, next) => {
   try {
     await initOnce()
   } catch (err) {

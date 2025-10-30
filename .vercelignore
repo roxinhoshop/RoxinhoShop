@@ -1,6 +1,4 @@
-# Excluir backend e ferramentas de dev do deploy do frontend
-api/
-api/**
+# Excluir ferramentas de dev do deploy
 
 # Ferramentas locais e scripts
 tools/

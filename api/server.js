@@ -69,8 +69,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/imagens', express.static(path.join(__dirname, '../imagens')))
-app.use(express.static(path.join(__dirname, '../')))
+// Produção: backend não serve assets estáticos do frontend
 
 // Rotas
 app.use('/api/products', require('./routes/products'))
@@ -79,6 +78,20 @@ app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/price-history', require('./routes/price-history'))
 app.use('/api/vendors', require('./routes/vendors'))
+
+// Raiz e saúde do serviço (JSON)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: 'RoxinhoShop Backend',
+    env: process.env.NODE_ENV || 'production',
+    timestamp: new Date().toISOString()
+  })
+})
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ ok: true, status: 'healthy' })
+})
 
 // 404 JSON para rotas /api não mapeadas
 app.use('/api', (req, res) => {
@@ -110,23 +123,14 @@ app.use((err, req, res, next) => {
   return res.status(status).json(payload)
 })
 
-// Rota para servir o frontend
-app.get('*', (req, res) => {
-  // Servir páginas limpas se existirem; caso contrário, index.html
-  const slug = String((req.path || '').replace(/^\/+/, ''));
-  const candidate = path.join(__dirname, `../${slug}.html`);
-  if (fs.existsSync(candidate)) return res.sendFile(candidate);
-  // Aliases para slugs antigos sem hífen
-  const aliasMap = {
-    'paginaproduto': 'pagina-produto.html',
-    'redefinirsenha': 'redefinir-senha.html',
-    'cabecalhorodape': 'cabecalho-rodape.html'
-  };
-  if (aliasMap[slug]) {
-    const aliasCandidate = path.join(__dirname, `../${aliasMap[slug]}`);
-    if (fs.existsSync(aliasCandidate)) return res.sendFile(aliasCandidate);
-  }
-  res.sendFile(path.join(__dirname, '../index.html'))
+// 404 JSON para rotas não-API não mapeadas
+app.use((req, res, next) => {
+  if (String(req.originalUrl || '').startsWith('/api/')) return next()
+  return res.status(404).json({
+    ok: false,
+    error: 'not_found',
+    message: `Rota não encontrada: ${req.method} ${req.originalUrl}`
+  })
 })
 // Inicialização única para ambiente serverless/local
 let readyPromise = null
@@ -295,11 +299,7 @@ const ensureSearchHistoryTable = async () => {
   }
 }
 // 301 permanente: *.html -> caminho sem extensão (compatibilidade quando UI é servida aqui)
-app.get(/^\/(.+)\.html$/i, (req, res) => {
-  const clean = `/${req.params[0]}`;
-  const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-  return res.redirect(301, clean + qs);
-});
+// Removido roteamento de páginas HTML do frontend
 
 // Exporta app para Vercel (@vercel/node)
 module.exports = app

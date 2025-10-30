@@ -1,8 +1,7 @@
 // Configuração global de API com fallback automático e variável central
 (function(){
   // Ajuste rápido: altere esta constante para apontar o backend desejado
-  // Ex.: 'http://sd-br1.blazebr.com:26365'
-  const CONFIG_API_BASE = 'http://sd-br1.blazebr.com:26365';
+  const CONFIG_API_BASE = 'https://backend.roxinhoshopoficial.workers.dev/';
 
   try {
     // Respeita valor já definido externamente, senão usa a constante acima

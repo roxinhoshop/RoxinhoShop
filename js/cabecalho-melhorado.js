@@ -758,7 +758,7 @@ function inicializarLoginBox() {
     if (avatarEl) {
       const src = (usuario && typeof usuario.foto_perfil === 'string' && usuario.foto_perfil.trim())
         ? usuario.foto_perfil
-        : 'imagens/logos/avatar-roxo.svg';
+        : '/imagens/logos/avatar-roxo.svg';
       avatarEl.src = src;
     }
     // Alterar seta para baixo indicando dropdown

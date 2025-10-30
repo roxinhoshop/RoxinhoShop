@@ -1,21 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "api/server.js"
-    },
-    { "src": "/paginaproduto", "dest": "/pagina-produto.html" },
-    { "src": "/redefinirsenha", "dest": "/redefinir-senha.html" },
-    { "src": "/cabecalhorodape", "dest": "/cabecalho-rodape.html" }
-  ],
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/server.js" }
+  ],
+  "redirects": [
+    { "source": "/paginaproduto", "destination": "/pagina-produto", "statusCode": 308 },
+    { "source": "/redefinirsenha", "destination": "/redefinir-senha", "statusCode": 308 },
+    { "source": "/cabecalhorodape", "destination": "/cabecalho-rodape", "statusCode": 308 }
+  ],
   "env": {
     "DB_HOST": "mysql.railway.internal",
     "DB_USER": "root",

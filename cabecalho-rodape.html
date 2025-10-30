@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Favicon -->
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
   
   <!-- Fonte -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,8 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
-  <link rel="stylesheet" href="./css/chatbot.css">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
 </head>
 
   <!-- ======================= CABEÇALHO ======================= -->
@@ -27,7 +27,7 @@
     <div class="container-cabecalho">
       <!-- LOGO -->
       <a class="logo" href="/">
-        <img src="imagens/logos/logo-cabecalho.png" alt="Roxinho Shop" class="logo-imagem">
+        <img src="/imagens/logos/logo-cabecalho.png" alt="Roxinho Shop" class="logo-imagem">
       </a>
 
       <!-- BARRA DE PESQUISA CENTRALIZADA -->
@@ -68,7 +68,7 @@
 
         <!-- 🔹 Caixinha de Login -->
         <div class="caixa-entre" id="caixa-login">
-          <img src="imagens/logos/avatar-roxo.svg" alt="Avatar" class="avatar" id="avatar-usuario">
+          <img src="/imagens/logos/avatar-roxo.svg" alt="Avatar" class="avatar" id="avatar-usuario">
           <div class="texto" id="texto-login">
             <strong id="status-login">Entre</strong>
             <br><span id="subtexto-login">Iniciar Sessão</span>
@@ -334,7 +334,7 @@
       <!-- Identidade + Descrição + Redes -->
       <section class="rodape-intro rodape-coluna" aria-label="Identidade">
         <div class="rodape-logo">
-          <img src="imagens/logos/logo-rodapé.png" alt="Logo Roxinho Shop" class="logo">
+  <img src="/imagens/logos/logo-rodapé.png" alt="Logo Roxinho Shop" class="logo">
         </div>
         <p class="rodape-descricao">
           Economizar nunca foi tão leve.
@@ -699,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cand) img = cand;
       }
     } catch (_) {}
-    if (!img) img = 'imagens/logos/logo-cabecalho.png';
+if (!img) img = '/imagens/logos/logo-cabecalho.png';
     return img;
   }
 
@@ -802,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="preview-close" aria-label="Fechar prévia" title="Fechar">&times;</button>
         <a href="${url}" class="preview-link" aria-label="Abrir página do produto">
           <div class="preview-thumb">
-            <img src="${imagem}" alt="${produto.titulo || produto.nome || 'Produto'}" onerror="this.src='imagens/logos/logo-cabecalho.png'">
+<img src="${imagem}" alt="${produto.titulo || produto.nome || 'Produto'}" onerror="this.src='/imagens/logos/logo-cabecalho.png'">
           </div>
           <div class="preview-info">
             <div class="preview-marca">${marcaHTML}</div>
@@ -1178,6 +1178,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Removido redirecionamento agressivo da caixinha de login.
   // A lógica de dropdown e navegação é controlada por js/cabecalho-melhorado.js.
   </script>
-  <script src="js/chatbot.js" defer></script>
+<script src="/js/chatbot.js" defer></script>
 </body>
 </html>

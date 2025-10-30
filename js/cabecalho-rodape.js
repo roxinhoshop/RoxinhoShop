@@ -63,16 +63,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (cand) img = cand;
               }
             } catch (_) {}
-            if (!img) img = 'imagens/logos/logo-cabecalho.png';
+if (!img) img = '/imagens/logos/logo-cabecalho.png';
 
             return `
               <div class="item-desejo">
-                <img src="${img}" alt="${produto.titulo}" class="item-imagem" onerror="this.src='imagens/logos/logo-cabecalho.png'">
+<img src="${img}" alt="${produto.titulo}" class="item-imagem" onerror="this.src='/imagens/logos/logo-cabecalho.png'">
                 <div class="item-detalhes">
                   <h4 class="item-titulo">${produto.titulo}</h4>
                   <p class="item-preco">${precoTexto}</p>
                 </div>
-  <a class="ir-produto" href="pagina-produto?id=${produto.id}" aria-label="Ver produto">Ver</a>
+  <a class="ir-produto" href="/pagina-produto?id=${produto.id}" aria-label="Ver produto">Ver</a>
                 <button class="remover-item" onclick="removerDosDesejos(${produto.id})" aria-label="Remover">&times;</button>
               </div>
             `;

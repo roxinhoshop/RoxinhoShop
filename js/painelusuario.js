@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
       xp: 0,
       xpProximoNivel: 100
     },
-    avatarPadrao: 'imagens/logos/avatar-roxo.svg'
+    avatarPadrao: '/imagens/logos/avatar-roxo.svg'
   };
   
   // ==================== SISTEMA DE AVATAR ====================
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="preco-produto">
             <div class="precos-plataformas">
               <div class="preco-ml"><i class="fa-solid fa-store" aria-label="Mercado Livre"></i> <span class="preco-ml-badge">R$ ${(produto.precoMercadoLivre ?? 0).toFixed(2).replace('.', ',')}</span></div>
-        <div class="preco-amazon"><span><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> R$ ${(produto.precoAmazon ?? 0).toFixed(2).replace('.', ',')}</span></div>
+        <div class="preco-amazon"><span><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> R$ ${(produto.precoAmazon ?? 0).toFixed(2).replace('.', ',')}</span></div>
               ${(() => {
                 const ml = Number((produto.precoMercadoLivre ?? 0));
                 const amz = Number((produto.precoAmazon ?? 0));

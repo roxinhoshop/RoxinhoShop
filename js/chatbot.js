@@ -22,9 +22,9 @@
 
   function avatarPaths() {
     return {
-      roxinho: 'imagens/chatbot/roxinho.png',
-      roxFallback: 'imagens/logos/avatar-roxo.svg',
-      user: 'imagens/logos/avatar-roxo.svg'
+      roxinho: '/imagens/chatbot-roxinho.png',
+      roxFallback: '/imagens/logos/avatar-roxo.svg',
+      user: '/imagens/logos/avatar-roxo.svg'
     };
   }
 
@@ -208,4 +208,3 @@
     setup();
   }
 })();
-

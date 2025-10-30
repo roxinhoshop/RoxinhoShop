@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel do Vendedor | Roxinho Shop</title>
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
-  <link rel="stylesheet" href="./css/painel-vendedor.css">
-  <link rel="stylesheet" href="./css/vendedores.css">
-  <link rel="stylesheet" href="./css/responsivo.css">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/painel-vendedor.css">
+  <link rel="stylesheet" href="/css/vendedores.css">
+  <link rel="stylesheet" href="/css/responsivo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
   
@@ -187,12 +187,12 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="./js/config.js"></script>
-  <script src="./js/cabecalho-melhorado.js"></script>
-  <script src="./js/painel-vendedor.js"></script>
-  <script src="./js/vendedores.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/cabecalho-melhorado.js"></script>
+  <script src="/js/painel-vendedor.js"></script>
+  <script src="/js/vendedores.js"></script>
   <script>
-  fetch('cabecalho-rodape')
+  fetch('/cabecalho-rodape')
       .then(r => r.text())
       .then(html => {
         const doc = new DOMParser().parseFromString(html, 'text/html');

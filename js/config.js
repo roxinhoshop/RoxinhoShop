@@ -21,7 +21,7 @@
     window.getAmazonIconByTheme = function() {
       const isDark = document.documentElement.classList.contains('dark');
       // Em dark, preferir versão clara; em light, versão padrão
-      return isDark ? 'imagens/logos/amazon-icon.png' : 'imagens/logos/Amazon_icon.png';
+      return isDark ? '/imagens/logos/amazon-icon.png' : '/imagens/logos/Amazon_icon.png';
     };
 
     // Atualiza ícones já renderizados quando o tema mudar

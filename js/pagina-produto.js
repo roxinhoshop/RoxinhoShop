@@ -81,7 +81,7 @@ class SistemaAvaliacoes {
           const candidato = imgs.find(u => this.ehURLImagem(u));
           if (candidato) produto.imagem = candidato;
         }
-        if (!produto.imagem) produto.imagem = 'imagens/logos/logo-cabecalho.png';
+        if (!produto.imagem) produto.imagem = '/imagens/logos/logo-cabecalho.png';
         if (Array.isArray(imgs)) produto.imagens = imgs;
       } catch (_) {}
       this.produtoAtual = produto;
@@ -133,7 +133,7 @@ class SistemaAvaliacoes {
     // Imagem principal com fallback e onerror seguro
     const imgPrincipalEl = document.getElementById("imagemProduto");
     if (imgPrincipalEl) {
-      const srcValido = produto.imagem && this.ehURLImagem(produto.imagem) ? produto.imagem : './imagens/thumbs/produto1.webp';
+      const srcValido = produto.imagem && this.ehURLImagem(produto.imagem) ? produto.imagem : '/imagens/thumbs/produto1.webp';
       imgPrincipalEl.setAttribute('src', srcValido);
       imgPrincipalEl.setAttribute('alt', produto.titulo || 'Imagem do produto');
       // Priorizar carregamento da imagem principal para LCP
@@ -142,7 +142,7 @@ class SistemaAvaliacoes {
       imgPrincipalEl.setAttribute('decoding', 'async');
       imgPrincipalEl.onerror = function() {
         this.onerror = null;
-        this.src = './imagens/thumbs/produto1.webp';
+        this.src = '/imagens/thumbs/produto1.webp';
       };
     }
     this.definirElementoTexto("marcaProduto", produto.marca || '');
@@ -174,9 +174,9 @@ class SistemaAvaliacoes {
         const maior = ofertas.reduce((acc, o) => (o.preco > acc.preco ? o : acc));
         const diferenca = Math.abs(menor.preco - maior.preco);
         const percentual = (numML > 0 && numAMZ > 0) ? Math.round((diferenca / Math.max(numML, numAMZ)) * 100) : 0;
-        const amazonLogo = (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png';
-        const logoMenor = menor.plat === 'ml' ? 'imagens/logos/mercado-livre.png' : amazonLogo;
-        const logoMaior = maior.plat === 'ml' ? 'imagens/logos/mercado-livre.png' : amazonLogo;
+        const amazonLogo = (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png';
+        const logoMenor = menor.plat === 'ml' ? '/imagens/logos/mercado-livre.png' : amazonLogo;
+        const logoMaior = maior.plat === 'ml' ? '/imagens/logos/mercado-livre.png' : amazonLogo;
 
         comparativoEl.innerHTML = `
           <div class="menor-preco-label"><img src="${logoMenor}" class="icone-plataforma" ${menor.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${menor.loja}" /> menor preço via ${menor.loja}</div>
@@ -189,8 +189,8 @@ class SistemaAvaliacoes {
           </div>
           <div class="detalhes-comparativo">
             ${iguais 
-              ? `Preços iguais entre <span class="valor-ml"><img src="imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> e <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span>`
-              : ofertas.length > 1 ? `<span class="valor-ml"><img src="imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> vs <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span> • diferença de ${this.formatarMoeda(diferenca)} (${percentual}%)` : ''}
+              ? `Preços iguais entre <span class="valor-ml"><img src="/imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> e <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span>`
+              : ofertas.length > 1 ? `<span class="valor-ml"><img src="/imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> vs <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span> • diferença de ${this.formatarMoeda(diferenca)} (${percentual}%)` : ''}
           </div>
         `;
 
@@ -271,7 +271,7 @@ class SistemaAvaliacoes {
         imagemPrincipalEl.style.cursor = 'zoom-in';
         imagemPrincipalEl.onclick = () => abrirImagemModal(src0);
       } else {
-        const fallback = './imagens/thumbs/produto1.webp';
+        const fallback = '/imagens/thumbs/produto1.webp';
         imagemPrincipalEl.setAttribute('src', fallback);
         imagemPrincipalEl.setAttribute('alt', 'Imagem indisponível');
         imagemPrincipalEl.setAttribute('fetchpriority', 'high');
@@ -401,7 +401,7 @@ class SistemaAvaliacoes {
             const candidato = imgs.find(u => this.ehURLImagem(u));
             if (candidato) p.imagem = candidato;
           }
-          if (!p.imagem) p.imagem = 'imagens/logos/logo-cabecalho.png';
+          if (!p.imagem) p.imagem = '/imagens/logos/logo-cabecalho.png';
         } catch (_) {}
         return p;
       });
@@ -640,7 +640,7 @@ class SistemaAvaliacoes {
               <div class="parcelamento">ou 10x de ${this.formatarMoeda(o.preco / 10)}</div>
             </div>
             <div class="oferta-loja">
-              <span class="loja"><img src="${o.plat === 'ml' ? 'imagens/logos/mercadolivre-icon.png' : (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function' ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png')}" class="icone-plataforma" ${o.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${o.loja}" /> ${o.loja}</span>
+              <span class="loja"><img src="${o.plat === 'ml' ? '/imagens/logos/mercadolivre-icon.png' : (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function' ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png')}" class="icone-plataforma" ${o.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${o.loja}" /> ${o.loja}</span>
             </div>
             <div class="oferta-acao">
               ${o.link ? `<a class="btn-ir-loja" href="${o.link}" target="_blank" rel="noopener noreferrer">Ir à loja</a>` : ''}
@@ -771,7 +771,7 @@ class SistemaAvaliacoes {
     if (produto.imagem && this.ehURLImagem?.(produto.imagem)) {
       imagem = produto.imagem;
     } else {
-      imagem = './imagens/thumbs/produto1.webp';
+      imagem = '/imagens/thumbs/produto1.webp';
     }
 
     const item = {
@@ -1228,7 +1228,7 @@ class SistemaAvaliacoes {
       if (imagemProdutoModal) {
         const srcModal = (this.produtoAtual.imagem && this.ehURLImagem(this.produtoAtual.imagem)) 
           ? this.produtoAtual.imagem 
-          : './imagens/thumbs/produto1.webp';
+          : '/imagens/thumbs/produto1.webp';
         imagemProdutoModal.src = srcModal;
         imagemProdutoModal.onerror = function() {
           this.style.display = 'none';

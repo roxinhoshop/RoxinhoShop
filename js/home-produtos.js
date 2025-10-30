@@ -45,7 +45,7 @@ async function carregarProdutosDestaque() {
           const candidato = imgs.find(u => ehURLImagem(u));
           if (candidato) p.imagem = candidato;
         }
-        if (!p.imagem) p.imagem = 'imagens/logos/logo-cabecalho.png';
+        if (!p.imagem) p.imagem = '/imagens/logos/logo-cabecalho.png';
       } catch (_) {}
       return p;
     });
@@ -63,7 +63,7 @@ async function carregarProdutosDestaque() {
       }
 
       return `
-  <a href="pagina-produto?id=${produto.id}" class="cartao-link">
+  <a href="/pagina-produto?id=${produto.id}" class="cartao-link">
           <div class="card-produto-home" data-produto-id="${produto.id}">
             <div class="produto-imagem">
               ${imagemHTML}

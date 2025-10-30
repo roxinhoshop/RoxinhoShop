@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (avatarAtual) {
         avatarAtual.src = (typeof u.foto_perfil === 'string' && u.foto_perfil.trim())
           ? u.foto_perfil
-          : 'imagens/logos/avatar-roxo.svg';
+: '/imagens/logos/avatar-roxo.svg';
         avatarAnteriorSrc = avatarAtual.src;
       }
 
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (headerAvatar) {
         headerAvatar.src = (typeof u.foto_perfil === 'string' && u.foto_perfil.trim())
           ? u.foto_perfil
-          : 'imagens/logos/avatar-roxo.svg';
+: '/imagens/logos/avatar-roxo.svg';
       }
 
       // Finalizar estado de carregamento (sem mensagem persistente)
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Remover avatar: volta ao padrão do site
   async function removerAvatar() {
-    const defaultUrl = 'imagens/logos/avatar-roxo.svg';
+const defaultUrl = '/imagens/logos/avatar-roxo.svg';
     try {
       const confirmar = await (window.sitePopup && typeof window.sitePopup.confirm === 'function'
         ? window.sitePopup.confirm('Remover sua foto e voltar ao avatar padrão?')
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (avatarPreview) {
     avatarPreview.onerror = () => {
       avatarPreview.onerror = null;
-      avatarPreview.src = 'imagens/logos/avatar-roxo.svg';
+avatarPreview.src = '/imagens/logos/avatar-roxo.svg';
     };
   }
 });

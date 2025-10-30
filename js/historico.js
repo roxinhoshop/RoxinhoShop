@@ -112,7 +112,7 @@
 
     const itensHTML = historico.map(item => {
       const p = mapaProdutos.get(String(item.id));
-      const thumb = (item.imagem || (p && p.imagem)) || './imagens/thumbs/produto1.webp';
+  const thumb = (item.imagem || (p && p.imagem)) || '/imagens/thumbs/produto1.webp';
       const nome = (p && (p.titulo || p.nome)) || item.titulo || item.nome || 'Produto';
       const precoML = paraNumero(p && p.precoMercadoLivre);
       const precoAMZ = paraNumero(p && p.precoAmazon);

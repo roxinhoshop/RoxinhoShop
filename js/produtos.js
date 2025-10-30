@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const candidato = imgs.find(u => ehURLImagem(u));
             if (candidato) p.imagem = candidato;
           }
-          if (!p.imagem) p.imagem = 'imagens/logos/logo-cabecalho.png';
+          if (!p.imagem) p.imagem = '/imagens/logos/logo-cabecalho.png';
         } catch (_) {}
         return p;
       });
@@ -932,7 +932,7 @@ function renderizarProdutos() {
     }
 
     return `
-        <a href="pagina-produto?id=${produto.id}" class="cartao-link">
+        <a href="/pagina-produto?id=${produto.id}" class="cartao-link">
         <div class="cartao-produto ${modoVisualizacao === 'lista' ? 'visualizacao-lista' : ''}" data-produto-id="${produto.id}">
           <div class="imagem-produto">
             ${imagemHTML}
@@ -973,7 +973,7 @@ function renderizarProdutos() {
                   const parcela10x = valorAtual > 0 ? (valorAtual / 10) : 0;
                   return `
                     <div class="preco-atual ${plataformaAtual}">
-                      <img class="icone-plataforma" src="${plataformaAtual === 'amazon' ? ((typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png') : 'imagens/logos/mercadolivre-icon.png'}" ${plataformaAtual === 'amazon' ? 'data-store="amazon"' : ''} alt="${plataformaAtual === 'amazon' ? 'Amazon' : 'Mercado Livre'}" />
+                      <img class="icone-plataforma" src="${plataformaAtual === 'amazon' ? ((typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png') : '/imagens/logos/mercadolivre-icon.png'}" ${plataformaAtual === 'amazon' ? 'data-store="amazon"' : ''} alt="${plataformaAtual === 'amazon' ? 'Amazon' : 'Mercado Livre'}" />
                       <span class="moeda">R$</span>
                       <span class="valor">${formatarMoeda(valorAtual).replace(/^R\$\s?/, '')}</span>
                     </div>

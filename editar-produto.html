@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Produto | Roxinho Shop</title>
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <style>
     .container-edicao { max-width: 900px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
@@ -79,10 +79,10 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="js/editar-produto.js"></script>
+  <script src="/js/editar-produto.js"></script>
   <script>
     // Carregar Header e Footer
-  fetch('cabecalho-rodape')
+  fetch('/cabecalho-rodape')
       .then(response => response.text())
       .then(data => {
         const parser = new DOMParser();

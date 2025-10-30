@@ -6,13 +6,13 @@
     <title>Produtos | Roxinho Shop</title>
 
     <!-- Favicon -->
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/produtos.css">
+  <link rel="stylesheet" href="/css/produtos.css">
 <!-- Removidos CSS ausentes para evitar erros de carregamento -->
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
-    <link rel="stylesheet" href="css/responsivo.css">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/responsivo.css">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -34,7 +34,7 @@
 
       <!-- ======================= BANNER ======================= -->
   <section class="banner">
-    <img src="imagens/banner-produtos.png" alt="">
+      <img src="/imagens/banner-produtos.png" alt="">
   </section>
 
     <!-- Banner de Categoria -->
@@ -225,14 +225,14 @@
 
             <!-- JavaScript -->
     <!-- Define API_BASE para mesma origem antes dos demais scripts -->
-    <script src="js/site-popup.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/produtos.js"></script>
-    <script src="js/cabecalho-rodape.js"></script>
-    <script src="js/cabecalho-melhorado.js"></script>   <!-- script que preenche os dados -->
+  <script src="/js/site-popup.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/produtos.js"></script>
+  <script src="/js/cabecalho-rodape.js"></script>
+  <script src="/js/cabecalho-melhorado.js"></script>   <!-- script que preenche os dados -->
 
     <script>
-  fetch("cabecalho-rodape")
+  fetch('/cabecalho-rodape')
             .then(response => response.text())
             .then(data => {
                 const parser = new DOMParser();

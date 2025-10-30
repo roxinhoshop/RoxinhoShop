@@ -6,14 +6,14 @@
   <title>Roxinho Shop | Compare, economize e encontre o melhor para você.</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/home-melhorado.css">
-  <link rel="stylesheet" href="css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="/css/home-melhorado.css">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
 
-  <link rel="stylesheet" href="css/responsivo.css">
+  <link rel="stylesheet" href="/css/responsivo.css">
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -36,17 +36,17 @@
     <div class="slides-wrapper" id="slidesWrapper">
       <!-- Slide 1: Banner principal -->
       <div class="slide ativo" data-link="produtos">
-        <img src="imagens/banner1.png" alt="Destaques RoxinhoShop">
+        <img src="/imagens/banner1.png" alt="Destaques RoxinhoShop">
       </div>
 
       <!-- Slide 2: Halloween Promo -->
       <div class="slide" data-link="produtos">
-        <img src="imagens/banner-halloween.png" alt="Promoção de Halloween">
+        <img src="/imagens/banner-halloween.png" alt="Promoção de Halloween">
       </div>
 
       <!-- Slide 3: Banner gamer -->
       <div class="slide" data-link="computadores">
-        <img src="imagens/banner-gamer.jpeg" alt="Linha gamer">
+        <img src="/imagens/banner-gamer.jpeg" alt="Linha gamer">
       </div>
     </div>
   </div>
@@ -84,28 +84,28 @@
       <h2 class="titulo-secao">Categorias Populares</h2>
       <div class="grid-categorias">
             <a href="/produtos?categoria=Hardware" class="categoria-card">
-          <img src="imagens/Catalogos/categoria-hardware.png" alt="Hardware" class="categoria-imagem">
+          <img src="/imagens/Catalogos/categoria-hardware.png" alt="Hardware" class="categoria-imagem">
           <div class="categoria-conteudo">
             <h3>Hardware</h3>
             <p>Processadores, placas de vídeo e mais</p>
           </div>
         </a>
             <a href="/produtos?categoria=Periféricos" class="categoria-card">
-          <img src="imagens/Catalogos/categoria-perifericos.png" alt="Periféricos" class="categoria-imagem">
+          <img src="/imagens/Catalogos/categoria-perifericos.png" alt="Periféricos" class="categoria-imagem">
           <div class="categoria-conteudo">
             <h3>Periféricos</h3>
             <p>Teclados, mouses e headsets</p>
           </div>
         </a>
             <a href="/produtos?categoria=Computadores" class="categoria-card">
-          <img src="imagens/Catalogos/categoria-computadores.png" alt="Computadores" class="categoria-imagem">
+          <img src="/imagens/Catalogos/categoria-computadores.png" alt="Computadores" class="categoria-imagem">
           <div class="categoria-conteudo">
             <h3>Computadores</h3>
             <p>PCs completos e notebooks</p>
           </div>
         </a>
             <a href="/produtos?categoria=Games" class="categoria-card">
-          <img src="imagens/Catalogos/categoria-games.png" alt="Games" class="categoria-imagem">
+          <img src="/imagens/Catalogos/categoria-games.png" alt="Games" class="categoria-imagem">
           <div class="categoria-conteudo">
             <h3>Games</h3>
             <p>Consoles e acessórios gamer</p>
@@ -147,17 +147,17 @@
 
   <!-- JS - ORDEM IMPORTANTE! -->
   <!-- Define API_BASE para mesma origem antes dos demais scripts -->
-  <script src="js/site-popup.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/home-produtos.js"></script>
-  <script src="js/home-melhorado.js"></script>
-  <script src="js/cabecalho-melhorado.js"></script>
-  <script src="js/rotas.js"></script>
+  <script src="/js/site-popup.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/home-produtos.js"></script>
+  <script src="/js/home-melhorado.js"></script>
+  <script src="/js/cabecalho-melhorado.js"></script>
+  <script src="/js/rotas.js"></script>
   
 
   
   <script>
-  fetch('cabecalho-rodape')
+  fetch('/cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     grade.innerHTML = filtrado.map(item => {
       const p = mapa.get(Number(item.id));
       const nome = p?.titulo || p?.nome || item.titulo || 'Produto';
-      const img = (p?.imagem && typeof p?.imagem === 'string') ? p.imagem : (item.imagem || './imagens/thumbs/produto1.webp');
+      const img = (p?.imagem && typeof p?.imagem === 'string') ? p.imagem : (item.imagem || '/imagens/thumbs/produto1.webp');
       const ml = typeof p?.precoMercadoLivre === 'number' ? p.precoMercadoLivre : undefined;
       const amz = typeof p?.precoAmazon === 'number' ? p.precoAmazon : undefined;
       const fmt = v => 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
@@ -400,8 +400,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <div>
               <div class="titulo">${nome}</div>
               <div class="precos">
-                ${typeof ml === 'number' ? `<span class="preco-ml"><img src="imagens/logos/mercadolivre-icon.png" class="icone-plataforma" alt="Mercado Livre" /> ${fmt(ml)}</span>` : ''}
-                ${typeof amz === 'number' ? `<span class="preco-amz"><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${fmt(amz)}</span>` : ''}
+                ${typeof ml === 'number' ? `<span class="preco-ml"><img src="/imagens/logos/mercadolivre-icon.png" class="icone-plataforma" alt="Mercado Livre" /> ${fmt(ml)}</span>` : ''}
+                ${typeof amz === 'number' ? `<span class="preco-amz"><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${fmt(amz)}</span>` : ''}
               </div>
               <div class="data">${data ? `Visto em ${data}` : ''}</div>
             </div>

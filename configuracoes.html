@@ -6,11 +6,11 @@
     <title>Usuário | Roxinho Shop</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
-  <link rel="stylesheet" href="./css/painelusuario.css">
-  <link rel="stylesheet" href="./css/painel-melhorado.css">
-  <link rel="stylesheet" href="./css/configuracoes.css">
-  <link rel="stylesheet" href="./css/responsivo.css">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/painelusuario.css">
+  <link rel="stylesheet" href="/css/painel-melhorado.css">
+  <link rel="stylesheet" href="/css/configuracoes.css">
+  <link rel="stylesheet" href="/css/responsivo.css">
   <!-- Removidos temas e sistema XP nesta página para simplificar -->
 
   <!-- Google Fonts -->
@@ -20,8 +20,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
-  <script src="js/config.js"></script>
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
+  <script src="/js/config.js"></script>
 </head>
 <body>
   
@@ -30,7 +30,7 @@
     <div class="container-cabecalho">
       <!-- LOGO -->
       <a class="logo" href="/">
-        <img src="imagens/logos/logo-cabecalho.png" alt="Roxinho Shop" class="logo-imagem">
+  <img src="/imagens/logos/logo-cabecalho.png" alt="Roxinho Shop" class="logo-imagem">
       </a>
 
       <!-- BARRA DE PESQUISA -->
@@ -51,7 +51,7 @@
         
         <!-- Login / Usuário -->
         <div class="caixa-entre" id="caixa-login">
-          <img src="imagens/logos/avatar-roxo.svg" alt="Avatar" class="avatar" id="avatar-usuario">
+  <img src="/imagens/logos/avatar-roxo.svg" alt="Avatar" class="avatar" id="avatar-usuario">
           <div class="texto" id="texto-login">
             <strong id="status-login">Entre</strong>
             <br><span id="subtexto-login">Iniciar Sessão</span>
@@ -153,7 +153,7 @@
                       <div class="perfil-avatar-col">
                         <div class="perfil-avatar">
                           <div class="avatar-container">
-                            <img id="avatar-atual" class="avatar-preview" src="imagens/logos/avatar-roxo.svg" alt="Avatar do usuário">
+  <img id="avatar-atual" class="avatar-preview" src="/imagens/logos/avatar-roxo.svg" alt="Avatar do usuário">
                               <div class="avatar-upload">
                               <input type="file" id="avatar-input" accept="image/png, image/jpeg, image/webp">
                               <button type="button" class="btn-upload-avatar" id="btn-alterar-foto">
@@ -206,12 +206,12 @@
 
     <!-- Rodapé será inserido diretamente no body, sem wrapper -->
 
-    <script src="js/site-popup.js"></script>
-    <script src="js/cabecalho-melhorado.js"></script>
-    <script src="js/configuracoes.js"></script>
+  <script src="/js/site-popup.js"></script>
+  <script src="/js/cabecalho-melhorado.js"></script>
+  <script src="/js/configuracoes.js"></script>
     <script>
       // Carregar apenas o Footer e inserir diretamente no body
-  fetch('cabecalho-rodape')
+  fetch('/cabecalho-rodape')
         .then(response => response.text())
         .then(data => {
           const parser = new DOMParser();

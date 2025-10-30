@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roxinho Shop - Os melhores preços em eletrônicos!</title>
 
-  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="css/pagina-produto.css">
-  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/responsivo.css">
+  <link rel="stylesheet" href="/css/pagina-produto.css">
+  <link rel="stylesheet" href="/css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="/css/responsivo.css">
 
   <!-- Chart.js para o gráfico de histórico de preços -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -82,10 +82,10 @@
         <!-- Botões de ação (dentro do painel) -->
         <div class="botoes-acao">
           <button class="btn-comprar-agora" onclick="abrirMercadoLivre()" aria-label="Comprar no Mercado Livre" title="Comprar no Mercado Livre">
-            <img src="imagens/logos/mercado-livre.png" alt="Mercado Livre" class="logo-plataforma logo-ml">
+  <img src="/imagens/logos/mercado-livre.png" alt="Mercado Livre" class="logo-plataforma logo-ml">
           </button>
           <button class="btn-carrinho" onclick="abrirAmazon()" aria-label="Comprar na Amazon" title="Comprar na Amazon">
-            <img src="imagens/logos/amazon-logo.png" alt="Amazon" class="logo-plataforma logo-amazon">
+  <img src="/imagens/logos/amazon-logo.png" alt="Amazon" class="logo-plataforma logo-amazon">
           </button>
         </div>
       </div>     
@@ -259,16 +259,16 @@
 <div id="footer-placeholder"></div>
 
 <!-- Scripts -->
-<script src="js/site-popup.js"></script>
-<script src="js/config.js"></script>
-<script src="js/links-externos.js"></script>
-  <script src="js/pagina-produto.js"></script>
-  <script src="js/cabecalho-rodape.js"></script>
-<script src="js/cabecalho-melhorado.js"></script>
+  <script src="/js/site-popup.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/links-externos.js"></script>
+  <script src="/js/pagina-produto.js"></script>
+  <script src="/js/cabecalho-rodape.js"></script>
+  <script src="/js/cabecalho-melhorado.js"></script>
 
 <script>
   // Carregar Header e Footer
-  fetch('cabecalho-rodape')
+  fetch('/cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

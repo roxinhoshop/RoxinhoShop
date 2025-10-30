@@ -6,10 +6,11 @@
 
     const origin = window.location.origin;
     const host = window.location.hostname || '';
-    // Em produção, o frontend está em roxinhoshop.vercel.app e o backend separado em roxinhoshop-backend.vercel.app
-    // Em desenvolvimento/local, manter na mesma origem para evitar CORS/cookies.
+    // Em produção, usar sempre same-origin com caminho /api,
+    // o vercel.json do frontend faz o proxy para o backend.
+    // Isso elimina CORS no navegador.
     const isProdFrontend = /roxinhoshop\.(?:vercel\.app)$/i.test(host);
-    window.API_BASE = isProdFrontend ? 'https://roxinhoshop-backend.vercel.app' : origin;
+    window.API_BASE = origin;
   } catch {
     try { window.API_BASE = window.location.origin; } catch {}
   }

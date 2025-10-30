@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Vendedor | Roxinho Shop</title>
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="./css/painel-vendedor.css">
+  <link rel="stylesheet" href="./css/vendedores.css">
+  <link rel="stylesheet" href="./css/responsivo.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
+  
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <main class="painel-vendedor">
+    <header class="painel-header">
+      <div class="titulo-area">
+        <h1><i class="fa-solid fa-store"></i> Painel do Vendedor</h1>
+        <p id="boas-vindas-vendedor" class="subtitulo">Bem-vindo(a) ao seu painel.</p>
+      </div>
+      <nav class="abas" aria-label="Navegação do painel">
+        <button class="aba ativa" data-alvo="#aba-dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</button>
+        <button class="aba" data-alvo="#aba-produtos"><i class="fa-solid fa-box"></i> Produtos & Inventário</button>
+        <button class="aba" data-alvo="#aba-vendedores"><i class="fa-solid fa-users"></i> Vendedores</button>
+        <button class="aba" data-alvo="#aba-historico"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</button>
+        <button class="aba" data-alvo="#aba-config"><i class="fa-solid fa-gear"></i> Configurações</button>
+      </nav>
+    </header>
+
+    <section id="aba-dashboard" class="conteudo-aba visivel" aria-labelledby="Dashboard">
+      <div class="cards-dashboard">
+        <div class="card-info">
+          <div class="card-topo"><i class="fa-solid fa-boxes-stacked"></i> Produtos</div>
+          <div class="card-valor" id="stat-total-produtos">0</div>
+          <div class="card-legenda">Itens cadastrados</div>
+        </div>
+        <div class="card-info">
+          <div class="card-topo"><i class="fa-solid fa-circle-check"></i> Ativos</div>
+          <div class="card-valor" id="stat-produtos-ativos">0</div>
+          <div class="card-legenda">Disponíveis para venda</div>
+        </div>
+        <div class="card-info">
+          <div class="card-topo"><i class="fa-solid fa-chart-line"></i> Vendas</div>
+          <div class="card-valor" id="stat-vendas">0</div>
+          <div class="card-legenda">Últimos 30 dias</div>
+        </div>
+        <div class="card-info">
+          <div class="card-topo"><i class="fa-solid fa-clock"></i> Aguardando</div>
+          <div class="card-valor" id="stat-aguardando">0</div>
+          <div class="card-legenda">Processamento</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aba-produtos" class="conteudo-aba" aria-labelledby="Produtos & Inventário">
+      <header class="cabecalho-secao">
+        <h2 class="titulo-secao"><i class="fa-solid fa-box"></i> Produtos & Inventário</h2>
+        <p class="subtitulo-secao">Cadastre, edite e gerencie seu estoque (MVP local)</p>
+      </header>
+      <form id="formProduto" class="form-produto" autocomplete="off">
+        <div class="grupo">
+          <label>Nome</label>
+          <input id="produtoNome" type="text" required placeholder="Ex.: Teclado Mecânico" />
+        </div>
+        <div class="grupo">
+          <label>Preço (R$)</label>
+          <input id="produtoPreco" type="number" min="0" step="0.01" required placeholder="0,00" />
+        </div>
+        <div class="grupo">
+          <label>Quantidade</label>
+          <input id="produtoQtd" type="number" min="0" step="1" required placeholder="0" />
+        </div>
+        <div class="acoes-form">
+          <button class="btn-primario" type="submit"><i class="fa-solid fa-plus"></i> Adicionar</button>
+          <button class="btn-secundario" type="button" id="btnLimparForm">Limpar</button>
+        </div>
+      </form>
+      <div class="tabela-wrapper">
+        <table class="tabela-generic">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Qtd</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProdutos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="aba-vendedores" class="conteudo-aba" aria-labelledby="Vendedores">
+      <section class="cabecalho-secao">
+        <h2 class="titulo-secao"><i class="fa-solid fa-users"></i> Vendedores</h2>
+        <p class="subtitulo-secao">Gerencie contas de vendedores – MVP local</p>
+      </section>
+      <section class="filtros-secao" aria-label="Filtros da tabela de vendedores">
+        <div class="grupo-filtro">
+          <label for="filtroBusca"><i class="fa-solid fa-magnifying-glass"></i> Buscar</label>
+          <input id="filtroBusca" type="text" placeholder="Nome, e-mail ou CPF" autocomplete="off">
+        </div>
+        <div class="grupo-filtro">
+          <label for="filtroStatus"><i class="fa-solid fa-toggle-on"></i> Status</label>
+          <select id="filtroStatus">
+            <option value="todos">Todos</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+        <div class="grupo-filtro">
+          <label for="filtroAtividade"><i class="fa-solid fa-clock-rotate-left"></i> Atividade</label>
+          <select id="filtroAtividade">
+            <option value="todos">Todos</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+          </select>
+        </div>
+        <div class="grupo-filtro grupo-itens-por-pagina">
+          <label for="itensPorPagina"><i class="fa-solid fa-list-ol"></i> Itens</label>
+          <select id="itensPorPagina">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="tabela-secao" aria-label="Tabela de vendedores">
+        <div class="tabela-wrapper">
+          <table class="tabela-vendedores">
+            <thead>
+              <tr>
+                <th data-sort="nome">Nome <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="cpf">CPF <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="email">E-mail <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="status">Status <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="criadoEm">Criado em <i class="fa-solid fa-sort"></i></th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaVendedoresBody"></tbody>
+          </table>
+        </div>
+        <div class="paginacao" id="paginacao" aria-label="Paginação"></div>
+      </section>
+    </section>
+
+    <section id="aba-historico" class="conteudo-aba" aria-labelledby="Histórico">
+      <header class="cabecalho-secao">
+        <h2 class="titulo-secao"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</h2>
+        <p class="subtitulo-secao">Registro de ações recentes</p>
+      </header>
+      <ul id="listaHistorico" class="lista-historico"></ul>
+    </section>
+
+    <section id="aba-config" class="conteudo-aba" aria-labelledby="Configurações">
+      <header class="cabecalho-secao">
+        <h2 class="titulo-secao"><i class="fa-solid fa-gear"></i> Configurações</h2>
+        <p class="subtitulo-secao">Preferências da sua loja</p>
+      </header>
+      <form id="formConfig" class="form-config">
+        <div class="grupo">
+          <label>Nome da loja</label>
+          <input id="configNomeLoja" type="text" placeholder="Ex.: Loja do João" />
+        </div>
+        <div class="grupo">
+          <label>Telefone</label>
+          <input id="configTelefone" type="tel" placeholder="(00) 00000-0000" />
+        </div>
+        <div class="grupo">
+          <label>Sobre a loja</label>
+          <textarea id="configSobre" rows="4" placeholder="Fale um pouco sobre sua loja..."></textarea>
+        </div>
+        <div class="acoes-form">
+          <button class="btn-primario" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/cabecalho-melhorado.js"></script>
+  <script src="./js/painel-vendedor.js"></script>
+  <script src="./js/vendedores.js"></script>
+  <script>
+  fetch('cabecalho-rodape')
+      .then(r => r.text())
+      .then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const header = doc.querySelector('nav.cabecalho');
+        const categorias = doc.querySelector('.barra-categorias');
+        const footer = doc.querySelector('footer.rodape');
+        if (header) document.getElementById('header-placeholder').appendChild(header);
+        if (categorias) document.getElementById('header-placeholder').appendChild(categorias);
+        if (footer) document.getElementById('footer-placeholder').appendChild(footer);
+        // reexecutar scripts do header injetado se houver
+        doc.querySelectorAll('script').forEach(s => {
+          const ns = document.createElement('script');
+          if (s.src) ns.src = s.src; else ns.textContent = s.textContent;
+          document.body.appendChild(ns);
+        });
+      });
+  </script>
+</body>
+</html>

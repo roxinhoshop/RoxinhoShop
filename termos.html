@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
-<!-- Desenvolvido por Gabriel (gabwvr) -->
-<!-- Página: [NOME DA PÁGINA] -->
-<!-- Design responsivo com identidade visual roxo e amarelo -->
-
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -11,10 +6,11 @@
   <title>Termos e condições | Roxinho Shop</title>
 
       <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
 
   <link rel="stylesheet" href="css/termos.css">
-  <link rel="stylesheet" href="css/cabecalhorodape.css">
+  <link rel="stylesheet" href="css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="css/responsivo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
@@ -37,7 +33,7 @@
       <li><strong>Disponibilidade e Informações:</strong> As informações, preços e disponibilidade dos produtos exibidos no catálogo são de responsabilidade exclusiva dos parceiros. Esforçamo-nos para manter os dados atualizados, mas não garantimos sua precisão ou disponibilidade constante.</li>
       <li><strong>Preços e Condições:</strong> Os valores e condições de pagamento exibidos podem ser alterados sem aviso prévio pelos sites de destino. A Roxinho Shop não interfere nem realiza transações financeiras diretamente.</li>
       <!-- É possível acessar a página de políticas por aqui também -->
-      <li><strong>Política de Privacidade:</strong> O uso do catálogo implica a aceitação da nossa <a href="politicas.html">Política de Segurança e Privacidade</a>, que assegura o tratamento responsável dos dados pessoais, conforme a legislação vigente (LGPD).</li>
+            <li><strong>Política de Privacidade:</strong> O uso do catálogo implica a aceitação da nossa <a href="/politicas">Política de Segurança e Privacidade</a>, que assegura o tratamento responsável dos dados pessoais, conforme a legislação vigente (LGPD).</li>
       <li><strong>Responsabilidade do Usuário:</strong> O usuário deve verificar cuidadosamente as condições de venda, entrega e garantia diretamente com o site parceiro antes de concluir qualquer compra.</li>
       <li><strong>Alterações nos Termos:</strong> Estes termos podem ser atualizados periodicamente, sendo responsabilidade do usuário consultá-los sempre que acessar o catálogo.</li>
     </ul>
@@ -47,7 +43,7 @@
 <div id="footer-placeholder"></div>
 
 <script>
-  fetch('cabecalhorodape.html')
+  fetch('cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();
@@ -70,7 +66,6 @@
     });
 </script>
 
-    <script src="./js/sistema-xp.js"></script>
         <script src="js/cabecalho-melhorado.js"></script>
 
 </body>

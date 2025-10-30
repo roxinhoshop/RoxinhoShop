@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
-<!-- Desenvolvido por Gabriel (gabwvr) -->
-<!-- Design responsivo com identidade visual roxo e amarelo -->
-
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -10,16 +6,17 @@
   <title>Contato | Roxinho Shop</title>
 
     <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
 
   <link rel="stylesheet" href="css/contato.css">
-  <link rel="stylesheet" href="css/cabecalhorodape.css">
+  <link rel="stylesheet" href="css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="css/responsivo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
 
 </head>
-<body>
+<body class="contato-page">
 
 <div id="header-placeholder"></div>
 
@@ -30,7 +27,7 @@
 
     <ul>
       <li><strong><i class="fa-solid fa-envelope"></i> Email: </strong>roxinhoshopoficial@gmail.com</li>
-      <li></strong><i class="fa-solid fa-location-dot"></i> Endereço:</strong> Rua Camélia, 26 - Osasco/SP</li>
+      <li><strong><i class="fa-solid fa-location-dot"></i> Endereço:</strong> Rua Camélia, 26 - Osasco/SP</li>
     </ul>
   </section>
 
@@ -47,8 +44,13 @@
 
 <div id="footer-placeholder"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  fetch('cabecalhorodape.html')
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script src="js/site-popup.js"></script>
+<script src="js/config.js"></script>
+<script src="js/cabecalho-melhorado.js"></script>
+<script src="js/rotas.js"></script>
+<script>
+  fetch('cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();
@@ -62,14 +64,12 @@
       if (categorias) document.getElementById('header-placeholder').appendChild(categorias);
       if (footer) document.getElementById('footer-placeholder').appendChild(footer);
 
-      doc.querySelectorAll("script").forEach(oldScript => {
-        const newScript = document.createElement("script");
-        if (oldScript.src) newScript.src = oldScript.src;
-        else newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
-      });
-    });
+      // Atualizar contador do carrinho se disponível
+      if (typeof atualizarContadorCarrinho === 'function') {
+        atualizarContadorCarrinho();
+      }
+    })
+    .catch(err => console.error('Erro ao carregar cabeçalho/rodapé:', err));
 </script>
-    <script src="./js/sistema-xp.js"></script>
-</body>
+    </body>
 </html>

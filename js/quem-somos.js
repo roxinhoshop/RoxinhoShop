@@ -1,9 +1,3 @@
-// ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS =====
-// Desenvolvido por Gabriel (gabwvr)
-// Este arquivo contém funções para gerenciar [FUNCIONALIDADE]
-// Comentários didáticos para facilitar o entendimento
-
-
 // ================== ANIMAÇÃO AO ROLAR ==================
 const caixas = document.querySelectorAll(".caixa-destaque");
 
@@ -31,16 +25,16 @@ if (form) {
     const msg = form.querySelector("#mensagem");
 
     if (!nome.value.trim() || !email.value.trim() || !msg.value.trim()) {
-      alert("Por favor, preencha todos os campos.");
+      window.sitePopup && window.sitePopup.alert('Por favor, preencha todos os campos.', 'Aviso');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-      alert("Digite um e-mail válido.");
+      window.sitePopup && window.sitePopup.alert('Digite um e-mail válido.', 'Aviso');
       return;
     }
 
-    alert("Mensagem enviada com sucesso!");
+    window.sitePopup && window.sitePopup.alert('Mensagem enviada com sucesso!', 'Sucesso');
     form.reset();
   });
 }

@@ -1,8 +1,3 @@
-// ===== Roxinho Shop - PÁGINA DE PRODUTOS ATUALIZADA =====
-// Desenvolvido por Gabriel (gabwvr)
-// Sistema de produtos integrado com carrinho unificado
-// Comentários didáticos para facilitar o entendimento
-
 // Sistema de categorias expandido e produtos unificado
 const sistemaCategorias = {
   'Hardware': {
@@ -27,13 +22,10 @@ const sistemaCategorias = {
     subcategorias: ['Fones de Ouvido', 'Caixas de Som', 'Soundbars', 'Amplificadores', 'Microfones', 'Interfaces de Áudio', 'Monitores de Referência'],
   },
   'Espaço Gamer': {
-    subcategorias: ['Cadeiras Gamer', 'Mesas Gamer', 'Suportes Monitor', 'Iluminação RGB', 'Decoração', 'Organizadores', 'Tapetes'],
+    subcategorias: ['Cadeiras Gamer', 'Mesas Gamer', 'Suportes Monitor', 'Iluminação RGB', 'Decoração', 'Organização', 'Tapetes'],
   },
   'Casa Inteligente': {
     subcategorias: ['Assistentes Virtuais', 'Câmeras Segurança', 'Lâmpadas Smart', 'Tomadas Smart', 'Sensores', 'Fechaduras Digitais', 'Termostatos'],
-  },
-  'PC Gamer': {
-    subcategorias: ['PCs Montados', 'Componentes Gamer', 'Periféricos Gaming', 'Monitores Gamer', 'Cadeiras Gamer'],
   },
   'Giftcards': {
     subcategorias: ['Mais populares','Serviços', 'Jogos', 'Xbox', 'Nintendo'],
@@ -41,7 +33,8 @@ const sistemaCategorias = {
 };
 
 // Estado global
-let produtosFiltrados = [...produtos];
+let produtos = [];
+let produtosFiltrados = [];
 let filtrosAtuais = {
   busca: '',
   categoria: '',
@@ -51,7 +44,6 @@ let filtrosAtuais = {
   precoMinimo: 0,
   precoMaximo: 15000,
   avaliacaoMinima: 0,
-  emEstoque: false,
   desconto: false,
   freteGratis: false
 };
@@ -64,6 +56,7 @@ let paginacaoConfig = {
 };
 
 let ordenacaoAtual = 'relevancia';
+let plataformaAtual = 'ambas';
 let modoVisualizacao = 'grade';
 let favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
 let categoriaAtivaSelecionada = '';
@@ -75,11 +68,15 @@ const barraFiltros = document.getElementById('barraFiltros');
 const botaoVisualizacaoGrade = document.getElementById('visualizacaoGrade');
 const botaoVisualizacaoLista = document.getElementById('visualizacaoLista');
 const categoriasRelacionadas = document.getElementById('categoriasRelacionadas');
+const seletorPlataforma = document.getElementById('seletorPlataforma');
 const seletorMarca = document.getElementById('seletorMarca');
 const faixaPrecoMinimo = document.getElementById('faixaPrecoMinimo');
 const faixaPrecoMaximo = document.getElementById('faixaPrecoMaximo');
-const spanPrecoMinimo = document.getElementById('precoMinimo');
-const spanPrecoMaximo = document.getElementById('precoMaximo');
+const spanPrecoMinimo = document.getElementById('valorMinimoRange');
+const spanPrecoMaximo = document.getElementById('valorMaximoRange');
+const inputPrecoMinimo = document.getElementById('precoMinimo');
+const inputPrecoMaximo = document.getElementById('precoMaximo');
+const seletorPreco = document.getElementById('seletorPreco');
 const filtroAvaliacao = document.getElementById('filtroAvaliacao');
 const valorAvaliacao = document.getElementById('valorAvaliacao');
 const apenasEmEstoque = document.getElementById('apenasEmEstoque');
@@ -105,16 +102,62 @@ document.addEventListener('DOMContentLoaded', function() {
   inicializarFiltros();
   inicializarEventListeners();
   processarParametrosURL();
-  
-  // Só renderizar produtos se estivermos na página de produtos
-  if (gradeProdutos) {
-    renderizarProdutos();
-    renderizarPaginacao();
-    atualizarInfoResultados();
-    aplicarFiltros();
+
+  async function carregarProdutos() {
+    try {
+      let json = null;
+      // Carregar somente da API
+      try {
+        const API_BASE = window.API_BASE || window.location.origin;
+        const respApi = await fetch(`${API_BASE}/api/products`, {
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (respApi && respApi.ok) {
+          json = await respApi.json();
+        }
+      } catch (_) {}
+
+      let lista = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      if (!Array.isArray(lista)) lista = [];
+      produtos = (lista || []).map(p => {
+        // Classificação automática de categoria/subcategoria se ausente
+        if (!p.categoria || !p.subcategoria) {
+          const { categoria, subcategoria } = classificarProduto(p.titulo || '', p.marca || '');
+          p.categoria = p.categoria || categoria;
+          p.subcategoria = p.subcategoria || subcategoria;
+        }
+        // Normalização da imagem principal a partir de `imagens`
+        try {
+          let imgs = p.imagens;
+          if (typeof imgs === 'string') { try { imgs = JSON.parse(imgs); } catch (_) {} }
+          if ((!p.imagem || !ehURLImagem(p.imagem)) && Array.isArray(imgs)) {
+            const candidato = imgs.find(u => ehURLImagem(u));
+            if (candidato) p.imagem = candidato;
+          }
+          if (!p.imagem) p.imagem = 'imagens/logos/logo-cabecalho.png';
+        } catch (_) {}
+        return p;
+      });
+      produtosFiltrados = [...produtos];
+      // Popular seletor de marcas com dados carregados
+      popularMarcas();
+      calcularPaginacao();
+      renderizarProdutos();
+      renderizarPaginacao();
+      atualizarInfoResultados();
+      aplicarFiltros();
+      if (semResultados) semResultados.style.display = produtos.length === 0 ? 'block' : 'none';
+    } catch (e) {
+      console.error('Erro ao carregar produtos', e);
+      if (semResultados) semResultados.style.display = 'block';
+    }
   }
-  
-  // Atualizar contador do carrinho se a função existir
+
+  if (gradeProdutos) {
+    carregarProdutos();
+  }
+
   if (typeof atualizarContadorCarrinho === 'function') {
     atualizarContadorCarrinho();
   }
@@ -234,17 +277,20 @@ function processarParametrosURL() {
 
 // Função para mostrar banner da categoria com dados personalizados
 function mostrarBannerCategoria(categoria, subcategoria = '') {
-  if (bannerCategoria && tituloCategoria && descricaoCategoria) {
+  if (bannerCategoria && tituloCategoria) {
     const dadosCategoria = sistemaCategorias[categoria];
     
     if (dadosCategoria) {
       // Configurar título e descrição
       if (subcategoria) {
         tituloCategoria.innerHTML = `<i class="${dadosCategoria.icone}"></i> ${subcategoria}`;
-        descricaoCategoria.textContent = `Produtos da categoria ${subcategoria} em ${categoria}`;
       } else {
         tituloCategoria.innerHTML = `<i class="${dadosCategoria.icone}"></i> ${categoria}`;
-        descricaoCategoria.textContent = dadosCategoria.descricao || `Encontre os melhores produtos em ${categoria}`;
+      }
+
+      // Remover/ocultar a descrição da categoria do banner
+      if (descricaoCategoria) {
+        try { descricaoCategoria.remove(); } catch (_) { descricaoCategoria.style.display = 'none'; }
       }
 
       // 👇 Aqui você move o banner para baixo da seção desejada
@@ -260,24 +306,45 @@ function mostrarBannerCategoria(categoria, subcategoria = '') {
 
 // Inicializar filtros
 function inicializarFiltros() {
-  // Popular seletor de marcas
+  // Inicializa seletor de marcas com opção padrão; marcas reais serão populadas após carregar produtos
   if (seletorMarca) {
-    const marcas = ['', ...new Set(produtos.map(p => p.marca))];
-    marcas.forEach(marca => {
-      const opcao = document.createElement('option');
-      opcao.value = marca;
-      opcao.textContent = marca || 'Todas as Marcas';
-      seletorMarca.appendChild(opcao);
-    });
+    seletorMarca.innerHTML = '';
+    const opcao = document.createElement('option');
+    opcao.value = '';
+    opcao.textContent = 'Todas as Marcas';
+    seletorMarca.appendChild(opcao);
+    seletorMarca.disabled = false;
+  }
+
+  // Sincroniza seletor de plataforma com o valor padrão atual
+  if (seletorPlataforma) {
+    try { seletorPlataforma.value = plataformaAtual; } catch (_) {}
+  }
+
+  // Seletor de preço (Todos os Preços)
+  if (seletorPreco) {
+    try { seletorPreco.value = 'todos'; } catch (_) {}
   }
 
   // Renderizar categorias relacionadas
   renderizarCategoriasRelacionadas();
 
   // Definir valores iniciais da faixa de preço
-  if (spanPrecoMinimo) spanPrecoMinimo.textContent = filtrosAtuais.precoMinimo;
-  if (spanPrecoMaximo) spanPrecoMaximo.textContent = filtrosAtuais.precoMaximo;
+  if (faixaPrecoMinimo) faixaPrecoMinimo.value = filtrosAtuais.precoMinimo;
+  if (faixaPrecoMaximo) faixaPrecoMaximo.value = filtrosAtuais.precoMaximo;
+  if (spanPrecoMinimo) spanPrecoMinimo.textContent = formatarMoeda(filtrosAtuais.precoMinimo);
+  if (spanPrecoMaximo) spanPrecoMaximo.textContent = formatarMoeda(filtrosAtuais.precoMaximo);
+  if (inputPrecoMinimo) inputPrecoMinimo.value = filtrosAtuais.precoMinimo;
+  if (inputPrecoMaximo) inputPrecoMaximo.value = filtrosAtuais.precoMaximo;
   if (valorAvaliacao) valorAvaliacao.textContent = filtrosAtuais.avaliacaoMinima;
+  // Deixar o texto "0 estrelas" preto quando valor = 0
+  const rotuloAvaliacaoEl = document.querySelector('.rotulo-avaliacao');
+  if (rotuloAvaliacaoEl) {
+    rotuloAvaliacaoEl.style.color = filtrosAtuais.avaliacaoMinima === 0 ? '#000000' : '';
+  }
+  if (valorAvaliacao) {
+    valorAvaliacao.style.color = filtrosAtuais.avaliacaoMinima === 0 ? '#000000' : '';
+  }
 }
 
 // Renderizar categorias relacionadas - com layout melhorado
@@ -386,10 +453,28 @@ function inicializarEventListeners() {
     });
   }
 
-  // Alternar filtros
-  if (botaoAlternarFiltros) {
-    botaoAlternarFiltros.addEventListener('click', () => {
-      barraFiltros.classList.toggle('oculta');
+  // Expandir/colapsar seções via setas existentes
+  const secoesFiltro = document.querySelectorAll('.barra-filtros .secao-filtro');
+  secoesFiltro.forEach(secao => {
+    // Estado inicial: expandida
+    secao.classList.add('expandida');
+    const cabecalho = secao.querySelector('.cabecalho-secao');
+    if (cabecalho) {
+      cabecalho.addEventListener('click', () => {
+        const ficaColapsada = secao.classList.toggle('colapsada');
+        secao.classList.toggle('expandida', !ficaColapsada);
+      });
+    }
+  });
+
+  // Seletor de plataforma (Mercado Livre / Amazon / Ambas)
+  if (seletorPlataforma) {
+    seletorPlataforma.addEventListener('change', (e) => {
+      const val = (e.target.value || '').toLowerCase();
+      plataformaAtual = val === 'amazon' ? 'amazon' : (val === 'ambas' ? 'ambas' : 'mercadoLivre');
+      // Reaplicar filtros e re-renderizar com preços da plataforma selecionada
+      paginacaoConfig.paginaAtual = 1;
+      aplicarFiltros();
     });
   }
 
@@ -421,10 +506,39 @@ function inicializarEventListeners() {
     });
   }
 
+  // Seletor de preço: Todos os Preços
+  if (seletorPreco) {
+    seletorPreco.addEventListener('change', (e) => {
+      if (e.target.value === 'todos') {
+        filtrosAtuais.precoMinimo = 0;
+        filtrosAtuais.precoMaximo = 15000;
+        if (faixaPrecoMinimo) faixaPrecoMinimo.value = String(filtrosAtuais.precoMinimo);
+        if (faixaPrecoMaximo) faixaPrecoMaximo.value = String(filtrosAtuais.precoMaximo);
+        if (spanPrecoMinimo) spanPrecoMinimo.textContent = formatarMoeda(filtrosAtuais.precoMinimo);
+        if (spanPrecoMaximo) spanPrecoMaximo.textContent = formatarMoeda(filtrosAtuais.precoMaximo);
+        if (inputPrecoMinimo) inputPrecoMinimo.value = filtrosAtuais.precoMinimo;
+        if (inputPrecoMaximo) inputPrecoMaximo.value = filtrosAtuais.precoMaximo;
+        paginacaoConfig.paginaAtual = 1;
+        aplicarFiltros();
+      }
+    });
+  }
+
   if (faixaPrecoMinimo) {
     faixaPrecoMinimo.addEventListener('input', (e) => {
-      filtrosAtuais.precoMinimo = parseInt(e.target.value);
-      if (spanPrecoMinimo) spanPrecoMinimo.textContent = filtrosAtuais.precoMinimo;
+      const novoMin = parseInt(e.target.value);
+      if (Number.isNaN(novoMin)) return;
+      filtrosAtuais.precoMinimo = Math.min(novoMin, filtrosAtuais.precoMaximo);
+      // Ajustar max se cruzar
+      if (faixaPrecoMaximo) {
+        const maxAtual = parseInt(faixaPrecoMaximo.value);
+        if (!Number.isNaN(maxAtual) && filtrosAtuais.precoMinimo > maxAtual) {
+          faixaPrecoMaximo.value = String(filtrosAtuais.precoMinimo);
+          filtrosAtuais.precoMaximo = filtrosAtuais.precoMinimo;
+        }
+      }
+      if (spanPrecoMinimo) spanPrecoMinimo.textContent = formatarMoeda(filtrosAtuais.precoMinimo);
+      if (inputPrecoMinimo) inputPrecoMinimo.value = filtrosAtuais.precoMinimo;
       paginacaoConfig.paginaAtual = 1;
       aplicarFiltros();
     });
@@ -432,29 +546,70 @@ function inicializarEventListeners() {
 
   if (faixaPrecoMaximo) {
     faixaPrecoMaximo.addEventListener('input', (e) => {
-      filtrosAtuais.precoMaximo = parseInt(e.target.value);
-      if (spanPrecoMaximo) spanPrecoMaximo.textContent = filtrosAtuais.precoMaximo;
+      const novoMax = parseInt(e.target.value);
+      if (Number.isNaN(novoMax)) return;
+      filtrosAtuais.precoMaximo = Math.max(novoMax, filtrosAtuais.precoMinimo);
+      // Ajustar min se cruzar
+      if (faixaPrecoMinimo) {
+        const minAtual = parseInt(faixaPrecoMinimo.value);
+        if (!Number.isNaN(minAtual) && filtrosAtuais.precoMaximo < minAtual) {
+          faixaPrecoMinimo.value = String(filtrosAtuais.precoMaximo);
+          filtrosAtuais.precoMinimo = filtrosAtuais.precoMaximo;
+        }
+      }
+      if (spanPrecoMaximo) spanPrecoMaximo.textContent = formatarMoeda(filtrosAtuais.precoMaximo);
+      if (inputPrecoMaximo) inputPrecoMaximo.value = filtrosAtuais.precoMaximo;
       paginacaoConfig.paginaAtual = 1;
       aplicarFiltros();
     });
   }
 
+  // Inputs de texto de preço
+  if (inputPrecoMinimo) {
+    inputPrecoMinimo.addEventListener('input', (e) => {
+      const v = parseValorTextoPreco(e.target.value);
+      filtrosAtuais.precoMinimo = Math.min(v, filtrosAtuais.precoMaximo);
+      if (faixaPrecoMinimo) faixaPrecoMinimo.value = String(filtrosAtuais.precoMinimo);
+      if (spanPrecoMinimo) spanPrecoMinimo.textContent = formatarMoeda(filtrosAtuais.precoMinimo);
+      paginacaoConfig.paginaAtual = 1;
+      aplicarFiltros();
+    });
+    inputPrecoMinimo.addEventListener('blur', (e) => {
+      e.target.value = filtrosAtuais.precoMinimo;
+    });
+  }
+
+  if (inputPrecoMaximo) {
+    inputPrecoMaximo.addEventListener('input', (e) => {
+      const v = parseValorTextoPreco(e.target.value);
+      filtrosAtuais.precoMaximo = Math.max(v, filtrosAtuais.precoMinimo);
+      if (faixaPrecoMaximo) faixaPrecoMaximo.value = String(filtrosAtuais.precoMaximo);
+      if (spanPrecoMaximo) spanPrecoMaximo.textContent = formatarMoeda(filtrosAtuais.precoMaximo);
+      paginacaoConfig.paginaAtual = 1;
+      aplicarFiltros();
+    });
+    inputPrecoMaximo.addEventListener('blur', (e) => {
+      e.target.value = filtrosAtuais.precoMaximo;
+    });
+  }
   if (filtroAvaliacao) {
     filtroAvaliacao.addEventListener('input', (e) => {
       filtrosAtuais.avaliacaoMinima = parseFloat(e.target.value);
       if (valorAvaliacao) valorAvaliacao.textContent = filtrosAtuais.avaliacaoMinima;
+      // Ajustar cor do texto quando for 0 estrelas
+      const rotuloAvaliacaoEl = document.querySelector('.rotulo-avaliacao');
+      if (rotuloAvaliacaoEl) {
+        rotuloAvaliacaoEl.style.color = filtrosAtuais.avaliacaoMinima === 0 ? '#000000' : '';
+      }
+      if (valorAvaliacao) {
+        valorAvaliacao.style.color = filtrosAtuais.avaliacaoMinima === 0 ? '#000000' : '';
+      }
       paginacaoConfig.paginaAtual = 1;
       aplicarFiltros();
     });
   }
 
-  if (apenasEmEstoque) {
-    apenasEmEstoque.addEventListener('change', (e) => {
-      filtrosAtuais.emEstoque = e.target.checked;
-      paginacaoConfig.paginaAtual = 1;
-      aplicarFiltros();
-    });
-  }
+  // Removido filtro de estoque
 
   if (apenasComDesconto) {
     apenasComDesconto.addEventListener('change', (e) => {
@@ -482,29 +637,58 @@ function inicializarEventListeners() {
       aplicarFiltros();
     });
   }
+
+  // Alternar visibilidade da barra de filtros em mobile/tablet
+  if (botaoAlternarFiltros && barraFiltros) {
+    botaoAlternarFiltros.addEventListener('click', () => {
+      const visivel = barraFiltros.classList.toggle('visivel');
+      botaoAlternarFiltros.setAttribute('aria-expanded', visivel ? 'true' : 'false');
+      if (visivel) {
+        const primeiroCampo = barraFiltros.querySelector('input, select, button');
+        if (primeiroCampo) {
+          try { primeiroCampo.focus(); } catch(_) {}
+        }
+      }
+    });
+  }
+}
+
+// Atualização dinâmica de busca, exposta globalmente para integração com a barra de busca do cabeçalho
+function atualizarBuscaProdutos(termo) {
+  const texto = String(termo || '').trim();
+  filtrosAtuais.busca = texto;
+  paginacaoConfig.paginaAtual = 1;
+  if (campoBusca) {
+    campoBusca.value = texto;
+  }
+  const url = new URL(window.location);
+  if (texto) {
+    url.searchParams.set('busca', texto);
+  } else {
+    url.searchParams.delete('busca');
+  }
+  window.history.pushState({}, '', url);
+  aplicarFiltros();
 }
 
 // Aplicar filtros
 function aplicarFiltros() {
-  // Filtrar produtos
+  // Filtrar produtos com base SOMENTE em campos do banco
   produtosFiltrados = produtos.filter(produto => {
-    const correspondeABusca = !filtrosAtuais.busca || 
-      produto.nome.toLowerCase().includes(filtrosAtuais.busca.toLowerCase()) ||
-      produto.marca.toLowerCase().includes(filtrosAtuais.busca.toLowerCase()) ||
-      produto.tags.some(tag => tag.toLowerCase().includes(filtrosAtuais.busca.toLowerCase()));
+    const textoBusca = (filtrosAtuais.busca || '').toLowerCase();
+    const correspondeABusca = !textoBusca ||
+      (produto.titulo || '').toLowerCase().includes(textoBusca) ||
+      (produto.descricao || '').toLowerCase().includes(textoBusca);
 
     const correspondeACategoria = !filtrosAtuais.categoria || produto.categoria === filtrosAtuais.categoria;
     const correspondeASubcategoria = !filtrosAtuais.subcategoria || produto.subcategoria === filtrosAtuais.subcategoria;
-    const correspondeAMarca = !filtrosAtuais.marca || produto.marca === filtrosAtuais.marca;
-    const correspondeAoPreco = produto.preco >= filtrosAtuais.precoMinimo && produto.preco <= filtrosAtuais.precoMaximo;
-    const correspondeAAvaliacao = produto.avaliacao >= filtrosAtuais.avaliacaoMinima;
-    const correspondeAoEstoque = !filtrosAtuais.emEstoque || produto.emEstoque;
-    const correspondeAoDesconto = !filtrosAtuais.desconto || produto.desconto > 0;
-    const correspondeAoFrete = !filtrosAtuais.freteGratis || produto.freteGratis;
+    const correspondeMarca = !filtrosAtuais.marca || (produto.marca || '').toLowerCase() === (filtrosAtuais.marca || '').toLowerCase();
+    const precoNum = numero(obterPrecoProduto(produto));
+    const correspondeAoPreco = precoNum >= filtrosAtuais.precoMinimo && precoNum <= filtrosAtuais.precoMaximo;
+    const correspondeAAvaliacao = numero(produto.avaliacao) >= filtrosAtuais.avaliacaoMinima;
 
-    return correspondeABusca && correspondeACategoria && correspondeASubcategoria && correspondeAMarca && 
-           correspondeAoPreco && correspondeAAvaliacao && correspondeAoEstoque && 
-           correspondeAoDesconto && correspondeAoFrete;
+    return correspondeABusca && correspondeACategoria && correspondeASubcategoria && correspondeMarca &&
+           correspondeAoPreco && correspondeAAvaliacao;
   });
 
   // Ordenar produtos
@@ -520,26 +704,51 @@ function aplicarFiltros() {
   renderizarPaginacao();
 }
 
+// Popular marcas únicas no seletor de marca
+function popularMarcas() {
+  if (!seletorMarca) return;
+  const marcas = new Set();
+  produtos.forEach(p => {
+    const m = (p.marca || '').trim();
+    if (m) marcas.add(m);
+  });
+
+  const marcasOrdenadas = Array.from(marcas).sort((a, b) => a.localeCompare(b));
+
+  // Preserva a primeira opção "Todas as Marcas"
+  seletorMarca.innerHTML = '';
+  const opcaoPadrao = document.createElement('option');
+  opcaoPadrao.value = '';
+  opcaoPadrao.textContent = 'Todas as Marcas';
+  seletorMarca.appendChild(opcaoPadrao);
+
+  marcasOrdenadas.forEach(marca => {
+    const opt = document.createElement('option');
+    opt.value = marca;
+    opt.textContent = marca;
+    seletorMarca.appendChild(opt);
+  });
+
+  // Mantém valor atual do filtro se existir
+  if (filtrosAtuais.marca) {
+    seletorMarca.value = filtrosAtuais.marca;
+  }
+}
+
 // Ordenar produtos
 function ordenarProdutos() {
   switch (ordenacaoAtual) {
     case 'preco-asc':
-      produtosFiltrados.sort((a, b) => a.preco - b.preco);
+      produtosFiltrados.sort((a, b) => numero(obterPrecoProduto(a)) - numero(obterPrecoProduto(b)));
       break;
     case 'preco-desc':
-      produtosFiltrados.sort((a, b) => b.preco - a.preco);
+      produtosFiltrados.sort((a, b) => numero(obterPrecoProduto(b)) - numero(obterPrecoProduto(a)));
       break;
     case 'avaliacao':
-      produtosFiltrados.sort((a, b) => b.avaliacao - a.avaliacao);
-      break;
-    case 'desconto':
-      produtosFiltrados.sort((a, b) => b.desconto - a.desconto);
-      break;
-    case 'avaliacoes':
-      produtosFiltrados.sort((a, b) => b.avaliacoes - a.avaliacoes);
+      produtosFiltrados.sort((a, b) => numero(b.avaliacao) - numero(a.avaliacao));
       break;
     case 'nome':
-      produtosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+      produtosFiltrados.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
       break;
     default:
       // Manter ordem original para relevância
@@ -626,7 +835,7 @@ function atualizarInfoResultados() {
       if (filtrosAtuais.subcategoria) {
         textoCategoria += ` › ${filtrosAtuais.subcategoria}`;
       }
-      infoCategoria.innerHTML = `<span style="color: #7c3aed; margin-left: 0.5rem;">${textoCategoria}</span>`;
+      infoCategoria.innerHTML = `<span style="color: #833dd0; margin-left: 0.5rem;">${textoCategoria}</span>`;
     } else {
       infoCategoria.innerHTML = '';
     }
@@ -634,8 +843,56 @@ function atualizarInfoResultados() {
 }
 
 // Função para verificar se uma string é uma URL de imagem
-function ehURLImagem(str) {
-  return str && (str.startsWith('http') || str.startsWith('./') || str.startsWith('/'));
+function ehURLImagem(url) {
+  if (!url || typeof url !== 'string') return false;
+  const u = url.toLowerCase();
+  const extensoesImagem = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+  const temExtensao = extensoesImagem.some(ext => u.includes(ext));
+  if (!temExtensao) return false;
+  const caminhoRelativoSemPonto = (u.startsWith('imagens/') || u.startsWith('assets/') || u.startsWith('img/'));
+  return url.startsWith('http') || url.startsWith('./') || url.startsWith('/') || caminhoRelativoSemPonto;
+}
+
+// Utilitários de formatação com suporte a DECIMAL vindo como string
+function numero(valor) {
+  if (valor === null || valor === undefined) return 0;
+  const n = typeof valor === 'number' ? valor : parseFloat(String(valor).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+// Parsing robusto para preço digitado em texto (ex: "R$ 1.200,50")
+function parseValorTextoPreco(str) {
+  if (str === null || str === undefined) return 0;
+  let s = String(str);
+  // Remove tudo que não for dígito, ponto ou vírgula
+  s = s.replace(/[^\d.,]/g, '');
+  // Remove pontos de milhar (ponto seguido de 3 dígitos)
+  s = s.replace(/\.(?=\d{3}(\D|$))/g, '');
+  // Troca vírgula por ponto para decimal
+  s = s.replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function formatarMoeda(valor) {
+  const n = numero(valor);
+  return 'R$ ' + n.toFixed(2).replace('.', ',');
+}
+
+// Obter preço conforme plataforma atual com fallback
+function obterPrecoProduto(produto) {
+  const precoML = produto.precoMercadoLivre;
+  const precoAMZ = produto.precoAmazon;
+  if (plataformaAtual === 'amazon') {
+    return precoAMZ != null ? precoAMZ : Number.POSITIVE_INFINITY;
+  }
+  if (plataformaAtual === 'ambas') {
+    const vML = precoML != null ? precoML : Number.POSITIVE_INFINITY;
+    const vAMZ = precoAMZ != null ? precoAMZ : Number.POSITIVE_INFINITY;
+    return Math.min(vML, vAMZ);
+  }
+  // padrão: Mercado Livre
+  return precoML != null ? precoML : Number.POSITIVE_INFINITY;
 }
 
 // Renderizar produtos - com suporte a imagens reais e botão de comprar funcional
@@ -675,63 +932,105 @@ function renderizarProdutos() {
     }
 
     return `
-      <a href="paginaproduto.html?id=${produto.id}" class="cartao-link">
+        <a href="pagina-produto?id=${produto.id}" class="cartao-link">
         <div class="cartao-produto ${modoVisualizacao === 'lista' ? 'visualizacao-lista' : ''}" data-produto-id="${produto.id}">
           <div class="imagem-produto">
             ${imagemHTML}
-            <div class="badges-produto">
-              ${!produto.emEstoque ? '<span class="badge indisponivel">Indisponível</span>' : ''}
-            </div>
-            <button class="botao-favorito ${ehFavorito ? 'ativo' : ''}" onclick="event.preventDefault(); event.stopPropagation(); alternarFavorito(${produto.id})">
-              <i class="fas fa-heart"></i>
-            </button>
           </div>
           
           <div class="conteudo-produto">
-            <div class="marca-produto">${produto.marca}</div>
+            <div class="marca-produto">${(produto.marca || '').trim()}</div>
             
-            <h3 class="nome-produto">${produto.nome}</h3>
+            <h3 class="nome-produto">${produto.titulo}</h3>
             
             <div class="avaliacao-produto">
               <div class="estrelas">
-                ${gerarEstrelas(produto.avaliacao)}
+                ${gerarEstrelas(produto.avaliacao || 0)}
               </div>
-              <span class="numero-avaliacoes">(${produto.avaliacoes})</span>
             </div>
             
             <div class="preco-produto">
-              ${produto.precoOriginal ? `<span class="preco-original">R$ ${produto.precoOriginal.toFixed(2).replace('.', ',')}</span>` : ''}
-              <div class="preco-atual">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
-              ${produto.desconto > 0 ? `<div class="percentual-desconto">-${produto.desconto}%</div>` : ''}
+              ${(() => {
+                if (plataformaAtual === 'ambas') {
+                  const precoML = numero(produto.precoMercadoLivre);
+                  const precoAMZ = numero(produto.precoAmazon);
+                  const ofertas = [];
+                  if (precoML > 0) ofertas.push({ loja: 'Mercado Livre', preco: precoML });
+                  if (precoAMZ > 0) ofertas.push({ loja: 'Amazon', preco: precoAMZ });
+                  const temOfertas = ofertas.length > 0;
+                  const menor = temOfertas ? ofertas.reduce((acc, o) => (o.preco < acc.preco ? o : acc)) : null;
+                  const lojaMenor = menor ? menor.loja : '';
+                  const valorMenor = menor ? menor.preco : 0;
+                  const parcela10x = valorMenor > 0 ? (valorMenor / 10) : 0;
+                  return `
+                    <div class="menor-preco-label">Menor preço via ${lojaMenor}</div>
+                    <div class="preco-principal">${formatarMoeda(valorMenor)}</div>
+                    <div class="parcelamento">até 10x de ${formatarMoeda(parcela10x)}</div>
+                    <div class="comparar-lojas">Compare entre ${ofertas.length} lojas</div>
+                  `;
+                } else {
+                  const valorAtual = numero(obterPrecoProduto(produto));
+                  const parcela10x = valorAtual > 0 ? (valorAtual / 10) : 0;
+                  return `
+                    <div class="preco-atual ${plataformaAtual}">
+                      <img class="icone-plataforma" src="${plataformaAtual === 'amazon' ? ((typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png') : 'imagens/logos/mercadolivre-icon.png'}" ${plataformaAtual === 'amazon' ? 'data-store="amazon"' : ''} alt="${plataformaAtual === 'amazon' ? 'Amazon' : 'Mercado Livre'}" />
+                      <span class="moeda">R$</span>
+                      <span class="valor">${formatarMoeda(valorAtual).replace(/^R\$\s?/, '')}</span>
+                    </div>
+                    <div class="parcelamento">até 10x de ${formatarMoeda(parcela10x)}</div>
+                  `;
+                }
+              })()}
             </div>
             
-            <div class="parcelamento">${produto.parcelamento}</div>
+            
 
             
-            <div class="status-produto">
-              ${produto.emEstoque ? '<div class="status-item em-estoque"><i class="fas fa-check"></i> Em estoque</div>' : ''}
-            </div>
+            <div class="status-produto"></div>
           </div>
 
-          <!-- Botões de Ação -->
-          <div class="acoes-produto">
-            <button class="botao-comprar-direto ${!produto.emEstoque ? 'indisponivel' : ''}" 
-                    onclick="event.preventDefault(); event.stopPropagation(); ${produto.emEstoque ? `comprarDireto(${produto.id})` : 'mostrarNotificacao(\'Produto indisponível\', \'aviso\')'}"
-                    ${!produto.emEstoque ? 'disabled' : ''}>
-              <i class="fas fa-bolt"></i>
-              ${produto.emEstoque ? 'Comprar' : 'Indisponível'}
-            </button>
-            <button class="botao-adicionar-carrinho ${!produto.emEstoque ? 'indisponivel' : ''}" 
-                    onclick="event.preventDefault(); event.stopPropagation(); ${produto.emEstoque ? `adicionarProdutoAoCarrinho(${produto.id})` : 'mostrarNotificacao(\'Produto indisponível\', \'aviso\')'}"
-                    ${!produto.emEstoque ? 'disabled' : ''}>
-              <i class="fas fa-cart-plus"></i>
-              ${produto.emEstoque ? 'Carrinho' : 'Indisponível'}
-            </button>
-          </div>
+          
         </div>
       </a>
     `;
   }).join('');
+}
+
+// Classificação simples de categoria/subcategoria com base no título/marca
+function classificarProduto(titulo, marca) {
+  const t = (titulo || '').toLowerCase();
+  const m = (marca || '').toLowerCase();
+  // Guarda de prioridade: se for um processador Ryzen,
+  // e não houver termos de smartphone, classificar como Hardware > Processadores
+  const ehRyzenHardware = /(\bryzen\b)/.test(t) || /(\bryzen\b)/.test(m);
+  const ehSmartphone = /(smartphone|celular|iphone|android|galaxy|samsung|samsumg|ios)/.test(t) || /(smartphone|celular|iphone|android|galaxy|samsung|samsumg|ios)/.test(m);
+  if (ehRyzenHardware && !ehSmartphone) return { categoria: 'Hardware', subcategoria: 'Processadores' };
+  const matchers = [
+    // Priorizar smartphones antes de hardware (alinhado ao backend)
+    [/smartphone|celular|iphone(?:\s*16)?|galaxy|samsung|samsumg|s\s?24|android|ios/, 'Celular & Smartphone', 'Smartphones'],
+    [/placa de vídeo|rtx|gpu|nvidia|radeon/, 'Hardware', 'Placas de Vídeo'],
+    [/\bryzen\b/, 'Hardware', 'Processadores'],
+    [/notebook|laptop|ultrabook|pc montado|computador montado|pc completo|pc pronto/, 'Computadores', 'Notebooks'],
+    [/console|ps5(?:\s*sony)?|sony\s*ps5|playstation\s*5|sony\s*playstation|playstation|xbox|nintendo switch/, 'Games', 'Consoles'],
+    [/smart tv|\btv\b|oled|4k|8k|uhd/, 'TV & Áudio', 'Smart TVs'],
+    [/teclado/, 'Periféricos', 'Teclados'],
+    [/mouse/, 'Periféricos', 'Mouses'],
+    [/headset|fone|fones de ouvido/, 'Periféricos', 'Headsets'],
+    [/monitor/, 'Periféricos', 'Monitores'],
+    [/ssd|nvme|hdd|hd|disco/, 'Hardware', 'Armazenamento'],
+    [/memória|ram/, 'Hardware', 'Memórias RAM'],
+    [/fonte|psu/, 'Hardware', 'Fontes'],
+    [/cadeira gamer|cadeira/, 'Espaço Gamer', 'Cadeiras Gamer'],
+    [/alexa|echo/, 'Casa Inteligente', 'Assistentes Virtuais'],
+    [/suporte|organizador|stand|headset|controle gamer|controller|gamer/, 'Espaço Gamer', 'Organização'],
+    [/gift card xbox|game pass|xbox game pass|ultimate|assinatura|codigo/, 'Giftcards', 'Xbox'],
+  ];
+
+  for (const [re, cat, sub] of matchers) {
+    if (re.test(t) || re.test(m)) return { categoria: cat, subcategoria: sub };
+  }
+
+  return { categoria: 'Hardware', subcategoria: '' };
 }
 
 // Renderizar paginação minimalista
@@ -808,11 +1107,22 @@ function irParaPagina(numeroPagina) {
 
 // Gerar HTML das estrelas
 function gerarEstrelas(avaliacao) {
-  let htmlEstrelas = '';
-  for (let i = 1; i <= 5; i++) {
-    htmlEstrelas += `<i class="fas fa-star estrela ${i <= Math.floor(avaliacao) ? '' : 'vazia'}"></i>`;
+  const nota = Math.max(0, Math.min(5, Number(avaliacao) || 0));
+  const cheias = Math.floor(nota);
+  const temMeia = (nota - cheias) >= 0.5;
+
+  let html = '';
+  for (let i = 1; i <= cheias; i++) {
+    html += '<i class="fas fa-star estrela"></i>';
   }
-  return htmlEstrelas;
+  if (temMeia && cheias < 5) {
+    html += '<i class="fas fa-star-half-alt estrela"></i>';
+  }
+  const restantes = 5 - cheias - (temMeia ? 1 : 0);
+  for (let i = 0; i < restantes; i++) {
+    html += '<i class="fas fa-star estrela vazia"></i>';
+  }
+  return html;
 }
 
 // Alternar favorito
@@ -838,7 +1148,6 @@ function limparFiltros() {
     precoMinimo: 0,
     precoMaximo: 15000,
     avaliacaoMinima: 0,
-    emEstoque: false,
     desconto: false,
     freteGratis: false
   };
@@ -856,10 +1165,11 @@ function limparFiltros() {
   // Resetar elementos do formulário
   if (campoBusca) campoBusca.value = '';
   if (seletorMarca) seletorMarca.value = '';
+  if (seletorPreco) seletorPreco.value = 'todos';
   if (faixaPrecoMinimo) faixaPrecoMinimo.value = 0;
   if (faixaPrecoMaximo) faixaPrecoMaximo.value = 15000;
   if (filtroAvaliacao) filtroAvaliacao.value = 0;
-  if (apenasEmEstoque) apenasEmEstoque.checked = false;
+  // removido reset de apenasEmEstoque
   if (apenasComDesconto) apenasComDesconto.checked = false;
   if (apenasFreteGratis) apenasFreteGratis.checked = false;
   if (spanPrecoMinimo) spanPrecoMinimo.textContent = 0;
@@ -888,4 +1198,10 @@ if (typeof window !== 'undefined') {
   window.alternarFavorito = alternarFavorito;
   window.limparFiltros = limparFiltros;
   window.fecharMenu = fecharMenu;
+  window.atualizarBuscaProdutos = atualizarBuscaProdutos;
 }
+
+
+
+
+

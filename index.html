@@ -1,26 +1,19 @@
 <!DOCTYPE html>
-<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
-<!-- Desenvolvido por Gabriel (gabwvr) -->
-<!-- Página: [NOME DA PÁGINA] -->
-<!-- Design responsivo com identidade visual roxo e amarelo -->
-
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Início | Roxinho Shop</title>
+  <title>Roxinho Shop | Compare, economize e encontre o melhor para você.</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/home-melhorado.css">
-  <link rel="stylesheet" href="css/cabecalhorodape.css">
-  <link rel="stylesheet" href="css/carrinho-contador.css">
-  <link rel="stylesheet" href="css/responsivo.css">
+  <link rel="stylesheet" href="css/cabecalho-rodape.css">
 
-  <div id="header-placeholder"></div>
+  <link rel="stylesheet" href="css/responsivo.css">
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -28,39 +21,33 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
+  <style>
+    /* Salvaguarda: garantir que o carrossel esteja visível */
+    .carrossel-moderno { display: block; }
+  </style>
 </head>
-<body>
+<body class="index-page">
+  <div id="header-placeholder"></div>
 
   
 <!-- ======================= CARROSSEL DE BANNERS MODERNO ======================= -->
 <section class="carrossel-moderno">  
   <div class="container-carrossel">
     <div class="slides-wrapper" id="slidesWrapper">
-      <!-- Slide 1 -->
-      <div class="slide ativo" data-link="produtos.html?categoria=Promoções">
-        <img src="imagens/Roxinho Shop.png" alt="Promoções">
-        <div class="slide-content">
-        </div>
+      <!-- Slide 1: Banner principal -->
+      <div class="slide ativo" data-link="produtos">
+        <img src="imagens/banner1.png" alt="Destaques RoxinhoShop">
       </div>
 
-      <!-- Slide 2 -->
-      <div class="slide" data-link="produtos.html?categoria=PC Gamer">
-        <img src="imagens/BANNER2.png" alt="Monte seu PC Gamer">
-        <div class="slide-overlay">
-          <div class="slide-content">
-          </div>
-        </div>
+      <!-- Slide 2: Halloween Promo -->
+      <div class="slide" data-link="produtos">
+        <img src="imagens/banner-halloween.png" alt="Promoção de Halloween">
       </div>
 
-      <!-- Slide 3 -->
-      <div class="slide" data-link="produtos.html?categoria=Celular & Smartphone">
-        <img src="imagens/banner7.png" alt="Smartphones 2025">
-        <div class="slide-overlay">
-          <div class="slide-content">
-          </div>
-        </div>
+      <!-- Slide 3: Banner gamer -->
+      <div class="slide" data-link="computadores">
+        <img src="imagens/banner-gamer.jpeg" alt="Linha gamer">
       </div>
-
     </div>
   </div>
       
@@ -74,20 +61,58 @@
         </button>
       </div>
       
-      <!-- Indicadores -->
+      <!-- Indicadores + Pausa/Play (lado a lado e alinhados) -->
       <div class="carrossel-indicadores" id="indicadores">
         <button class="indicador ativo" data-slide="0"></button>
         <button class="indicador" data-slide="1"></button>
         <button class="indicador" data-slide="2"></button>
-      </div>
-      
-      <!-- Botão de Pausa/Play -->
-      <div class="carrossel-play-pause">
         <button class="btn-play-pause" id="btnPlayPause">
           <i class="fas fa-pause"></i>
         </button>
       </div>
    
+  </section>
+
+  <!-- Placeholder para barra de categorias (reposicionada abaixo do carrossel) -->
+  <!-- Removido placeholder; categorias serão injetadas no header-placeholder -->
+
+  
+
+  <!-- ======================= CATEGORIAS POPULARES ======================= -->
+  <section class="categorias-populares">
+    <div class="container">
+      <h2 class="titulo-secao">Categorias Populares</h2>
+      <div class="grid-categorias">
+            <a href="/produtos?categoria=Hardware" class="categoria-card">
+          <img src="imagens/Catalogos/categoria-hardware.png" alt="Hardware" class="categoria-imagem">
+          <div class="categoria-conteudo">
+            <h3>Hardware</h3>
+            <p>Processadores, placas de vídeo e mais</p>
+          </div>
+        </a>
+            <a href="/produtos?categoria=Periféricos" class="categoria-card">
+          <img src="imagens/Catalogos/categoria-perifericos.png" alt="Periféricos" class="categoria-imagem">
+          <div class="categoria-conteudo">
+            <h3>Periféricos</h3>
+            <p>Teclados, mouses e headsets</p>
+          </div>
+        </a>
+            <a href="/produtos?categoria=Computadores" class="categoria-card">
+          <img src="imagens/Catalogos/categoria-computadores.png" alt="Computadores" class="categoria-imagem">
+          <div class="categoria-conteudo">
+            <h3>Computadores</h3>
+            <p>PCs completos e notebooks</p>
+          </div>
+        </a>
+            <a href="/produtos?categoria=Games" class="categoria-card">
+          <img src="imagens/Catalogos/categoria-games.png" alt="Games" class="categoria-imagem">
+          <div class="categoria-conteudo">
+            <h3>Games</h3>
+            <p>Consoles e acessórios gamer</p>
+          </div>
+        </a>
+      </div>
+    </div>
   </section>
 
   <!-- ======================= PRODUTOS EM DESTAQUE ======================= -->
@@ -101,7 +126,7 @@
       </div>
 
       <div class="ver-todos">
-        <a href="produtos.html" class="botao-ver-todos">
+        <a href="/produtos" class="botao-ver-todos">
           <span>Ver Todos os Produtos</span>
           <i class="fas fa-arrow-right"></i>
         </a>
@@ -109,64 +134,30 @@
     </div>
   </section>
 
-  <!-- ======================= CATEGORIAS POPULARES ======================= -->
-  <section class="categorias-populares">
+  <!-- ======================= HISTÓRICO DE PRODUTOS (HOME) ======================= -->
+  <section class="historico-home" id="historicoHome" style="display:none;">
     <div class="container">
-      <h2 class="titulo-secao">Categorias Populares</h2>
-      <div class="grid-categorias">
-        <a href="produtos.html?categoria=Hardware" class="categoria-card">
-          <div class="categoria-imagem">
-            <img src="imagens/Catalogos/categoria-hardware.jpeg" alt="Hardware">
-          </div>
-          <div class="categoria-conteudo">
-            <h3>Hardware</h3>
-            <p>Processadores, placas de vídeo e mais</p>
-          </div>
-        </a>
-        <a href="produtos.html?categoria=Periféricos" class="categoria-card">
-          <div class="categoria-imagem">
-            <img src="imagens/Catalogos/categoria-perifericos.jpg" alt="Periféricos">
-          </div>
-          <div class="categoria-conteudo">
-            <h3>Periféricos</h3>
-            <p>Teclados, mouses e headsets</p>
-          </div>
-        </a>
-        <a href="produtos.html?categoria=Computadores" class="categoria-card">
-          <div class="categoria-imagem">
-            <img src="imagens/Catalogos/categoria-computadores.jpg" alt="Computadores">
-          </div>
-          <div class="categoria-conteudo">
-            <h3>Computadores</h3>
-            <p>PCs completos e notebooks</p>
-          </div>
-        </a>
-        <a href="produtos.html?categoria=Games" class="categoria-card">
-          <div class="categoria-imagem">
-            <img src="imagens/Catalogos/categoria-games.jpg" alt="Games">
-          </div>
-          <div class="categoria-conteudo">
-            <h3>Games</h3>
-            <p>Consoles e acessórios gamer</p>
-          </div>
-        </a>
-      </div>
+      <h2 class="titulo-secao">Seu Histórico</h2>
+      <p class="subtitulo-secao">Continue navegando pelos últimos produtos que você visualizou</p>
+      <div id="grade-historico-home" class="grade-historico-home"></div>
     </div>
   </section>
 
   <div id="footer-placeholder"></div>
 
   <!-- JS - ORDEM IMPORTANTE! -->
-  <script src="js/database.js"></script>
-  <script src="js/carrinho.js"></script>
-  <script src="js/home.js"></script>
+  <!-- Define API_BASE para mesma origem antes dos demais scripts -->
+  <script src="js/site-popup.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/home-produtos.js"></script>
   <script src="js/home-melhorado.js"></script>
   <script src="js/cabecalho-melhorado.js"></script>
+  <script src="js/rotas.js"></script>
   
 
   
   <script>
-  fetch('cabecalhorodape.html')
+  fetch('cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();
@@ -190,16 +181,14 @@
         
         document.getElementById('header-placeholder').appendChild(header);
       }
-      if (categorias) document.getElementById('header-placeholder').appendChild(categorias);
+      // Inserir barra de categorias imediatamente após o cabeçalho
+      if (categorias) {
+        document.getElementById('header-placeholder').appendChild(categorias);
+      }
       if (footer) document.getElementById('footer-placeholder').appendChild(footer);
 
-      // Executar scripts do cabecalho/rodape
-      doc.querySelectorAll("script").forEach(oldScript => {
-        const newScript = document.createElement("script");
-        if (oldScript.src) newScript.src = oldScript.src;
-        else newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
-      });
+      // Evitar injeção de scripts do cabeçalho/rodapé para prevenir duplicidade
+      // O cabeçalho é controlado por js/cabecalho-melhorado.js já incluído na página.
 
       // Atualizar contador do carrinho após carregar o cabeçalho
       if (typeof atualizarContadorCarrinho === 'function') {
@@ -212,6 +201,5 @@
 
   </script>
 
-    <script src="./js/sistema-xp.js"></script>
-</body>
+    </body>
 </html>

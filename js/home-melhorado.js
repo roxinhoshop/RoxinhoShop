@@ -1,12 +1,17 @@
 // ==================== CARROSSEL MODERNO 2025 ====================
 document.addEventListener('DOMContentLoaded', function() {
+  // Garantir que o carrossel esteja visível na primeira renderização
+  const cmEl = document.querySelector('.carrossel-moderno');
+  if (cmEl) {
+    cmEl.style.display = 'block';
+  }
   
   // ==================== CONFIGURAÇÕES DO CARROSSEL ====================
   const carrossel = {
     slideAtual: 0,
     totalSlides: 3,
     autoPlay: true,
-    intervalo: 5000,
+    intervalo: 15000,
     timer: null,
     
     elementos: {
@@ -18,13 +23,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
   
+  // Ajustar dinamicamente a contagem de slides e controles
+  carrossel.totalSlides = document.querySelectorAll('.slide').length;
+  // Informar ao CSS a quantidade de slides para calcular a largura do wrapper
+  if (carrossel.elementos.slidesWrapper) {
+    try {
+      carrossel.elementos.slidesWrapper.style.setProperty('--total-slides', String(carrossel.totalSlides || 1));
+    } catch (_) {}
+  }
+  const controlesContainer = document.querySelector('.carrossel-controles');
+  const indicadoresContainer = document.getElementById('indicadores');
+  if (carrossel.totalSlides <= 1) {
+    carrossel.autoPlay = false;
+    if (controlesContainer) controlesContainer.style.display = 'none';
+// Garantir que os indicadores do carrossel permaneçam visíveis
+// (removido ocultamento automático)
+  }
+  
   // ==================== FUNÇÕES DO CARROSSEL ====================
   function irParaSlide(indice) {
     carrossel.slideAtual = indice;
     
     if (carrossel.elementos.slidesWrapper) {
       const translateX = -indice * 100;
-      carrossel.elementos.slidesWrapper.style.transform = `translateX(${translateX}%)`;
+      // Usar translate3d para evitar cortes/flicker entre banners durante a transição
+      carrossel.elementos.slidesWrapper.style.transform = `translate3d(${translateX}%, 0, 0)`;
     }
     
     // Atualizar indicadores
@@ -50,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function iniciarAutoPlay() {
-    if (carrossel.autoPlay) {
+    if (carrossel.autoPlay && carrossel.totalSlides > 1) {
       carrossel.timer = setInterval(proximoSlide, carrossel.intervalo);
     }
   }
@@ -132,6 +155,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // Estado inicial: garantir que o primeiro slide esteja ativo e visível
+  try {
+    irParaSlide(0);
+  } catch (_) {}
   
   // ==================== CONTROLES DE VÍDEO ====================
   const video = document.getElementById('videoAnuncio');
@@ -227,8 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const isMobile = window.innerWidth <= 768;
     
     if (isMobile) {
-      // Ajustar intervalo do carrossel para mobile
-      carrossel.intervalo = 7000;
+      // Ajuste de intervalo para mobile (mantém 15s conforme requisito)
+      carrossel.intervalo = 15000;
       
       // Pausar vídeo em mobile para economizar dados
       if (video && !video.paused) {
@@ -283,6 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== INICIALIZAÇÃO ====================
   function inicializar() {
     // Iniciar carrossel
+    // Garantir estado visual inicial
+    irParaSlide(0);
     iniciarAutoPlay();
     
     // Configurar animações
@@ -303,7 +333,82 @@ document.addEventListener('DOMContentLoaded', function() {
     // Acessibilidade
     melhorarAcessibilidade();
     
+    // Renderizar histórico na home
+    renderizarHistoricoHome();
+
     console.log('Home melhorada inicializada com sucesso!');
+  }
+
+  // ==================== HISTÓRICO NA HOME ====================
+  function obterHistoricoLS() {
+    try {
+      const raw = localStorage.getItem('historico_visualizacoes');
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  async function buscarProdutosApi() {
+    try {
+      const API_BASE = window.API_BASE || window.location.origin;
+      const resp = await fetch(`${API_BASE}/api/products`);
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      let lista = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      return Array.isArray(lista) ? lista : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  async function renderizarHistoricoHome() {
+    const section = document.getElementById('historicoHome');
+    const grade = document.getElementById('grade-historico-home');
+    if (!section || !grade) return;
+
+    // Obter histórico e filtrar por IDs válidos
+    const historico = obterHistoricoLS();
+    if (!historico || historico.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    const produtos = await buscarProdutosApi();
+    const mapa = new Map(produtos.map(p => [Number(p.id), p]));
+    const filtrado = historico.filter(it => mapa.has(Number(it.id))).slice(0, 6);
+
+    if (filtrado.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = '';
+    grade.innerHTML = filtrado.map(item => {
+      const p = mapa.get(Number(item.id));
+      const nome = p?.titulo || p?.nome || item.titulo || 'Produto';
+      const img = (p?.imagem && typeof p?.imagem === 'string') ? p.imagem : (item.imagem || './imagens/thumbs/produto1.webp');
+      const ml = typeof p?.precoMercadoLivre === 'number' ? p.precoMercadoLivre : undefined;
+      const amz = typeof p?.precoAmazon === 'number' ? p.precoAmazon : undefined;
+      const fmt = v => 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
+      const data = (() => { try { return new Date(item.visualizadoEm).toLocaleDateString('pt-BR'); } catch { return ''; } })();
+      return `
+        <div class="card-historico">
+  <a href="/pagina-produto?id=${item.id}">
+            <img src="${img}" alt="${nome}" class="thumb" onerror="this.style.display='none'" />
+            <div>
+              <div class="titulo">${nome}</div>
+              <div class="precos">
+                ${typeof ml === 'number' ? `<span class="preco-ml"><img src="imagens/logos/mercadolivre-icon.png" class="icone-plataforma" alt="Mercado Livre" /> ${fmt(ml)}</span>` : ''}
+                ${typeof amz === 'number' ? `<span class="preco-amz"><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${fmt(amz)}</span>` : ''}
+              </div>
+              <div class="data">${data ? `Visto em ${data}` : ''}</div>
+            </div>
+          </a>
+        </div>
+      `;
+    }).join('');
   }
   
   // ==================== EVENT LISTENERS GLOBAIS ====================
@@ -413,6 +518,13 @@ const estilosNotificacoes = `
 
 .notificacao-info i {
   color: #3b82f6;
+}
+
+/* Dark mode overrides */
+html.dark .notificacao-home {
+  background: #1E1E1E;
+  color: #FFFFFF;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
 }
 </style>
 `;

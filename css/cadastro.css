@@ -1,7 +1,3 @@
-/* ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== */
-/* Desenvolvido por Gabriel (gabwvr) */
-/* Este arquivo contém estilos para [SEÇÃO] */
-/* Cores principais: Roxo (#7c3aed) e Amarelo (#eab308) */
 
 
 * {
@@ -17,6 +13,21 @@ body {
   min-height: 100vh;
 }
 
+/* ===== Tema Escuro (Cadastro) ===== */
+body.dark { background: #000000; color: #e5e7eb; }
+body.dark .auth-container { background: #000000; box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+body.dark .auth-aside { background: #833dd0; color: #ffffff; }
+body.dark .auth-banner { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+body.dark .auth-content { background: transparent; }
+body.dark .cartao-cadastro { background: #000000; }
+body.dark .texto-titulo { color: #f3f4f6; }
+body.dark .texto-subtitulo { color: #cbd5e1; }
+body.dark .entrada-formulario { border-color: #334155; background: #000000; color: #e5e7eb; }
+body.dark .entrada-formulario:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.20); }
+body.dark .floating-label { color: #94a3b8; background: transparent; }
+body.dark .entrada-formulario:focus + .floating-label,
+body.dark .entrada-formulario:not(:placeholder-shown) + .floating-label { color: #a78bfa; background: transparent; }
+
 main {
   flex: 1;
 }
@@ -29,7 +40,7 @@ main {
     --text-secondary: #64748b;
     --border-color: #e2e8f0;
     --error-color: #ef4444;
-    --warning-color: #f59e0b;
+    --warning-color: #fab60b;
     --success-color: #10b981;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -49,6 +60,72 @@ main {
     z-index: 1;
 }
 
+/* ==============================
+   🔹 LAYOUT DIVIDIDO (ROXO/BRANCO)
+============================== */
+.auth-container {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.auth-aside {
+  background: #833dd0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Slot de banner no bloco roxo (proporção 2037x2075, bordas finas) */
+.auth-banner {
+  width: min(90%, 460px);
+  aspect-ratio: 2037 / 2075;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auth-aside-content { max-width: 320px; }
+.auth-brand { font-size: 1.25rem; font-weight: 800; margin-bottom: 2rem; }
+.auth-text { font-size: 0.95rem; opacity: 0.95; margin-bottom: 1.5rem; }
+.auth-action {
+  display: inline-block;
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.auth-action:hover { background: #ffffff; color: #6d28d9; }
+
+.auth-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
 /* Seção de cadastro */
 .secao-cadastro {
     flex: 1;
@@ -60,14 +137,14 @@ main {
     background: #fff;
     border-radius: 16px;
     padding: 2.5rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-shadow: none;
     transition: all 0.3s ease;
     width: 500px;
 }
 
 .cartao-cadastro:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    box-shadow: none;
 }
 
 /* Título */
@@ -119,7 +196,7 @@ main {
     font-size: 1rem;
     pointer-events: none;
     transition: all 0.3s ease;
-    background: #fff;
+    background: transparent;
     padding: 0 0.25rem;
 }
 
@@ -130,7 +207,14 @@ main {
     font-size: 0.75rem;
     font-weight: normal;
     color: #7c3aed;
-    background: #fff;
+    background: transparent;
+    padding: 0 0.5rem;
+}
+
+/* ===== Dark Mode Overrides (Floating Label) ===== */
+html.dark .entrada-formulario:focus + .floating-label,
+html.dark .entrada-formulario:not(:placeholder-shown) + .floating-label {
+    background: transparent;
     padding: 0 0.5rem;
 }
 
@@ -257,21 +341,21 @@ main {
 
 /* Cores para diferentes níveis de força */
 .forca-fraca .progresso-forca-senha {
-    background: linear-gradient(90deg, #ff0000, #ff0000);
+    background: var(--error-color);
 }
 .forca-fraca .nivel-forca {
     color: #ff0000;
 }
 
 .forca-moderada .progresso-forca-senha {
-    background: linear-gradient(90deg, #eab308, #facc15);
+    background: var(--warning-color);
 }
 .forca-moderada .nivel-forca {
-    color: #eab308;
+    color: #fab60b;
 }
 
 .forca-forte .progresso-forca-senha {
-    background: linear-gradient(90deg, #22c55e, #4ade80);
+    background: var(--success-color);
 }
 .forca-forte .nivel-forca {
     color: #22c55e;
@@ -333,7 +417,7 @@ main {
 .botao-cadastro {
     width: 100%;
     height: 52px;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    background: linear-gradient(90deg, #833dd0, #833dd0);
     color: white;
     border: none;
     padding: 0 24px;
@@ -353,7 +437,7 @@ main {
 }
 
 .botao-cadastro:hover {
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    background: linear-gradient(90deg, #833dd0, #833dd0);
     transform: translateY(-1px);
 }
 
@@ -595,3 +679,35 @@ main {
   }
 }
 
+
+/* Toggle mostrar/ocultar senha */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.toggle-password.active {
+  color: #7c3aed;
+}
+/* Ícones do toggle de senha */
+.toggle-password {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.toggle-password .icon-eye,
+.toggle-password .icon-eye-off {
+  font-size: 1rem;
+  line-height: 1;
+}
+.toggle-password .icon-eye-off { display: none; }
+.toggle-password.active .icon-eye { display: none; }
+.toggle-password.active .icon-eye-off { display: inline; }

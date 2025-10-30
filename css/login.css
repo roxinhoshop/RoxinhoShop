@@ -21,6 +21,27 @@ body {
   flex-direction: column; /* Cabeçalho em cima, rodapé embaixo */
 }
 
+/* ===== Tema Escuro (Login) ===== */
+body.dark {
+  background: #000000;
+  color: #FFFFFF;
+}
+body.dark .auth-container { background: #000000; box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+body.dark .auth-aside { background: #833dd0; color: #ffffff; }
+body.dark .auth-banner { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+body.dark .auth-content { background: transparent; }
+body.dark .login-card { background: #000000; box-shadow: none; }
+body.dark .welcome-text { color: #f3f4f6; }
+body.dark .welcome-subtitle { color: #cbd5e1; }
+body.dark .form-input { border-color: #334155; background: #000000; color: #FFFFFF; }
+body.dark .form-input:focus { border-color: #7c3aed; }
+body.dark .floating-label { color: #94a3b8; background: transparent; }
+body.dark .form-input:focus + .floating-label,
+body.dark .form-input:not(:placeholder-shown) + .floating-label,
+body.dark .form-input:valid + .floating-label { color: #a78bfa; background: transparent; }
+body.dark .forgot-password { color: #a78bfa; }
+body.dark .forgot-password a { color: #a78bfa; }
+
 /* ==============================
    🔹 CONTAINER DO LOGIN
 ============================== */
@@ -31,6 +52,89 @@ body {
   align-items: center;
   padding: 2rem;
 }
+
+/* ==============================
+   🔹 LAYOUT DIVIDIDO (ROXO/BRANCO)
+============================== */
+.auth-container {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.auth-aside {
+  background: #833dd0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Slot de banner no bloco roxo (proporção 2037x2075, bordas finas) */
+.auth-banner {
+  width: min(90%, 460px);
+  aspect-ratio: 2037 / 2075;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auth-aside-content {
+  max-width: 320px;
+}
+
+.auth-brand {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+}
+
+.auth-text {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  margin-bottom: 1.5rem;
+}
+
+.auth-action {
+  display: inline-block;
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.auth-action:hover {
+  background: #ffffff;
+  color: #6d28d9;
+}
+
+.auth-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
 
 .login-section {
   width: 100%;
@@ -44,7 +148,7 @@ body {
   backdrop-filter: blur(10px);
   padding: 2.5rem;
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
   text-align: center;
   justify-content: center;
   align-items: center;
@@ -73,7 +177,7 @@ body {
 /* ====== FLOATING LABEL STYLES ====== */
 .form-group {
   position: relative;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.6rem; /* espaço extra para aviso abaixo do input */
 }
 
 .form-input {
@@ -106,14 +210,28 @@ body {
 
 /* 🔹 Quando o campo está em foco ou já tem valor preenchido */
 .form-input:focus + .floating-label,
+/* manter label acima quando há qualquer conteúdo */
+.form-input:not(:placeholder-shown) + .floating-label,
+/* compatibilidade anterior (senha required costuma ficar válido) */
 .form-input:valid + .floating-label {
   top: -6px;
   left: 8px;
   font-size: 0.8rem;
   color: #7c3aed;
-  background: #fff;
+  background: transparent;
   padding: 0 4px;
 }
+
+/* ===== Dark Mode Overrides (Floating Label) ===== */
+html.dark .form-input:focus + .floating-label,
+html.dark .form-input:not(:placeholder-shown) + .floating-label,
+html.dark .form-input:valid + .floating-label {
+  background: transparent;
+  padding: 0 4px;
+}
+
+/* Placeholder invisível para evitar sobreposição com label flutuante */
+.form-input::placeholder { color: transparent; }
 
 /* ==========================
    🔹 ERROS NOS INPUTS
@@ -121,10 +239,13 @@ body {
 .error-message {
   color: #e63946;
   font-size: 0.85rem;
-  margin-top: 0.3rem;
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+  position: absolute;
+  left: 12px;               /* canto esquerdo do input */
+  bottom: -1.35rem;         /* um pouco mais abaixo da borda */
+  margin: 0;                /* remove margens para posicionamento exato */
 }
 
 .error-message.ativo {
@@ -160,25 +281,14 @@ body {
 }
 
 
-/* ==============================
-   🔹 AVISO BETA
-============================== */
-.beta-notice {
-  background: #fff3cd;
-  border: 1px solid #ffeeba;
-  padding: 0.7rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  color: #856404;
-  margin-bottom: 1.2rem;
-}
+/* (Aviso beta removido) */
 
 /* ==============================
    🔹 BOTÃO LOGIN
 ============================== */
 .login-button {
   width: 100%;
-  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  background: linear-gradient(90deg, #833dd0, #833dd0);
   border: none;
   padding: 0.9rem;
   border-radius: 10px;
@@ -190,9 +300,10 @@ body {
 }
 
 .login-button:hover {
-  background: linear-gradient(90deg, #6d28d9, #a78bfa);
+  background: linear-gradient(90deg, #833dd0, #833dd0);
   transform: translateY(-2px);
 }
+
 
 /* ==============================
    🔹 BOTÃO GOOGLE
@@ -237,3 +348,44 @@ body {
     font-size: 1.5rem;
   }
 }
+
+@media (max-width: 900px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+  }
+  .auth-aside {
+    display: none;
+  }
+}
+
+/* Toggle mostrar/ocultar senha */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.toggle-password.active {
+  color: #7c3aed;
+}
+/* Ícones do toggle de senha */
+.toggle-password {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.toggle-password .icon-eye,
+.toggle-password .icon-eye-off {
+  font-size: 1rem;
+  line-height: 1;
+}
+.toggle-password .icon-eye-off { display: none; }
+.toggle-password.active .icon-eye { display: none; }
+.toggle-password.active .icon-eye-off { display: inline; }

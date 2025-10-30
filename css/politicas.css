@@ -73,6 +73,31 @@ footer.rodape {
   margin-top: auto;
 }
 
+/* ===== Dark Mode (html.dark) ===== */
+html.dark body {
+  background-color: #0b0b0b;
+  color: #e5e7eb;
+}
+html.dark main.politicas {
+  background: #0b0b0b;
+  border: 1px solid #2c2c2f;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+html.dark .politicas h1 {
+  color: #ffffff;
+}
+html.dark .politicas h2 {
+  color: #e5e7eb;
+  border-left-color: #833dd0;
+}
+html.dark .politicas article,
+html.dark .politicas ul,
+html.dark .politicas ul li,
+html.dark .politicas strong,
+html.dark .politicas b {
+  color: #cbd5e1;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   main.politicas {

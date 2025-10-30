@@ -1,9 +1,3 @@
-// ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS =====
-// Desenvolvido por Gabriel (gabwvr)
-// Este arquivo contém funções para gerenciar [FUNCIONALIDADE]
-// Comentários didáticos para facilitar o entendimento
-
-
 // Classe para manuseio do formulário de cadastro
 class FormularioCadastro {
     constructor() {
@@ -47,6 +41,26 @@ class FormularioCadastro {
         this.entradaConfirmarSenha.addEventListener('input', () => {
             this.validarConfirmacaoSenha();
         });
+
+        const toggleSenha = document.getElementById('toggleSenhaCadastro');
+        if (toggleSenha) {
+            toggleSenha.addEventListener('click', () => {
+                const mostrar = this.entradaSenha && this.entradaSenha.type === 'password';
+                if (this.entradaSenha) this.entradaSenha.type = mostrar ? 'text' : 'password';
+                toggleSenha.classList.toggle('active', mostrar);
+                toggleSenha.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+            });
+        }
+
+        const toggleConfirmar = document.getElementById('toggleConfirmarSenha');
+        if (toggleConfirmar) {
+            toggleConfirmar.addEventListener('click', () => {
+                const mostrar = this.entradaConfirmarSenha && this.entradaConfirmarSenha.type === 'password';
+                if (this.entradaConfirmarSenha) this.entradaConfirmarSenha.type = mostrar ? 'text' : 'password';
+                toggleConfirmar.classList.toggle('active', mostrar);
+                toggleConfirmar.setAttribute('aria-label', mostrar ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha');
+            });
+        }
     }
 
     validarNome() {
@@ -121,8 +135,7 @@ class FormularioCadastro {
         const senha = this.entradaSenha.value;
         if (!senha) return this.mostrarErro('senha', 'Senha é obrigatória');
         if (senha.length < 8) return this.mostrarErro('senha', 'Senha deve ter pelo menos 8 caracteres');
-        const forca = this.verificarForcaSenha();
-        if (forca < 50) return this.mostrarErro('senha', 'Senha muito fraca - Use uma combinação mais forte');
+        this.verificarForcaSenha();
         this.mostrarSucesso('senha'); return true;
     }
 
@@ -202,44 +215,67 @@ class FormularioCadastro {
         this.definirCarregamento(true);
 
         try {
-            // Simular criação da conta
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Salvar dados do usuário para verificação
+            const API_BASE = window.API_BASE || window.location.origin;
             const dadosUsuario = {
                 nome: this.entradaNome.value.trim(),
                 sobrenome: this.entradaSobrenome.value.trim(),
                 email: this.entradaEmail.value.trim(),
-                senha: this.entradaSenha.value,
-                dataCadastro: new Date().toISOString()
+                senha: this.entradaSenha.value
             };
+
+            const resposta = await fetch(`${API_BASE}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosUsuario),
+                credentials: 'include'
+            });
+            const ct = (resposta.headers.get('content-type') || '').toLowerCase();
+            const dados = ct.includes('application/json')
+                ? await resposta.json().catch(() => ({}))
+                : {};
+
+            if (!(resposta.ok && dados && dados.success)) {
+                const code = (dados && (dados.error || dados.code)) || '';
+                const msg = (dados && dados.message) || 'Erro ao criar conta';
+                if (code === 'INVALID_EMAIL_FORMAT' || /email inválido/i.test(msg)) {
+                    this.mostrarErro('email', 'E-mail inválido');
+                } else if (code === 'EMAIL_ALREADY_REGISTERED' || /já cadastrado/i.test(msg)) {
+                    this.mostrarErro('email', 'E-mail já cadastrado');
+                } else if (code === 'WEAK_PASSWORD' || /Senha.*8/i.test(msg)) {
+                    this.mostrarErro('senha', 'Senha deve ter pelo menos 8 caracteres');
+                } else if (code === 'MISSING_FIELDS') {
+                    this.mostrarNotificacao('Preencha todos os campos obrigatórios.', 'erro');
+                } else if (code === 'INVALID_NAME') {
+                    this.mostrarErro('nome', 'Nome deve ter pelo menos 2 caracteres');
+                } else {
+                    this.mostrarNotificacao(msg, 'erro');
+                }
+                throw new Error(msg);
+            }
+
+            // Sucesso: backend não autentica no cadastro; usuário deve logar
+            this.mostrarNotificacao('Conta criada com sucesso! Redirecionando para login...', 'sucesso');
             
-            // Salvar email para a página de verificação
-            localStorage.setItem('emailCadastro', dadosUsuario.email);
-            localStorage.setItem('dadosCadastro', JSON.stringify(dadosUsuario));
-            
-            // Mostrar mensagem de sucesso
-            this.mostrarNotificacao('Conta criada com sucesso! Verifique seu e-mail.', 'sucesso');
-            
-            // Redirecionar para página de verificação
+            // Redirecionar para página de login
             setTimeout(() => {
-                window.location.href = `verificacao.html?email=${encodeURIComponent(dadosUsuario.email)}`;
-            }, 1500);
+                window.location.href = '/login';
+            }, 1200);
             
         } catch (erro) {
             console.error('Erro no cadastro:', erro);
-            this.mostrarNotificacao('Erro ao criar conta. Tente novamente.', 'erro');
+            if (!String(erro && erro.message)) {
+                this.mostrarNotificacao('Erro ao criar conta. Tente novamente.', 'erro');
+            } else if (!/Redirecionando/.test(erro.message)) {
+                this.mostrarNotificacao(erro.message, 'erro');
+            }
         } finally {
             this.definirCarregamento(false);
         }
     }
 
     mostrarNotificacao(mensagem, tipo = 'info') {
-        // Remover notificação anterior
         const notificacaoAnterior = document.querySelector('.notificacao-sistema');
-        if (notificacaoAnterior) {
-            notificacaoAnterior.remove();
-        }
+        if (notificacaoAnterior) { notificacaoAnterior.remove(); }
 
         const notificacao = document.createElement('div');
         notificacao.className = `notificacao-sistema notificacao-${tipo}`;
@@ -252,50 +288,13 @@ class FormularioCadastro {
             padding: 1rem 1.5rem;
             border-radius: 8px;
             color: white;
-            font-weight: 600;
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         `;
 
-        switch (tipo) {
-            case 'sucesso':
-                notificacao.style.backgroundColor = '#10b981';
-                break;
-            case 'erro':
-                notificacao.style.backgroundColor = '#ef4444';
-                break;
-            default:
-                notificacao.style.backgroundColor = '#7c3aed';
-        }
-
         document.body.appendChild(notificacao);
-
-        setTimeout(() => {
-            if (notificacao.parentNode) {
-                notificacao.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => {
-                    if (notificacao.parentNode) {
-                        notificacao.remove();
-                    }
-                }, 300);
-            }
-        }, 4000);
+        setTimeout(() => notificacao.remove(), 3000);
     }
 }
 
-// Inicializar quando o DOM for carregado
 document.addEventListener('DOMContentLoaded', () => {
     new FormularioCadastro();
-
-    const entradas = document.querySelectorAll('.entrada-formulario');
-    entradas.forEach(entrada => {
-        entrada.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-2px)';
-        });
-        entrada.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
-    });
 });

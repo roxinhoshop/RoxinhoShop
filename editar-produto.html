@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Produto | Roxinho Shop</title>
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
+  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <style>
+    .container-edicao { max-width: 900px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .grupo { margin-bottom: 16px; }
+    .grupo label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .grupo input, .grupo textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .linha-imagens { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .linha-imagens .grupo { margin-bottom: 8px; }
+    .acoes { display: flex; gap: 12px; margin-top: 12px; }
+    .btn { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-salvar { background: #7c3aed; color: #fff; }
+    .btn-carregar { background: #e2e8f0; color: #1e293b; }
+    .status { margin-top: 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="container-edicao">
+    <h1>Editar Produto</h1>
+    <div class="grupo">
+      <label for="idProduto">ID do Produto</label>
+      <input type="number" id="idProduto" placeholder="Ex: 10">
+    </div>
+    <div class="acoes">
+      <button class="btn btn-carregar" id="btnCarregar">Carregar</button>
+    </div>
+    <hr style="margin: 16px 0" />
+    <div class="grupo">
+      <label for="titulo">Título</label>
+      <input type="text" id="titulo" placeholder="Título do produto">
+    </div>
+    <div class="grupo">
+      <label for="descricao">Descrição</label>
+      <textarea id="descricao" rows="4" placeholder="Descrição do produto"></textarea>
+    </div>
+    <div class="grupo">
+      <label>Imagens (4 URLs)</label>
+      <div class="linha-imagens">
+        <div class="grupo"><label>Imagem 1</label><input type="url" id="img1" placeholder="https://..."></div>
+        <div class="grupo"><label>Imagem 2</label><input type="url" id="img2" placeholder="https://..."></div>
+        <div class="grupo"><label>Imagem 3</label><input type="url" id="img3" placeholder="https://..."></div>
+        <div class="grupo"><label>Imagem 4</label><input type="url" id="img4" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="grupo">
+      <label>Preços</label>
+      <div class="linha-imagens">
+        <div class="grupo"><label>Preço Mercado Livre</label><input type="number" step="0.01" id="precoML" placeholder="0.00"></div>
+        <div class="grupo"><label>Preço Amazon</label><input type="number" step="0.01" id="precoAMZ" placeholder="0.00"></div>
+      </div>
+    </div>
+    <div class="grupo">
+      <label>Links</label>
+      <div class="linha-imagens">
+        <div class="grupo"><label>Link Mercado Livre</label><input type="url" id="linkML" placeholder="https://www.mercadolivre.com.br/..." /></div>
+        <div class="grupo"><label>Link Amazon</label><input type="url" id="linkAMZ" placeholder="https://www.amazon.com.br/..." /></div>
+      </div>
+    </div>
+    <div class="grupo">
+      <label>IDs</label>
+      <div class="linha-imagens">
+        <div class="grupo"><label>ID Mercado Livre</label><input type="text" id="mlId" placeholder="Ex: MLB123456" /></div>
+        <div class="grupo"><label>ASIN Amazon</label><input type="text" id="asin" placeholder="Ex: B0CXYZ1234" /></div>
+      </div>
+    </div>
+    <div class="acoes">
+      <button class="btn btn-salvar" id="btnSalvar">Salvar</button>
+      <span class="status" id="status"></span>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="js/editar-produto.js"></script>
+  <script>
+    // Carregar Header e Footer
+  fetch('cabecalho-rodape')
+      .then(response => response.text())
+      .then(data => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+
+        const header = doc.querySelector('nav.cabecalho');
+        const categorias = doc.querySelector('.barra-categorias');
+        const footer = doc.querySelector('footer.rodape');
+
+        if (header) document.getElementById('header-placeholder').appendChild(header);
+        if (categorias) document.getElementById('header-placeholder').appendChild(categorias);
+        if (footer) document.getElementById('footer-placeholder').appendChild(footer);
+
+        // Executar scripts do cabecalho/rodape
+        doc.querySelectorAll('script').forEach(oldScript => {
+          const newScript = document.createElement('script');
+          if (oldScript.src) newScript.src = oldScript.src;
+          else newScript.textContent = oldScript.textContent;
+          document.body.appendChild(newScript);
+        });
+      });
+  </script>
+</body>
+</html>

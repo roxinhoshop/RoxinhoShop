@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
-<!-- Desenvolvido por Gabriel (gabwvr) -->
-<!-- Página: [NOME DA PÁGINA] -->
-<!-- Design responsivo com identidade visual roxo e amarelo -->
-
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -11,13 +6,12 @@
     <title>Produtos | Roxinho Shop</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/produtos.css">
-    <link rel="stylesheet" href="css/filtros-melhorados.css">
-    <link rel="stylesheet" href="css/tema-escuro-2025.css">
-    <link rel="stylesheet" href="./css/cabecalhorodape.css">
+<!-- Removidos CSS ausentes para evitar erros de carregamento -->
+  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
     <link rel="stylesheet" href="css/responsivo.css">
 
     <!-- Font Awesome -->
@@ -40,7 +34,7 @@
 
       <!-- ======================= BANNER ======================= -->
   <section class="banner">
-    <img src="imagens/BANNER2.png" alt="Promoção 1">
+    <img src="imagens/banner-produtos.png" alt="">
   </section>
 
     <!-- Banner de Categoria -->
@@ -60,11 +54,13 @@
 
                     <!-- Categorias Relacionadas -->
                     <div class="secao-filtro">
-                    <h4 style="color: #475569;">Categorias relacionadas</h4>
+                    <h4 class="titulo-categorias-relacionadas" style="color: #475569;">Categorias relacionadas</h4>
                         <div class="categorias-relacionadas" id="categoriasRelacionadas">
                             <!-- Categorias serão populadas pelo JavaScript -->
                         </div>
                     </div>
+
+                    
 
                 <!-- Barra Lateral de Filtros -->
                 <aside class="barra-filtros" id="barraFiltros">
@@ -76,21 +72,33 @@
                         </button>
                     </div>
 
-                    <!-- Filtro de Marcas com Busca -->
-                    <div class="secao-filtro secao-marcas">
+                    <!-- Filtro de Marcas (seletor) -->
+                    <div class="secao-filtro">
                         <div class="cabecalho-secao">
                             <h4>Marcas</h4>
                             <i class="fas fa-chevron-up icone-expandir"></i>
                         </div>
                         <div class="conteudo-secao">
-                            <div class="busca-marca">
-                                <i class="fas fa-search icone-busca"></i>
-                                <input type="text" id="buscaMarca" placeholder="Buscar marca" class="input-busca-marca">
-                            </div>
-                            <div class="lista-marcas" id="listaMarcas">
-                                <!-- Marcas serão populadas pelo JavaScript -->
-                            </div>
-                            <button class="botao-ver-mais" id="verMaisMarcas">Ver mais</button>
+                            <label for="seletorMarca">Filtrar por marca</label>
+                            <select id="seletorMarca" class="seletor-marca">
+                                <option value="">Todas as Marcas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Seletor de Plataforma -->
+                    <div class="secao-filtro">
+                        <div class="cabecalho-secao">
+                            <h4>Plataforma</h4>
+                            <i class="fas fa-chevron-up icone-expandir"></i>
+                        </div>
+                        <div class="conteudo-secao">
+                            <label for="seletorPlataforma">Ver preços por plataforma</label>
+                            <select id="seletorPlataforma" class="seletor-plataforma">
+                                <option value="mercadoLivre">Mercado Livre</option>
+                                <option value="amazon">Amazon</option>
+                                <option value="ambas" selected>Ambas (comparar)</option>
+                            </select>
                         </div>
                     </div>
 
@@ -101,6 +109,10 @@
                             <i class="fas fa-chevron-up icone-expandir"></i>
                         </div>
                         <div class="conteudo-secao">
+                            <label for="seletorPreco">Exibir preços</label>
+                            <select id="seletorPreco" class="seletor-preco">
+                                <option value="todos" selected>Todos os Preços</option>
+                            </select>
                             <div class="intervalo-preco-label">Intervalo de Preço</div>
                             <div class="faixa-preco-visual">
                                 <input type="range" id="faixaPrecoMinimo" min="0" max="15000" value="0" step="100" class="range-minimo">
@@ -112,12 +124,10 @@
                             </div>
                             <div class="campos-preco">
                                 <div class="campo-preco">
-                                    <label>Mínimo</label>
-                                    <input type="text" id="precoMinimo" placeholder="R$ 0" class="input-preco">
+                                    <input type="text" id="precoMinimo" placeholder="Mínimo (ex: R$ 0)" class="input-preco">
                                 </div>
                                 <div class="campo-preco">
-                                    <label>Máximo</label>
-                                    <input type="text" id="precoMaximo" placeholder="R$ 15.000" class="input-preco">
+                                    <input type="text" id="precoMaximo" placeholder="Máximo (ex: R$ 15.000)" class="input-preco">
                                 </div>
                             </div>
                         </div>
@@ -125,30 +135,11 @@
 
                     <!-- Filtro de Avaliação -->
                     <div class="secao-filtro">
-                        <label for="filtroAvaliacao">Avaliação : <span id="valorAvaliacao">0</span> estrelas</label>
+                        <div class="rotulo-avaliacao">Avaliação: <span id="valorAvaliacao">0</span> estrelas</div>
                         <input type="range" id="filtroAvaliacao" min="0" max="5" value="0" step="0.5">
                     </div>
 
-                    <!-- Checkboxes -->
-                    <div class="secao-filtro">
-                        <div class="grupo-checkbox">
-                            <label class="rotulo-checkbox">
-                                <input type="checkbox" id="apenasEmEstoque">
-                                <span class="marca-checkbox"></span>
-                                Apenas em estoque
-                            </label>
-                            <label class="rotulo-checkbox">
-                                <input type="checkbox" id="apenasComDesconto">
-                                <span class="marca-checkbox"></span>
-                                Apenas com desconto
-                            </label>
-                            <label class="rotulo-checkbox">
-                                <input type="checkbox" id="apenasFreteGratis">
-                                <span class="marca-checkbox"></span>
-                                Frete grátis
-                            </label>
-                        </div>
-                    </div>
+                    
                 </aside>
 
                     </div>
@@ -190,6 +181,11 @@
                             <span class="numero" id="contadorResultados">0</span> produtos
                         </div>
 
+                        <button class="botao-alternar-filtros" id="alternarFiltros" aria-controls="barraFiltros" aria-expanded="false" title="Mostrar/ocultar filtros">
+                            <i class="fas fa-sliders-h"></i>
+                            Filtros
+                        </button>
+
                         <div class="alternador-visualizacao">
                             <button class="botao-visualizacao" id="visualizacaoLista" title="Visualização em lista">
                                 <i class="fas fa-list"></i>
@@ -228,15 +224,15 @@
   <div id="footer-placeholder"></div>
 
             <!-- JavaScript -->
-    <script src="js/database.js"></script>
+    <!-- Define API_BASE para mesma origem antes dos demais scripts -->
+    <script src="js/site-popup.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/produtos.js"></script>
-    <script src="js/produtos-melhorado.js"></script>
-    <script src="js/filtros-melhorados.js"></script>
-    <script src="js/cabecalhorodape.js"></script>
+    <script src="js/cabecalho-rodape.js"></script>
     <script src="js/cabecalho-melhorado.js"></script>   <!-- script que preenche os dados -->
 
     <script>
-        fetch("cabecalhorodape.html")
+  fetch("cabecalho-rodape")
             .then(response => response.text())
             .then(data => {
                 const parser = new DOMParser();
@@ -259,7 +255,6 @@
                 });
             });
     </script>
-    <script src="./js/sistema-xp.js"></script>
 </body>
 </html>
 

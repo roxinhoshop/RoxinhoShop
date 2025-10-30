@@ -1,5 +1,6 @@
 // ==================== PAINEL DE USUÁRIO MELHORADO ====================
 document.addEventListener('DOMContentLoaded', function() {
+  const API_BASE = window.API_BASE || window.location.origin;
   
   // ==================== CONFIGURAÇÕES GLOBAIS ====================
   const painelConfig = {
@@ -7,13 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
       id: 1,
       nome: 'Gabriel',
       sobrenome: 'Wagner',
-      email: 'gabriel@rooxyce.com',
+      email: 'gabriel@roxinho.com',
       avatar: null,
       nivel: 1,
       xp: 0,
       xpProximoNivel: 100
     },
-    avatarPadrao: 'imagens/avatar-default.png'
+    avatarPadrao: 'imagens/logos/avatar-roxo.svg'
   };
   
   // ==================== SISTEMA DE AVATAR ====================
@@ -226,30 +227,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  function carregarListaDesejos() {
-    const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+  async function carregarListaDesejos() {
+    const favoritosRaw = JSON.parse(localStorage.getItem('favoritos') || '[]');
     const gradeDesejos = document.getElementById('grade-desejos');
-    
     if (!gradeDesejos) return;
-    
+
+    let produtosApi = [];
+    try {
+      const resp = await fetch(`${API_BASE}/api/products`);
+      if (resp.ok) {
+        const json = await resp.json();
+        produtosApi = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      }
+    } catch (_) {}
+
+    const validIds = new Set(produtosApi.map(p => Number(p.id)));
+    const favoritos = Array.isArray(favoritosRaw)
+      ? favoritosRaw.filter(id => validIds.has(Number(id)))
+      : [];
+    // Persistir filtragem para manter localStorage consistente
+    try { localStorage.setItem('favoritos', JSON.stringify(favoritos)); } catch (_) {}
+
     atualizarContadorWishlist(favoritos.length);
-    
+
     if (favoritos.length === 0) {
       gradeDesejos.innerHTML = criarHTMLWishlistVazia();
       return;
     }
-    
-    // Buscar produtos da lista de desejos
-    const produtosDesejos = [];
-    if (typeof produtos !== 'undefined') {
-      favoritos.forEach(id => {
-        const produto = produtos.find(p => p.id === id);
-        if (produto) {
-          produtosDesejos.push(produto);
-        }
-      });
-    }
-    
+
+    // Montar produtos da lista de desejos a partir da API
+    const produtosDesejos = favoritos
+      .map(id => produtosApi.find(p => Number(p.id) === Number(id)))
+      .filter(Boolean);
+
     gradeDesejos.innerHTML = produtosDesejos.map(produto => criarHTMLProdutoWishlist(produto)).join('');
   }
   
@@ -259,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <i class="fas fa-heart-broken"></i>
         <h3>Sua lista de desejos está vazia</h3>
         <p>Adicione produtos que você gostaria de comprar mais tarde</p>
-        <a href="produtos.html" class="btn-explorar-produtos">
+    <a href="/produtos" class="btn-explorar-produtos">
           <i class="fas fa-search"></i>
           Explorar Produtos
         </a>
@@ -271,19 +281,30 @@ document.addEventListener('DOMContentLoaded', function() {
     return `
       <div class="produto-wishlist" data-produto-id="${produto.id}">
         <div class="imagem-produto">
-          ${produto.imagem && produto.imagem.startsWith('http') ? 
-            `<img src="${produto.imagem}" alt="${produto.nome}">` :
-            `<div class="fundo-gradiente ${produto.imagem || 'gradiente-roxo'}"></div>`
-          }
+                ${produto.imagem && (produto.imagem.startsWith('http') || produto.imagem.startsWith('./') || produto.imagem.startsWith('/') || produto.imagem.toLowerCase().startsWith('imagens/')) ?
+                `<img src="${produto.imagem}" alt="${produto.titulo || produto.nome}">` :
+                `<div class="fundo-gradiente ${produto.imagemFallback || 'gradiente-roxo'}"></div>`
+                }
           <button class="btn-remover-wishlist" onclick="removerDaWishlist(${produto.id})">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="conteudo-produto">
-          <div class="marca-produto">${produto.marca}</div>
-          <h3 class="nome-produto">${produto.nome}</h3>
+          <div class="marca-produto">${produto.marca || ''}</div>
+          <h3 class="nome-produto">${produto.titulo || produto.nome || ''}</h3>
           <div class="preco-produto">
-            <div class="preco-atual">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+            <div class="precos-plataformas">
+              <div class="preco-ml"><i class="fa-solid fa-store" aria-label="Mercado Livre"></i> <span class="preco-ml-badge">R$ ${(produto.precoMercadoLivre ?? 0).toFixed(2).replace('.', ',')}</span></div>
+        <div class="preco-amazon"><span><img src="${(typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : 'imagens/logos/amazon-icon.png'}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> R$ ${(produto.precoAmazon ?? 0).toFixed(2).replace('.', ',')}</span></div>
+              ${(() => {
+                const ml = Number((produto.precoMercadoLivre ?? 0));
+                const amz = Number((produto.precoAmazon ?? 0));
+                if (ml > 0 && amz > 0 && Math.abs(ml - amz) < 0.005) {
+                  return `<div class='precos-iguais' style='font-size:12px;color:#4b5563;margin-top:4px;'>Preços iguais</div>`;
+                }
+                return '';
+              })()}
+            </div>
           </div>
           <div class="acoes-produto">
             <button class="btn-comprar-wishlist" onclick="comprarDireto(${produto.id})">
@@ -308,10 +329,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function limparListaDesejos() {
-    if (confirm('Tem certeza que deseja limpar toda a lista de desejos?')) {
+    const executarLimpeza = () => {
       localStorage.removeItem('favoritos');
       carregarListaDesejos();
-      mostrarNotificacao('Lista de desejos limpa com sucesso!', 'sucesso');
+      if (typeof mostrarNotificacao === 'function') {
+        mostrarNotificacao('Lista de desejos limpa com sucesso!', 'sucesso');
+      } else if (window.sitePopup && typeof window.sitePopup.alert === 'function') {
+        window.sitePopup.alert('Lista de desejos limpa com sucesso!', 'Sucesso');
+      }
+    };
+
+    if (window.sitePopup && typeof window.sitePopup.confirm === 'function') {
+      window.sitePopup.confirm('Tem certeza que deseja limpar toda a lista de desejos?').then(sim => { if (sim) executarLimpeza(); });
+    } else if (typeof confirm === 'function') {
+      if (confirm('Tem certeza que deseja limpar toda a lista de desejos?')) executarLimpeza();
+    } else {
+      executarLimpeza();
     }
   }
   
@@ -362,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dadosDashboard = obterDadosDashboard();
     
     atualizarEstatisticas(dadosDashboard.estatisticas);
-    atualizarSistemaXP(dadosDashboard.xp);
+    /* XP removido: atualizarSistemaXP(dadosDashboard.xp); */
     carregarPedidosRecentes(dadosDashboard.pedidos);
   }
   
@@ -412,45 +445,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (elementos.xpTotal) {
       elementos.xpTotal.textContent = stats.xpTotal;
-    }
-  }
-  
-  function atualizarSistemaXP(dadosXP) {
-    const porcentagem = (dadosXP.atual / dadosXP.proximoNivel) * 100;
-    
-    const elementos = {
-      barraXP: document.getElementById('barra-xp'),
-      xpAtual: document.getElementById('xp-atual'),
-      xpNecessario: document.getElementById('xp-necessario'),
-      nivelAtual: document.getElementById('nivel-atual-detalhado'),
-      tituloNivel: document.getElementById('titulo-nivel-detalhado'),
-      listaAtividades: document.getElementById('lista-atividades-xp')
-    };
-    
-    if (elementos.barraXP) {
-      elementos.barraXP.style.width = `${Math.min(porcentagem, 100)}%`;
-    }
-    
-    if (elementos.xpAtual) {
-      elementos.xpAtual.textContent = `${dadosXP.atual} XP`;
-    }
-    
-    if (elementos.xpNecessario) {
-      elementos.xpNecessario.textContent = `/ ${dadosXP.proximoNivel} XP`;
-    }
-    
-    if (elementos.nivelAtual) {
-      elementos.nivelAtual.textContent = `Nível ${dadosXP.nivel}`;
-    }
-    
-    if (elementos.tituloNivel) {
-      elementos.tituloNivel.textContent = obterTituloNivel(dadosXP.nivel);
-    }
-    
-    if (elementos.listaAtividades) {
-      elementos.listaAtividades.innerHTML = dadosXP.atividades.length > 0 ? 
-        dadosXP.atividades.map(atividade => criarHTMLAtividade(atividade)).join('') :
-        '<div class="atividade-vazia"><i class="fas fa-star"></i><span>Faça sua primeira compra para ganhar XP!</span></div>';
     }
   }
   
@@ -530,52 +524,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // ==================== FUNÇÕES UTILITÁRIAS ====================
-  function adicionarXP(quantidade, descricao, icone = 'star') {
-    const xpAtual = parseInt(localStorage.getItem('usuario_xp') || '0');
-    const novoXP = xpAtual + quantidade;
-    
-    localStorage.setItem('usuario_xp', novoXP.toString());
-    
-    // Adicionar atividade
-    const atividades = JSON.parse(localStorage.getItem('atividades_xp') || '[]');
-    atividades.unshift({
-      descricao,
-      xp: quantidade,
-      icone,
-      data: new Date().toISOString()
-    });
-    
-    // Manter apenas as últimas 10 atividades
-    if (atividades.length > 10) {
-      atividades.splice(10);
-    }
-    
-    localStorage.setItem('atividades_xp', JSON.stringify(atividades));
-    
-    // Verificar se subiu de nível
-    verificarSubidaNivel(novoXP);
-    
-    // Atualizar dashboard
-    carregarDadosDashboard();
-    
-    mostrarNotificacao(`+${quantidade} XP: ${descricao}`, 'sucesso');
+  function adicionarXP() {
+    // XP removido: função neutralizada
+    return;
   }
-  
-  function verificarSubidaNivel(xpAtual) {
-    const nivelAtual = parseInt(localStorage.getItem('usuario_nivel') || '1');
-    const xpNecessario = calcularXPProximoNivel(nivelAtual);
-    
-    if (xpAtual >= xpNecessario) {
-      const novoNivel = nivelAtual + 1;
-      localStorage.setItem('usuario_nivel', novoNivel.toString());
-      
-      mostrarNotificacao(`🎉 Parabéns! Você subiu para o nível ${novoNivel}!`, 'sucesso');
-      
-      // Adicionar atividade de subida de nível
-      adicionarXP(50, `Subiu para o nível ${novoNivel}`, 'trophy');
-    }
+
+  function verificarSubidaNivel() {
+    // XP removido: função neutralizada
+    return;
   }
-  
+
   // ==================== INTEGRAÇÃO COM CARRINHO ====================
   window.adicionarAoCarrinho = function(produtoId) {
     // Lógica existente do carrinho
@@ -772,22 +730,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar a navegação da barra lateral
     inicializarNavegacaoSidebar();
     
-    // Garantir que o dashboard seja a seção ativa por padrão
-    const dashboardLink = document.querySelector('.link-navegacao[data-section="dashboard"]');
-    const dashboardSection = document.getElementById('dashboard');
+    // Definir seção ativa por padrão com base na página atual
+const isSettingsPage = /configuracoes(\.html)?$/i.test(window.location.pathname);
+    const defaultSection = isSettingsPage ? 'settings' : 'dashboard';
+    const defaultLinkEl = document.querySelector(`.link-navegacao[data-section="${defaultSection}"]`);
+    const defaultSectionEl = document.getElementById(defaultSection);
     
-    if (dashboardLink && dashboardSection) {
+    if (defaultLinkEl && defaultSectionEl) {
         // Remover active de todos os links e seções
         document.querySelectorAll('.link-navegacao').forEach(l => l.classList.remove('active'));
         document.querySelectorAll('.secao-conteudo').forEach(s => s.classList.remove('active'));
         
-        // Ativar dashboard
-        dashboardLink.classList.add('active');
-        dashboardSection.classList.add('active');
+        // Ativar seção padrão
+        defaultLinkEl.classList.add('active');
+        defaultSectionEl.classList.add('active');
         
         // Atualizar breadcrumb e título
-        atualizarBreadcrumb('dashboard');
-        atualizarTituloSecao('dashboard');
+        atualizarBreadcrumb(defaultSection);
+        atualizarTituloSecao(defaultSection);
     }
 });
 
@@ -806,13 +766,14 @@ const estilosNavegacao = `
 
 /* Melhorar o visual dos links ativos */
 .link-navegacao.active {
-    background-color: rgba(139, 69, 19, 0.1);
-    color: #8B4513;
+    background-color: #f1f5f9;
+    color: #000000;
     font-weight: 600;
+    border-left: 3px solid #833dd0;
 }
 
 .link-navegacao.active i {
-    color: #8B4513;
+    color: #833dd0;
 }
 
 /* Transições suaves */
@@ -821,14 +782,29 @@ const estilosNavegacao = `
 }
 
 .link-navegacao:hover {
-    background-color: rgba(139, 69, 19, 0.05);
+    background-color: #f8fafc;
     transform: translateX(5px);
 }
 
 /* Breadcrumb ativo */
 .item-caminho.ativo {
-    color: #8B4513;
-    font-weight: 600;
+    color: #000000; /* Preto */
+    font-weight: 700; /* Negrito */
+}
+
+/* ===== Dark mode overrides ===== */
+html.dark .link-navegacao.active {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border-left-color: #833dd0;
+}
+html.dark .item-caminho.ativo { color: #FFFFFF; }
+
+/* Notificações no painel em dark mode */
+html.dark .notificacao-painel {
+  background: #1E1E1E;
+  color: #FFFFFF;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
 }
 </style>
 `;
@@ -836,3 +812,27 @@ const estilosNavegacao = `
 // Adicionar estilos ao head
 document.head.insertAdjacentHTML('beforeend', estilosNavegacao);
 
+
+function carregarPedidosRecentes(pedidos = []) {
+  const tbody = document.querySelector('.tabela-pedidos tbody');
+  if (!tbody) return;
+  if (!Array.isArray(pedidos) || pedidos.length === 0) {
+    // Keep existing static rows or clear if needed
+    return;
+  }
+  tbody.innerHTML = pedidos.map((p) => {
+    const numero = p.numero || p.id || '-';
+    const data = p.data || p.data_pedido || '';
+    const status = p.status || 'Pendente';
+    const total = typeof p.total === 'number' ? `R$ ${p.total.toFixed(2).replace('.', ',')}` : (p.total || 'R$ -');
+    return `
+      <tr>
+        <td>${numero}</td>
+        <td>${data}</td>
+        <td><span class="badge">${status}</span></td>
+        <td>${total}</td>
+        <td><button class="botao-secundario botao-pequeno">Ver Detalhes</button></td>
+      </tr>
+    `;
+  }).join('');
+}

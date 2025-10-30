@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!-- ===== Roxinho Shop - E-COMMERCE DE ELETRÔNICOS ===== -->
-<!-- Desenvolvido por Gabriel (gabwvr) -->
-<!-- Design responsivo com identidade visual roxo e amarelo -->
-
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -10,21 +6,29 @@
   <title>Cadastre-se | Roxinho Shop</title>
 
     <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/favicon-rooxyce.png">
+  <link rel="icon" type="image/png" href="imagens/logos/favicon-32x32.png">
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/cadastro.css">
-  <link rel="stylesheet" href="./css/cabecalhorodape.css">
-
-  <div id="header-placeholder"></div>
+  <link rel="stylesheet" href="./css/cabecalho-rodape.css">
+  <link rel="stylesheet" href="css/responsivo.css">
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Placeholder para Header -->
+  <div id="header-placeholder"></div>
   
   <main class="container">
+    <section class="auth-container" aria-label="Criar conta">
+      <aside class="auth-aside">
+        <div class="auth-banner" aria-hidden="true">
+          <img src="imagens/cadastro-banner.png" alt="" />
+        </div>
+      </aside>
+      <div class="auth-content">
     <div class="secao-cadastro">
       <form class="cartao-cadastro" id="formularioCadastro" novalidate>
         <h2 class="texto-titulo">Crie sua Conta</h2>
@@ -62,7 +66,11 @@
         <div class="grupo-formulario coluna-completa">
           <div class="floating-label-container">
             <input type="password" id="senha" name="senha" class="entrada-formulario" placeholder=" " autocomplete="new-password" required aria-describedby="erro-senha">
-            <label for="senha" class="rotulo-formulario floating-label">Senha <span class="required">*</span></label> 
+            <label for="senha" class="rotulo-formulario floating-label">Senha <span class="required">*</span></label>
+            <button type="button" class="toggle-password" id="toggleSenhaCadastro" aria-label="Mostrar senha">
+              <span class="icon-eye" aria-hidden="true"><i class="fa-solid fa-eye"></i></span>
+              <span class="icon-eye-off" aria-hidden="true"><i class="fa-solid fa-eye-slash"></i></span>
+            </button>
           </div>
           
           <!-- Feedback da senha -->
@@ -90,6 +98,10 @@
           <div class="floating-label-container">
             <input type="password" id="confirmarSenha" name="confirmarSenha" class="entrada-formulario" placeholder=" " autocomplete="new-password" required aria-describedby="erro-confirmar-senha">
             <label for="confirmarSenha" class="rotulo-formulario floating-label">Confirmar Senha <span class="required">*</span></label>
+            <button type="button" class="toggle-password" id="toggleConfirmarSenha" aria-label="Mostrar confirmação de senha">
+              <span class="icon-eye" aria-hidden="true"><i class="fa-solid fa-eye"></i></span>
+              <span class="icon-eye-off" aria-hidden="true"><i class="fa-solid fa-eye-slash"></i></span>
+            </button>
           </div>
           <div id="erro-confirmar-senha" class="apenas-leitura-tela" aria-live="polite"></div>
         </div>
@@ -102,20 +114,23 @@
         <!-- Link para login -->
         <p class="link-login">
           Já tem uma conta? 
-          <a href="./login.html">Fazer login</a>
+        <a href="/login">Fazer login</a>
         </p>
       </form>
     </div>
-    </div>
+      </div>
+    </section>
   </main>
 
   <div id="footer-placeholder"></div>
 
   <!-- JS -->
+  <script src="./js/config.js"></script>
+  <script src="./js/cabecalho-melhorado.js"></script>
   <script src="./js/cadastro.js"></script>
   
   <script>
-  fetch('cabecalhorodape.html')
+  fetch('cabecalho-rodape')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();
@@ -138,6 +153,5 @@
     });
   </script>
 
-    <script src="./js/sistema-xp.js"></script>
-</body>
+    </body>
 </html>

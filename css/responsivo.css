@@ -82,56 +82,50 @@
 }
 
 /* ======================= BARRA DE CATEGORIAS RESPONSIVA ======================= */
-@media (max-width: 1024px) {
-  .barra-categorias {
-    padding: 0.5rem 1rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .barra-categorias::-webkit-scrollbar {
-    display: none;
-  }
-  
+/* Desktop (>1024px): horizontal com scroll horizontal e espaçamento 12px */
+@media (min-width: 1025px) {
+  .barra-categorias { overflow: visible; }
   .barra-categorias ul {
-    flex-wrap: nowrap;
-    min-width: max-content;
-    gap: 1rem;
-  }
-  
-  .barra-categorias ul li.dropdown > a {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    transition: gap 300ms ease-in-out;
+    overflow: visible;
   }
 }
 
-@media (max-width: 768px) {
+/* Tablet (768px–1024px): 2 linhas com scroll vertical */
+@media (min-width: 768px) and (max-width: 1024px) {
   .barra-categorias {
-    display: none; /* Ocultar em mobile muito pequeno */
+    padding: 0.5rem 1rem;
+    max-height: none;
+    overflow: visible;
+    transition: none;
   }
-  
-  /* Menu hambúrguer para mobile */
-  .menu-mobile {
-    display: block;
-    background: #1e1e1e;
-    padding: 0.5rem;
-    text-align: center;
-  }
-  
-  .btn-menu-mobile {
-    background: linear-gradient(135deg, #7c3aed, #a78bfa);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+  .barra-categorias ul {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-content: flex-start;
+    justify-content: flex-start;
+    overflow: visible;
   }
+  .barra-categorias ul li a {
+    min-height: 48px; /* área de toque mínima */
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Mobile (<768px): dropdown acionado por ícone */
+@media (max-width: 768px) {
+  .barra-categorias { position: relative; }
+  .barra-categorias .btn-quero-vender { display: none; }
+  .barra-categorias ul > li:not(.mega-dropdown) { display: none; }
+  .barra-categorias ul { justify-content: center; gap: 8px; }
+  .barra-categorias ul li a { min-height: 48px; display: inline-flex; align-items: center; }
+  /* Itens não-dropdown são ocultados no mobile; restante estilizado acima */
 }
 
 /* ======================= PRODUTOS RESPONSIVOS ======================= */
@@ -194,17 +188,18 @@
 /* ======================= BANNER RESPONSIVO ======================= */
 @media (max-width: 1024px) {
   .carrossel-moderno {
-    height: 300px;
+    height: clamp(260px, 40vh, 400px);
   }
   
   .carrossel-controles {
-    display: none; /* Ocultar setas em tablet */
+    display: flex; /* manter setas visíveis em tablet */
+    padding: 0 1rem;
   }
 }
 
 @media (max-width: 768px) {
   .carrossel-moderno {
-    height: 250px;
+    height: clamp(240px, 38vh, 360px);
   }
   
   .carrossel-indicadores {
@@ -212,17 +207,18 @@
   }
   
   .carrossel-play-pause {
-    display: none;
+    /* manter botão visível no mobile */
   }
 }
 
 @media (max-width: 480px) {
   .carrossel-moderno {
-    height: 200px;
+    height: clamp(200px, 35vh, 320px);
   }
   
   .slide img {
-    object-fit: cover;
+    object-fit: contain; /* manter o banner inteiro no mobile */
+    background-color: #ffffff; /* evitar barras pretas no mobile */
   }
 }
 
@@ -303,8 +299,19 @@
     padding: 1rem;
   }
   
-  .categoria-imagem {
-    height: 120px;
+  .categorias-populares .categoria-card > img.categoria-imagem {
+    height: 185px;
+  }
+}
+
+@media (max-width: 480px) {
+  .barra-categorias {
+    padding: 0.5rem;
+  }
+  .barra-categorias ul { gap: 8px; }
+  .barra-categorias ul li a {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.6rem;
   }
 }
 
@@ -381,23 +388,56 @@
   }
 }
 
+/* ===== Ajustes adicionais (wrap de ícones e banners completos) ===== */
+@media (max-width: 768px) {
+  .icones { flex-wrap: wrap; }
+}
+
+@media (max-width: 1024px) {
+  .slide img { object-fit: cover; object-position: center; }
+}
+@media (max-width: 768px) {
+  .slide img { object-fit: cover; object-position: center; }
+}
+@media (max-width: 480px) {
+  .slide img { object-fit: cover; object-position: center; }
+}
+
+/* ===== CTA "Quero Vender" em tablet: evitar sobreposição ===== */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .barra-categorias .btn-quero-vender {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    display: inline-flex;
+  }
+}
+
 /* ======================= PÁGINA DE PRODUTOS RESPONSIVA ======================= */
 @media (max-width: 1024px) {
   .wrapper-conteudo {
-    grid-template-columns: 1fr;
+    display: flex;           /* garante que aplicamos regras ao layout atual */
+    flex-direction: column;  /* empilha filtros e área de produtos */
+    gap: 1.25rem;            /* espaçamento vertical adequado */
   }
   
   .coluna-esquerda {
     order: 2;
     position: static;
+    width: 100%;             /* evita largura fixa que causa overflow */
+    flex-shrink: 0;
   }
   
   .area-produtos {
     order: 1;
+    width: 100%;             /* ocupa toda a largura disponível */
   }
   
   .barra-filtros {
     display: none; /* Ocultar filtros em tablet */
+  }
+  .barra-filtros.visivel {
+    display: block; /* Exibir quando alternado */
   }
   
   .botao-alternar-filtros {
@@ -449,16 +489,16 @@
 
 /* ======================= PAINEL DO USUÁRIO RESPONSIVO ======================= */
 @media (max-width: 1024px) {
-  .wrapper-conteudo {
+  .container-painel .wrapper-conteudo {
     grid-template-columns: 1fr;
   }
   
-  .coluna-esquerda {
+  .container-painel .coluna-esquerda {
     position: static;
     margin-bottom: 2rem;
   }
   
-  .menu-navegacao {
+  .container-painel .menu-navegacao {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 0;
@@ -611,3 +651,24 @@
   }
 }
 
+/* ===== Ajustes mobile para barra de categorias e CTA "Quero Vender" ===== */
+@media (max-width: 768px) {
+  .barra-categorias .btn-quero-vender {
+    position: static;
+    order: 2;
+    flex: 0 0 auto;
+    transform: none;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  .barra-categorias ul {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}

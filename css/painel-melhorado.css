@@ -31,7 +31,7 @@
 }
 
 .cabecalho-filtros {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   padding: 1.5rem;
   text-align: center;
@@ -97,7 +97,7 @@
 
 /* Banner de categoria no painel */
 .banner-categoria {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   padding: 2rem;
   text-align: center;
@@ -161,7 +161,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
 }
 
 .stat-card:hover {
@@ -251,29 +251,5 @@
   }
 }
 
-/* Tema escuro */
-[data-theme="dark"] .barra-filtros,
-[data-theme="dark"] .area-produtos,
-[data-theme="dark"] .stat-card {
-  background: #374151;
-  border-color: #4b5563;
-}
-
-[data-theme="dark"] .link-navegacao {
-  color: #d1d5db;
-}
-
-[data-theme="dark"] .link-navegacao:hover,
-[data-theme="dark"] .link-navegacao.active {
-  background: #4b5563;
-  color: #a78bfa;
-}
-
-[data-theme="dark"] .stat-label {
-  color: #9ca3af;
-}
-
-[data-theme="dark"] .item-navegacao {
-  border-color: #4b5563;
-}
+/* Removido: bloco de tema escuro para painel admin/usuário conforme solicitação */
 

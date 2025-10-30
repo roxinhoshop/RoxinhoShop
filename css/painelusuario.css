@@ -25,7 +25,7 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #7c3aed;
+  border: 4px solid #833dd0;
   box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
   transition: all 0.3s ease;
 }
@@ -39,14 +39,14 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 3rem;
   font-weight: bold;
-  border: 4px solid #7c3aed;
+  border: 4px solid #833dd0;
   box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
@@ -61,7 +61,7 @@
 }
 
 .btn-upload-avatar {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -139,7 +139,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #7c3aed;
+  color: #833dd0;
   font-weight: 600;
 }
 
@@ -191,7 +191,7 @@
 }
 
 .btn-explorar-produtos {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -313,28 +313,37 @@
 }
 
 .btn-comprar-wishlist {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
 }
 
 .btn-comprar-wishlist:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   transform: translateY(-2px);
 }
 
 .btn-carrinho-wishlist {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
 }
 
 .btn-carrinho-wishlist:hover {
-  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   transform: translateY(-2px);
+}
+
+/* Ícones de plataforma nas badges de preço no painel */
+.icone-plataforma {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  margin-right: 6px;
+  border-radius: 3px;
 }
 
 /* ==================== DASHBOARD MELHORADO ==================== */
 .dashboard-header {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   padding: 2rem;
   border-radius: 12px;
@@ -376,7 +385,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
 }
 
 .stat-card:hover {
@@ -450,7 +459,7 @@
 }
 
 .nivel-atual {
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -474,7 +483,7 @@
 
 .progresso-xp {
   height: 100%;
-  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
   border-radius: 6px;
   transition: width 0.6s ease;
   position: relative;
@@ -487,7 +496,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, #833dd0, #833dd0);
   animation: shimmer 2s infinite;
 }
 
@@ -526,7 +535,7 @@
 }
 
 .atividade-xp i {
-  color: #7c3aed;
+  color: #833dd0;
   font-size: 1.2rem;
   width: 20px;
   text-align: center;
@@ -678,18 +687,18 @@ ease;
 }
 
 .item-caminho {
-    color: #007bff;
+    color: #833dd0; /* Roxo padrão unificado */
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .item-caminho:hover {
-    color: #0056b3;
+    color: #6f2cb8; /* Roxo mais escuro no hover */
 }
 
 .item-caminho.ativo {
-    color: #495057;
-    font-weight: 600;
+    color: #000000; /* Preto */
+    font-weight: 500; /* Removido negrito */
 }
 
 .separador {
@@ -701,6 +710,10 @@ ease;
     font-size: 2.5rem;
     margin-bottom: 10px;
     font-weight: 800;
+  background: linear-gradient(90deg, #833dd0, #833dd0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .secao-conteudo {
@@ -812,7 +825,7 @@ ease;
 }
 
 .nivel-atual {
-    background: linear-gradient(45deg, #7c3aed, #a78bfa);
+  background: linear-gradient(45deg, #833dd0, #833dd0);
     color: #ffffff;
     padding: 5px 15px;
     border-radius: 20px;
@@ -836,7 +849,7 @@ ease;
 
 .progresso-xp {
     height: 100%;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  background: linear-gradient(90deg, #833dd0, #833dd0);
     border-radius: 8px;
     width: 0%; /* Será preenchido via JS */
     transition: width 0.5s ease-in-out;
@@ -952,7 +965,7 @@ ease;
 
 /* ======================= BOTÕES ======================= */
 .botao-primario {
-    background: linear-gradient(45deg, #7c3aed, #a78bfa);
+  background: linear-gradient(90deg, #833dd0, #833dd0);
     color: #ffffff;
     border: none;
     padding: 12px 25px;
@@ -1365,7 +1378,7 @@ ease;
 }
 
 .cartao-boas-vindas {
-    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #833dd0 0%, #833dd0 100%);
     color: #ffffff;
     padding: 30px;
     border-radius: 12px;

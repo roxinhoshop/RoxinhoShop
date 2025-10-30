@@ -11,14 +11,11 @@
       "src": "/api/(.*)",
       "dest": "api/server.js"
     },
-    {
-      "src": "/(.*)",
-      "dest": "api/server.js"
-    },
     { "src": "/paginaproduto", "dest": "/pagina-produto.html" },
     { "src": "/redefinirsenha", "dest": "/redefinir-senha.html" },
     { "src": "/cabecalhorodape", "dest": "/cabecalho-rodape.html" }
   ],
+  "cleanUrls": true,
   "env": {
     "DB_HOST": "mysql.railway.internal",
     "DB_USER": "root",

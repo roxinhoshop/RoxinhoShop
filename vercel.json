@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://roxinhoshop-backend.vercel.app/api/$1" }
+  ],
   "cleanUrls": true,
   "redirects": [
     { "source": "/paginaproduto", "destination": "/pagina-produto", "statusCode": 308 },

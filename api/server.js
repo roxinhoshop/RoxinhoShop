@@ -27,7 +27,8 @@ const DEFAULT_ORIGINS = [
   'http://127.0.0.1:3017',
   'http://127.0.0.1:38095'
 ]
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || ''
+// Origem do frontend em produção (Vercel)
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://roxinhoshop.vercel.app'
 const ALLOWED_ORIGINS = Array.from(new Set([
   ...DEFAULT_ORIGINS,
   FRONTEND_ORIGIN
@@ -42,6 +43,20 @@ app.use(cors({
     if (LOCAL_DEV_REGEX.test(origin)) return callback(null, true)
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
     // Permite variações localhost/127.0.0.1
+    const alt = origin.replace('localhost', '127.0.0.1')
+    if (ALLOWED_ORIGINS.includes(alt)) return callback(null, true)
+    return callback(new Error(`CORS: Origin não permitido: ${origin}`))
+  },
+  credentials: true
+}))
+
+// Responder preflight (OPTIONS) com os mesmos cabeçalhos CORS
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
+    const LOCAL_DEV_REGEX = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
+    if (LOCAL_DEV_REGEX.test(origin)) return callback(null, true)
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
     const alt = origin.replace('localhost', '127.0.0.1')
     if (ALLOWED_ORIGINS.includes(alt)) return callback(null, true)
     return callback(new Error(`CORS: Origin não permitido: ${origin}`))

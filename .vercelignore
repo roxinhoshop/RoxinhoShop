@@ -1,0 +1,11 @@
+# Excluir backend e ferramentas de dev do deploy do frontend
+api/
+api/**
+
+# Ferramentas locais e scripts
+tools/
+scripts/
+dev-server.js
+
+# Arquivos sensíveis/locais
+.env

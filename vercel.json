@@ -1,23 +1,9 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/server.js" }
-  ],
   "redirects": [
     { "source": "/paginaproduto", "destination": "/pagina-produto", "statusCode": 308 },
     { "source": "/redefinirsenha", "destination": "/redefinir-senha", "statusCode": 308 },
     { "source": "/cabecalhorodape", "destination": "/cabecalho-rodape", "statusCode": 308 }
-  ],
-  "env": {
-    "DB_HOST": "mysql.railway.internal",
-    "DB_USER": "root",
-    "DB_PASSWORD": "neFMagcBhfWUyBoRNMCBBTCZsTeyeBja",
-    "DB_NAME": "railway",
-    "DB_PORT": "3306",
-    "DB_PUBLIC_URL": "mysql://root:neFMagcBhfWUyBoRNMCBBTCZsTeyeBja@switchback.proxy.rlwy.net:46156/railway",
-    "JWT_SECRET": "roxinhoshop_secret_key",
-    "JWT_EXPIRE": "30d",
-    "FRONTEND_ORIGIN": "https://roxinhoshop.vercel.app"
-  }
+  ]
 }

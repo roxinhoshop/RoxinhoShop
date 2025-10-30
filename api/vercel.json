@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server.js" }
+  ],
+  "env": {
+    "DB_HOST": "mysql.railway.internal",
+    "DB_USER": "root",
+    "DB_PASSWORD": "neFMagcBhfWUyBoRNMCBBTCZsTeyeBja",
+    "DB_NAME": "railway",
+    "DB_PORT": "3306",
+    "DB_PUBLIC_URL": "mysql://root:neFMagcBhfWUyBoRNMCBBTCZsTeyeBja@switchback.proxy.rlwy.net:46156/railway",
+    "JWT_SECRET": "roxinhoshop_secret_key",
+    "JWT_EXPIRE": "30d",
+    "FRONTEND_ORIGIN": "https://roxinhoshop.vercel.app"
+  }
+}

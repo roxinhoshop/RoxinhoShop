@@ -52,7 +52,17 @@
   }
 
   function send(url, opts) {
-    return fetch(url, opts).then(r => r.json()).catch(e => ({ ok: false, error: 'network_error', message: String(e) }));
+    try {
+      const API_BASE = window.API_BASE || window.location.origin;
+      const isAbsolute = /^https?:\/\//i.test(url);
+      const fullUrl = isAbsolute ? url : (API_BASE + url);
+      const fetchOpts = Object.assign({ credentials: 'include' }, opts || {});
+      return fetch(fullUrl, fetchOpts)
+        .then(r => r.json())
+        .catch(e => ({ ok: false, error: 'network_error', message: String(e) }));
+    } catch (e) {
+      return Promise.resolve({ ok: false, error: 'init_error', message: String(e) });
+    }
   }
 
   function formatProducts(items) {

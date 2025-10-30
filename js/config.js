@@ -4,11 +4,12 @@
     // Se já estiver definida externamente, respeite
     if (typeof window.API_BASE === 'string' && window.API_BASE) return;
 
-    // Usar sempre a mesma origem da UI para chamadas à API.
-    // Em ambiente de preview, o servidor estático faz proxy de /api para o backend.
-    // Isso evita problemas de CORS, cookies (SameSite) e portas inconsistentes.
     const origin = window.location.origin;
-    window.API_BASE = origin;
+    const host = window.location.hostname || '';
+    // Em produção, o frontend está em roxinhoshop.vercel.app e o backend separado em roxinhoshop-backend.vercel.app
+    // Em desenvolvimento/local, manter na mesma origem para evitar CORS/cookies.
+    const isProdFrontend = /roxinhoshop\.(?:vercel\.app)$/i.test(host);
+    window.API_BASE = isProdFrontend ? 'https://roxinhoshop-backend.vercel.app' : origin;
   } catch {
     try { window.API_BASE = window.location.origin; } catch {}
   }

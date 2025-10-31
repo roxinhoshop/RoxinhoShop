@@ -80,13 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
       btnLogin.textContent = 'Entrando...';
       btnLogin.disabled = true;
 
-      const dados = { email: emailInput.value.trim(), senha: senhaInput.value.trim() };
+      const dados = { email: emailInput.value.trim(), senha: senhaInput.value.trim(), context: 'vendedor' };
 
       const tentarLogin = async () => {
         try {
           const resp = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Login-Role': 'vendedor' },
             body: JSON.stringify(dados),
             credentials: 'include'
           });
@@ -121,6 +121,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           } else if (code === 'INCORRECT_PASSWORD' || /Senha incorreta/i.test(msg)) {
             erroSenha.textContent = 'Senha incorreta. Tente novamente ou recupere sua senha.';
+            erroSenha.classList.add('ativo');
+            senhaInput.classList.add('error');
+            return;
+          } else if (code === 'ROLE_NOT_ALLOWED') {
+            erroSenha.textContent = 'Esta página é apenas para vendedores. Use o login de cliente se for o caso.';
+            erroSenha.classList.add('ativo');
+            senhaInput.classList.add('error');
+            return;
+          } else if (code === 'VENDOR_NOT_REGISTERED') {
+            erroSenha.textContent = 'Seu usuário não está registrado como vendedor. Complete o cadastro de vendedor.';
+            erroSenha.classList.add('ativo');
+            senhaInput.classList.add('error');
+            return;
+          } else if (code === 'VENDOR_NOT_ACTIVE') {
+            erroSenha.textContent = 'Seu cadastro de vendedor não está ativo. Aguarde aprovação ou contate o suporte.';
             erroSenha.classList.add('ativo');
             senhaInput.classList.add('error');
             return;

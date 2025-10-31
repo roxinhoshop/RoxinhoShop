@@ -1,3 +1,10 @@
 node_modules
 .env
 dev.sqlite
+# Ignore caches and local artifacts
+.cache/
+.npm/
+api/.cache/
+api/.npm/
+api/node_modules/
+*.log

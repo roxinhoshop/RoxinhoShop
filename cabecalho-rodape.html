@@ -527,7 +527,7 @@ function enviarHistoricoEvento(payload) {
       body: JSON.stringify(payload),
       credentials: 'include',
       keepalive: true,
-      mode: 'cors'
+      // sem 'mode: cors' para evitar dependência de CORS
     }).catch(() => {});
   } catch (_) {}
 }

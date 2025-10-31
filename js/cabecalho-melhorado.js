@@ -674,6 +674,20 @@ function inicializarLoginBox() {
     } catch {}
   };
 
+  // Utilitários de sessão local do cliente (fallback)
+  const getPerfilClienteLocal = () => {
+    try { return JSON.parse(localStorage.getItem('cliente:perfil')); } catch { return null; }
+  };
+  const isClienteLocal = () => {
+    try { return localStorage.getItem('auth:customer') === '1' || !!localStorage.getItem('cliente:perfil'); } catch { return false; }
+  };
+  const limparSessaoClienteLocal = () => {
+    try {
+      localStorage.removeItem('auth:customer');
+      localStorage.removeItem('cliente:perfil');
+    } catch {}
+  };
+
   const aplicarNaoLogado = () => {
     statusLogin.textContent = 'Entre';
     subtextoLogin.textContent = 'Iniciar Sessão';
@@ -771,7 +785,8 @@ function inicializarLoginBox() {
     const dropdownLogin = document.getElementById('dropdown-login');
     // Preferir nome do perfil local do vendedor se existir
     const perfilVend = getPerfilVendedorLocal();
-    const nome = perfilVend?.nome || usuario?.nome || usuario?.name || perfilVend?.email || '';
+    const perfilCli = getPerfilClienteLocal();
+    const nome = perfilVend?.nome || perfilCli?.nome || usuario?.nome || usuario?.name || perfilVend?.email || perfilCli?.email || '';
     const primeiroNome = obterPrimeiroNome(nome) || (usuario?.email ? usuario.email.split('@')[0] : 'Usuário');
     statusLogin.textContent = `Olá, ${primeiroNome}!`;
     subtextoLogin.textContent = 'Minha Conta';
@@ -905,6 +920,7 @@ function inicializarLoginBox() {
         } catch {}
         // limpar sessão local do vendedor
         limparSessaoVendedorLocal();
+        limparSessaoClienteLocal();
         try { localStorage.setItem('auth:event', 'logout:' + Date.now()); } catch {}
         if (dropdownUsuario) dropdownUsuario.style.display = 'none';
         aplicarNaoLogado();
@@ -927,7 +943,7 @@ function inicializarLoginBox() {
     if (window.__authCheckInFlight) return;
     window.__authCheckInFlight = true;
     try {
-      const resp = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include', keepalive: true, cache: 'no-store', mode: 'cors' });
+      const resp = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include', keepalive: true, cache: 'no-store' });
       const ok = resp && resp.ok;
       let data = null;
       if (ok) {
@@ -936,19 +952,25 @@ function inicializarLoginBox() {
       if (ok && data && data.success && data.user) {
         aplicarLogado(data.user);
       } else {
-        // Fallback: se houver vendedor local, aplicar logado com perfil local
+        // Fallback: vendedor ou cliente local
         const perfilVend = getPerfilVendedorLocal();
+        const perfilCli = getPerfilClienteLocal();
         if (perfilVend) {
           aplicarLogado(perfilVend);
+        } else if (perfilCli) {
+          aplicarLogado(perfilCli);
         } else {
           aplicarNaoLogado();
         }
       }
     } catch (_) {
-      // Fallback offline: vendedor local
+      // Fallback offline: vendedor ou cliente local
       const perfilVend = getPerfilVendedorLocal();
+      const perfilCli = getPerfilClienteLocal();
       if (perfilVend) {
         aplicarLogado(perfilVend);
+      } else if (perfilCli) {
+        aplicarLogado(perfilCli);
       } else {
         aplicarNaoLogado();
       }

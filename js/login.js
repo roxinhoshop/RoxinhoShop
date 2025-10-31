@@ -109,6 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await resp.json().catch(() => ({}));
           if (resp.ok && data && data.success) {
             try {
+              const user = (data && data.user) || {};
+              const role = String(user.role || '').toLowerCase();
+              if (role === 'cliente') {
+                const perfilMinimo = {
+                  nome: user.nome || user.name || '',
+                  email: user.email || '',
+                  role: 'cliente'
+                };
+                localStorage.setItem('auth:customer', '1');
+                localStorage.setItem('cliente:perfil', JSON.stringify(perfilMinimo));
+              }
               localStorage.setItem('auth:event', 'login:' + Date.now());
               localStorage.setItem('auth:last_login', String(Date.now()));
             } catch {}

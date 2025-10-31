@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-Add-Type -AssemblyName System.Net.HttpListener
+# HttpListener type is available in .NET; no need to load a non-existent assembly.
 
 $prefix = "http://localhost:$Port/"
 $listener = New-Object System.Net.HttpListener
@@ -73,4 +73,3 @@ while ($true) {
         catch {}
     }
 }
-

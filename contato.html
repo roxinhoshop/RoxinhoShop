@@ -33,11 +33,11 @@
 
   <section class="formulario-contato">
     <h2>Envie sua mensagem</h2>
-    <form action="https://formsubmit.co/roxinhoshopoficial@gmail.com" method="POST">
-      <input type="text" name="nome" placeholder="Seu nome" required>
-      <input type="email" name="email" placeholder="Seu email" required>
-      <textarea name="mensagem" placeholder="Sua mensagem" required></textarea>
-      <button type="submit">Enviar</button>
+    <form id="formContato" novalidate>
+      <input type="text" name="nome" id="campoNome" placeholder="Seu nome" required>
+      <input type="email" name="email" id="campoEmail" placeholder="Seu email" required>
+      <textarea name="mensagem" id="campoMensagem" placeholder="Sua mensagem" required></textarea>
+      <button type="submit" id="btnEnviar">Enviar</button>
     </form>
   </section>
 </main>
@@ -49,8 +49,9 @@
   <script src="/js/config.js"></script>
   <script src="/js/cabecalho-melhorado.js"></script>
   <script src="/js/rotas.js"></script>
+  <script src="/js/contato.js"></script>
 <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

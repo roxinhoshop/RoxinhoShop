@@ -5,7 +5,7 @@
     todos: [],
     filtrados: [],
     paginaAtual: 1,
-    itensPorPagina: 10,
+    itensPorPagina: Infinity,
     sort: { campo: 'criadoEm', dir: 'desc' },
     filtros: { texto: '', status: 'todos', atividadeDias: 'todos' },
     readonly: false,
@@ -17,6 +17,8 @@
   function init() {
     mapElements();
     bindEvents();
+    // Inicia com "Todos" os itens por página para exibir toda a lista
+    if (EL.itensPorPagina) { try { EL.itensPorPagina.value = 'todos'; } catch (_) {} }
     carregarVendedores();
     aplicarFiltrosOrdenacao();
     render();
@@ -34,8 +36,10 @@
     EL.btnSalvarEdicao = document.getElementById('salvarEdicao');
     EL.btnCancelarEdicao = document.getElementById('cancelarEdicao');
     EL.editarNome = document.getElementById('editarNome');
+    EL.editarNomeLoja = document.getElementById('editarNomeLoja');
     EL.editarCPF = document.getElementById('editarCPF');
     EL.editarStatus = document.getElementById('editarStatus');
+    EL.linkDocumento = document.getElementById('linkDocumento');
   }
 
   function bindEvents() {
@@ -58,7 +62,12 @@
       render();
     });
     if (EL.itensPorPagina) EL.itensPorPagina.addEventListener('change', () => {
-      state.itensPorPagina = Math.max(1, Number(EL.itensPorPagina.value || 10));
+      const val = EL.itensPorPagina.value;
+      if (String(val) === 'todos') {
+        state.itensPorPagina = Infinity;
+      } else {
+        state.itensPorPagina = Math.max(1, Number(val || 10));
+      }
       state.paginaAtual = 1;
       render();
     });
@@ -111,6 +120,8 @@
             email: String(v.email || ''),
             status: String(v.status || 'ativo'),
             criadoEm: Number(criadoTs),
+            nomeLoja: String(v.nomeLoja || ''),
+            arquivoDocumento: v.arquivoDocumento || null,
             extras: null
           };
         });
@@ -149,6 +160,8 @@
             email: email,
             status: status,
             criadoEm: Number(extras.criadoEm || Date.now()),
+            nomeLoja: String(extras.nomeLoja || ''),
+            arquivoDocumento: extras.arquivoDocumento || null,
             extras
           });
         } catch (_) { }
@@ -221,12 +234,22 @@
         <td>
           ${state.readonly ? '<span class="muted">—</span>' : `
           <div class="acoes">
+            <button class="btn btn-secundario" data-acao="inspecionar" data-id="${encodeURIComponent(v.id)}">
+              <i class="fa-solid fa-eye"></i> Inspecionar
+            </button>
             <button class="btn btn-secundario" data-acao="editar" data-id="${encodeURIComponent(v.id)}">
               <i class="fa-solid fa-pen"></i> Editar
             </button>
-            ${v.status === 'inativo'
-              ? `<button class="btn btn-primario" data-acao="ativar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-toggle-on"></i> Ativar</button>`
-              : `<button class="btn btn-perigo" data-acao="desativar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-toggle-off"></i> Desativar</button>`}
+            ${v.status === 'pendente'
+              ? `
+                <button class="btn btn-primario" data-acao="aprovar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-check"></i> Aprovar</button>
+                <button class="btn btn-perigo" data-acao="rejeitar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-xmark"></i> Rejeitar</button>
+              `
+              : (v.status === 'inativo'
+                  ? `<button class="btn btn-primario" data-acao="ativar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-toggle-on"></i> Ativar</button>`
+                  : `<button class="btn btn-perigo" data-acao="desativar" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-toggle-off"></i> Desativar</button>`
+                )
+            }
             ${state.backend ? `<button class="btn btn-perigo" data-acao="excluir" data-id="${encodeURIComponent(v.id)}"><i class="fa-solid fa-trash"></i> Excluir</button>` : ''}
           </div>`}
         </td>
@@ -248,9 +271,20 @@
     const id = decodeURIComponent(btn.getAttribute('data-id') || '');
     const item = state.todos.find(v => v.id === id);
     if (!item) return;
-    if (acao === 'editar') abrirModal(item);
+    if (acao === 'editar') abrirModal(item, 'editar');
+    else if (acao === 'inspecionar') abrirModal(item, 'inspecionar');
     else if (acao === 'desativar') (state.backend ? atualizarStatusAPI(item, 'inativo') : atualizarStatusLocal(item, 'inativo'));
     else if (acao === 'ativar') (state.backend ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
+    else if (acao === 'aprovar') (state.backend ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
+    else if (acao === 'rejeitar') {
+      const confirmar = window.sitePopup
+        ? window.sitePopup.confirm('Tem certeza que deseja rejeitar este vendedor?', 'Confirmar')
+        : Promise.resolve(window.confirm('Tem certeza que deseja rejeitar este vendedor?'));
+      confirmar.then(ok => {
+        if (!ok) return;
+        (state.backend ? atualizarStatusAPI(item, 'inativo') : atualizarStatusLocal(item, 'inativo'));
+      });
+    }
     else if (acao === 'excluir' && state.backend) excluirVendorAPI(item);
   }
 
@@ -280,10 +314,10 @@
         aplicarFiltrosOrdenacao();
         render();
       } else {
-        alert('Falha ao atualizar status: ' + (data.message || r.status));
+        window.sitePopup && window.sitePopup.alert('Falha ao atualizar status: ' + (data.message || r.status), 'Erro');
       }
     } catch (err) {
-      alert('Erro ao atualizar status. Verifique sua sessão de administrador.');
+      window.sitePopup && window.sitePopup.alert('Erro ao atualizar status. Verifique sua sessão da Loja.', 'Erro');
     }
   }
 
@@ -317,12 +351,49 @@
 
   // Modal edição
   let idEditando = null;
-  function abrirModal(item) {
+  function abrirModal(item, modo = 'editar') {
     idEditando = item.id;
-    if (EL.editarNome) EL.editarNome.value = item.nome && item.nome !== '—' ? item.nome : '';
-    if (EL.editarCPF) EL.editarCPF.value = mascaraCPF(String(item.cpf || ''));
-    if (EL.editarStatus) EL.editarStatus.value = item.status || 'ativo';
+    const somenteLeitura = modo === 'inspecionar';
+    if (EL.editarNome) {
+      EL.editarNome.value = item.nome && item.nome !== '—' ? item.nome : '';
+      EL.editarNome.disabled = !!somenteLeitura;
+    }
+    if (EL.editarNomeLoja) {
+      EL.editarNomeLoja.value = String(item.nomeLoja || '').trim();
+      // Campo informativo: manter desabilitado
+      EL.editarNomeLoja.disabled = true;
+    }
+    if (EL.editarCPF) {
+      EL.editarCPF.value = mascaraCPF(String(item.cpf || ''));
+      EL.editarCPF.disabled = !!somenteLeitura;
+    }
+    if (EL.editarStatus) {
+      EL.editarStatus.value = item.status || 'ativo';
+      EL.editarStatus.disabled = !!somenteLeitura;
+    }
+    if (EL.linkDocumento) {
+      const doc = item.arquivoDocumento;
+      if (doc) {
+        EL.linkDocumento.href = doc;
+        EL.linkDocumento.style.display = '';
+        try { EL.linkDocumento.setAttribute('download', 'documento-vendedor'); } catch (_) {}
+        EL.linkDocumento.textContent = 'Abrir documento';
+      } else {
+        EL.linkDocumento.removeAttribute('href');
+        EL.linkDocumento.style.display = '';
+        EL.linkDocumento.textContent = 'Documento não disponível';
+      }
+    }
     if (EL.modal) {
+      // Atualiza título do modal conforme o modo
+      const titulo = EL.modal.querySelector('.modal-cabecalho h3');
+      if (titulo) {
+        titulo.innerHTML = somenteLeitura
+          ? '<i class="fa-solid fa-eye"></i> Inspecionar vendedor'
+          : '<i class="fa-solid fa-pen-to-square"></i> Editar vendedor';
+      }
+      // Exibe/oculta botão salvar em modo leitura
+      if (EL.btnSalvarEdicao) EL.btnSalvarEdicao.style.display = somenteLeitura ? 'none' : '';
       EL.modal.classList.add('visivel');
       EL.modal.setAttribute('aria-hidden', 'false');
       EL.modal.setAttribute('aria-modal', 'true');
@@ -387,16 +458,20 @@
         aplicarFiltrosOrdenacao();
         render();
       } else {
-        alert('Falha ao salvar edição: ' + (data.message || r.status));
+        window.sitePopup && window.sitePopup.alert('Falha ao salvar edição: ' + (data.message || r.status), 'Erro');
       }
     } catch (err) {
-      alert('Erro ao salvar edição. Verifique sua sessão de administrador.');
+      window.sitePopup && window.sitePopup.alert('Erro ao salvar edição. Verifique sua sessão da Loja.', 'Erro');
     }
   }
 
   async function excluirVendorAPI(item) {
     const API_BASE = window.API_BASE || window.location.origin;
-    if (!confirm('Tem certeza que deseja excluir este vendedor?')) return;
+    const confirmar = window.sitePopup
+      ? window.sitePopup.confirm('Tem certeza que deseja excluir este vendedor?', 'Confirmar')
+      : Promise.resolve(window.confirm('Tem certeza que deseja excluir este vendedor?'));
+    const ok = await confirmar;
+    if (!ok) return;
     try {
       const r = await fetch(`${API_BASE}/api/vendors/${encodeURIComponent(item.id)}?hard=false`, {
         method: 'DELETE',
@@ -408,10 +483,10 @@
         aplicarFiltrosOrdenacao();
         render();
       } else {
-        alert('Falha ao excluir vendedor: ' + (data.message || r.status));
+        window.sitePopup && window.sitePopup.alert('Falha ao excluir vendedor: ' + (data.message || r.status), 'Erro');
       }
     } catch (err) {
-      alert('Erro ao excluir vendedor. Verifique sua sessão de administrador.');
+      window.sitePopup && window.sitePopup.alert('Erro ao excluir vendedor. Verifique sua sessão da Loja.', 'Erro');
     }
   }
 
@@ -441,9 +516,9 @@
   }
   function badgeStatus(status) {
     const st = (status || 'ativo');
-    const cls = st === 'inativo' ? 'status-inativo' : 'status-ativo';
-    const icon = st === 'inativo' ? 'fa-toggle-off' : 'fa-toggle-on';
-    const txt = st === 'inativo' ? 'Inativo' : 'Ativo';
+    const cls = st === 'inativo' ? 'status-inativo' : (st === 'pendente' ? 'status-pendente' : 'status-ativo');
+    const icon = st === 'inativo' ? 'fa-toggle-off' : (st === 'pendente' ? 'fa-hourglass-half' : 'fa-toggle-on');
+    const txt = st === 'inativo' ? 'Inativo' : (st === 'pendente' ? 'Pendente' : 'Ativo');
     return `<span class="status-badge ${cls}"><i class="fa-solid ${icon}"></i>${txt}</span>`;
   }
   function escapeHTML(s) {

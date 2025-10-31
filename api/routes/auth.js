@@ -98,7 +98,6 @@ router.post('/register', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
-        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });
@@ -168,26 +167,30 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Restringir por role conforme contexto
+    // Restringir por role conforme contexto, com exceção para qualquer usuário com role admin
     const userRole = String(user.role || '').toLowerCase();
-    if (loginContext === 'cliente' && userRole !== 'cliente') {
-      // Responder 200 com sucesso=false para permitir exibição de mensagem no frontend atual
-      return res.status(200).json({
-        success: false,
-        error: 'ROLE_NOT_ALLOWED',
-        message: 'Esta página é apenas para clientes. Use o login de vendedor se for o caso.'
-      });
-    }
-    if (loginContext === 'vendedor' && userRole !== 'vendedor') {
-      return res.status(200).json({
-        success: false,
-        error: 'ROLE_NOT_ALLOWED',
-        message: 'Esta página é apenas para vendedores. Use o login de cliente se for o caso.'
-      });
+    const isAdminSpecial = userRole === 'admin';
+    if (!isAdminSpecial) {
+      if (loginContext === 'cliente' && userRole !== 'cliente') {
+        // Responder 200 com sucesso=false para permitir exibição de mensagem no frontend atual
+        return res.status(200).json({
+          success: false,
+          error: 'ROLE_NOT_ALLOWED',
+          message: 'Esta página é apenas para clientes. Use o login de vendedor se for o caso.'
+        });
+      }
+      if (loginContext === 'vendedor' && userRole !== 'vendedor') {
+        return res.status(200).json({
+          success: false,
+          error: 'ROLE_NOT_ALLOWED',
+          message: 'Esta página é apenas para vendedores. Use o login de cliente se for o caso.'
+        });
+      }
     }
 
     // Requisito: somente vendedores presentes na tabela "vendedor" podem logar no fluxo de vendedor
-    if (loginContext === 'vendedor') {
+    // Exceção: qualquer usuário com role admin pode logar como vendedor mesmo sem registro em tabela vendedor
+    if (loginContext === 'vendedor' && !isAdminSpecial) {
       const [vendRows] = await sequelize.query(
         `SELECT * FROM vendedor WHERE userId = :uid LIMIT 1`,
         { replacements: { uid: user.id } }
@@ -223,7 +226,6 @@ router.post('/login', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
-        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });
@@ -285,7 +287,6 @@ router.get('/me', async (req, res) => {
         sobrenome: user.sobrenome,
         email: user.email,
         foto_perfil: user.foto_perfil,
-        avatar_base64: user.avatar_base64,
         role: user.role
       }
     });

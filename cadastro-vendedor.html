@@ -16,14 +16,30 @@
   <style>
     .upload-grupo { display: grid; gap: .5rem; }
     .upload-hint { font-size: .85rem; color: #555; }
-    .file-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .6rem; border-radius: 999px; background: #f5f1ff; color: #4b3f72; border: 1px solid #e6ddff; }
-    .file-pill i { color: #7a45d6; }
+    /* Label do documento: preto no light-mode */
+    .upload-grupo .rotulo-formulario { color: #000000; }
+    /* Light-mode: documento (file-pill) */
+    .file-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .6rem; border-radius: 999px; background: #ffffff; color: #000000; border: 1px solid #e5e7eb; }
+    .file-pill i { color: inherit; }
+    /* Área de preview com fundo preto para destacar imagens/documentos */
+    #previewImagem { display: none; background: #000000; color: #ffffff; padding: 8px; border-radius: 8px; border: 1px solid #111; max-width: 100%; }
+    #previewImagem img { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #222; }
     .mensagem-erro.visivel { color: #cc0000; margin-top: .25rem; }
     /* Oculta a caixa de login do cabeçalho nesta página */
     #caixa-login { display: none !important; }
+
+    /* Input de arquivo oculto e botão personalizado "Escolher arquivo" */
+    #arquivoDocumento { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .btn-arquivo { display: inline-block; background: #833dd0; color: #fff; border: 1px solid #7a36c3; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+
+    /* Variantes em modo escuro */
+    body.dark .file-pill { background: #000000; color: #ffffff; border-color: #334155; }
+    body.dark .btn-arquivo { background: #883fd8; color: #fff; border-color: #7a36c3; }
+    /* Label do documento: branco no dark-mode para contraste */
+    body.dark .upload-grupo .rotulo-formulario { color: #ffffff; }
   </style>
 </head>
-<body>
+<body class="pagina-cadastro">
   <div id="header-placeholder"></div>
 
   <main class="container">
@@ -83,6 +99,8 @@
 
             <div class="grupo-formulario coluna-completa upload-grupo">
               <label class="rotulo-formulario" for="arquivoDocumento">Documento do vendedor (PDF, JPG, PNG)</label>
+              <!-- Botão personalizado para escolher arquivo -->
+              <label for="arquivoDocumento" class="btn-arquivo">Escolher arquivo</label>
               <input type="file" id="arquivoDocumento" name="arquivoDocumento" accept=".pdf,.jpg,.jpeg,.png" />
               <div class="upload-hint">Tamanho máximo 5MB. Pré-visualização para imagens.</div>
               <div id="arquivoSelecionado" class="file-pill" style="display:none;"><i class="fa-regular fa-file"></i><span id="arquivoNome">arquivo</span></div>
@@ -110,10 +128,10 @@
                     <span id="pontuacao-senha" class="pontuacao-forca"></span>
                   </div>
                 </div>
-                <div id="aviso-senha-curta" class="aviso-senha-curta">
-                  <span class="icone-aviso"></span>
-                  <span>Mínimo 8 caracteres</span>
-                </div>
+              <div id="aviso-senha-curta" class="aviso-senha-curta">
+                <span class="icone-aviso"></span>
+                <span>Mínimo 8 caracteres — números e símbolos são opcionais</span>
+              </div>
               </div>
 
               <div id="erro-senha" class="apenas-leitura-tela" aria-live="polite"></div>
@@ -150,7 +168,7 @@
   <script src="/js/cabecalho-melhorado.js"></script>
   <script src="/js/cadastro-vendedor.js"></script>
   <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

@@ -14,4 +14,3 @@ const SearchHistory = sequelize.define('search_history', {
 });
 
 module.exports = SearchHistory;
-

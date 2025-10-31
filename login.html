@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sessão | Roxinho Shop</title>
+  <title>Fazer login | Roxinho Shop</title>
 
   <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
 
@@ -36,7 +36,7 @@
       <div class="auth-content">
       <div class="login-section">
       <form class="login-card" id="formularioLogin" novalidate>
-        <h2 class="welcome-text">Iniciar sessão</h2>
+        <h2 class="welcome-text">Fazer login</h2>
         <p class="welcome-subtitle">Bem-vindo à Roxinho Shop! Por favor, insira seus dados</p>
 
         <!-- E-mail -->
@@ -92,7 +92,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

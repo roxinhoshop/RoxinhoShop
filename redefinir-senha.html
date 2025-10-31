@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recuperar senha | Roxinho Shop</title>
+  <title>Redefinir senha | Roxinho Shop</title>
 
       <!-- Favicon -->
   <link rel="icon" type="image/png" href="/imagens/logos/favicon-32x32.png">
@@ -29,7 +29,7 @@
       <section class="login-section">
         <form class="login-card" id="formularioEsqueceuSenha" novalidate>
 
-          <h2 class="welcome-text">Esqueceu sua senha?</h2>
+          <h2 class="welcome-text">Redefinir senha</h2>
           <p class="welcome-subtitle">
             Digite seu e-mail para receber as instruções de recuperação de senha
           </p>
@@ -84,7 +84,7 @@
   <script src="/js/cabecalho-melhorado.js"></script>
   
   <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

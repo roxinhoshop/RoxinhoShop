@@ -232,7 +232,7 @@
   <script src="/js/cabecalho-melhorado.js"></script>   <!-- script que preenche os dados -->
 
     <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
             .then(response => response.text())
             .then(data => {
                 const parser = new DOMParser();
@@ -246,13 +246,10 @@
                 if (categorias) document.getElementById("header-placeholder").appendChild(categorias);
                 if (footer) document.getElementById("footer-placeholder").appendChild(footer);
 
-                // Executar scripts do cabecalho/rodape
-                doc.querySelectorAll("script").forEach(oldScript => {
-                    const newScript = document.createElement("script");
-                    if (oldScript.src) newScript.src = oldScript.src;
-                    else newScript.textContent = oldScript.textContent;
-                    document.body.appendChild(newScript);
-                });
+                // Não reinjetar scripts do cabeçalho/rodapé para evitar conflitos
+                // O comportamento do cabeçalho (incluindo a busca) é controlado por
+                // /js/cabecalho-melhorado.js já incluído nesta página.
+                // A presença do MutationObserver garante a inicialização após a injeção.
             });
     </script>
 </body>

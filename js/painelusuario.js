@@ -340,11 +340,9 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     if (window.sitePopup && typeof window.sitePopup.confirm === 'function') {
-      window.sitePopup.confirm('Tem certeza que deseja limpar toda a lista de desejos?').then(sim => { if (sim) executarLimpeza(); });
-    } else if (typeof confirm === 'function') {
-      if (confirm('Tem certeza que deseja limpar toda a lista de desejos?')) executarLimpeza();
+      window.sitePopup.confirm('Tem certeza que deseja limpar toda a lista de desejos?', 'Confirmar').then(sim => { if (sim) executarLimpeza(); });
     } else {
-      executarLimpeza();
+      console.warn('sitePopup indisponível para confirmação da limpeza da wishlist. Ação cancelada.');
     }
   }
   

@@ -52,6 +52,14 @@ main.politicas {
   text-align: justify;
 }
 
+/* Texto (light mode): preto para conteúdo principal */
+.politicas article,
+.politicas ul,
+.politicas ul li,
+.politicas p {
+  color: #000000;
+}
+
 /* Numeração e destaques */
 .politicas strong,
 .politicas b {
@@ -94,8 +102,9 @@ html.dark .politicas article,
 html.dark .politicas ul,
 html.dark .politicas ul li,
 html.dark .politicas strong,
-html.dark .politicas b {
-  color: #cbd5e1;
+html.dark .politicas b,
+html.dark .politicas p {
+  color: #ffffff;
 }
 
 /* Responsividade */

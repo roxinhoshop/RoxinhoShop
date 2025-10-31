@@ -167,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (avatarAtual) {
         let src = '/imagens/logos/avatar-roxo.svg';
-        if (typeof u.avatar_base64 === 'string' && u.avatar_base64.startsWith('data:image/')) {
-          src = u.avatar_base64;
+        if (typeof u.foto_perfil === 'string' && u.foto_perfil.startsWith('data:image/')) {
+          src = u.foto_perfil;
         } else if (typeof u.foto_perfil === 'string' && u.foto_perfil.trim()) {
           src = u.foto_perfil;
         }
@@ -180,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const headerAvatar = document.getElementById('avatar-usuario');
       if (headerAvatar) {
         let src = '/imagens/logos/avatar-roxo.svg';
-        if (typeof u.avatar_base64 === 'string' && u.avatar_base64.startsWith('data:image/')) {
-          src = u.avatar_base64;
+        if (typeof u.foto_perfil === 'string' && u.foto_perfil.startsWith('data:image/')) {
+          src = u.foto_perfil;
         } else if (typeof u.foto_perfil === 'string' && u.foto_perfil.trim()) {
           src = u.foto_perfil;
         }
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!resp.ok || !data?.success) throw new Error((data && data.message) || 'Falha ao enviar avatar');
       const fallback = '/imagens/logos/avatar-roxo.svg';
-      const url = data.avatar_base64 || data.foto_perfil || fallback;
+      const url = data.foto_perfil || fallback;
       if (avatarAtual) avatarAtual.src = url;
       const headerAvatar = document.getElementById('avatar-usuario');
       if (headerAvatar) headerAvatar.src = url;
@@ -471,9 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function removerAvatar() {
 const defaultUrl = '/imagens/logos/avatar-roxo.svg';
     try {
-      const confirmar = await (window.sitePopup && typeof window.sitePopup.confirm === 'function'
-        ? window.sitePopup.confirm('Remover sua foto e voltar ao avatar padrão?')
-        : Promise.resolve(window.confirm('Remover sua foto e voltar ao avatar padrão?')));
+      const confirmar = await window.sitePopup.confirm('Remover sua foto e voltar ao avatar padrão?', 'Confirmar');
       if (!confirmar) return;
       const resp = await fetch(`${API_BASE}/api/users/avatar`, { method: 'DELETE', credentials: 'include' });
       let data = null;

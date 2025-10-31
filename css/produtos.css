@@ -1733,7 +1733,7 @@ body.dark .barra-filtros {
     padding: 0 0.5rem;
     border: 1px solid #e5e7eb;
     background: white;
-    color: #374151;
+    color: #000000;
     border-radius: 0.375rem;
     cursor: pointer;
     transition: all 0.2s;

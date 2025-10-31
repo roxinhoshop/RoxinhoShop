@@ -8,7 +8,6 @@
     "dev": "nodemon api/server.js",
     "test:regression": "node scripts/regression-tests.js",
     "import:batch": "node api/scripts/import-batch.js",
-    "cleanup:db": "node api/scripts/cleanup-db.js",
     "test:auth": "node api/scripts/test-auth.js"
   },
   "keywords": [
@@ -29,7 +28,8 @@
     "mysql2": "^3.15.3",
     "node-fetch": "^2.7.0",
     "puppeteer": "^24.26.1",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

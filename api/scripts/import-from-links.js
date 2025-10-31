@@ -346,7 +346,6 @@ async function upsertProduct({ tituloPadrao, ml, amz }) {
       parcelamentoAmazon: amz.installments.length ? JSON.stringify(amz.installments) : null,
       data_coleta: agora,
       ativo: true,
-      emEstoque: true,
       destaque: false,
     });
   } else {
@@ -371,10 +370,10 @@ async function upsertProduct({ tituloPadrao, ml, amz }) {
   // Inserir histórico de preços
   try {
     if (ml.price != null) {
-      await PriceHistory.create({ produto_id: registro.id, plataforma: 'Mercado Livre', preco: ml.price, emEstoque: true, data_coleta: agora });
+      await PriceHistory.create({ produto_id: registro.id, plataforma: 'Mercado Livre', preco: ml.price, data_coleta: agora });
     }
     if (amz.price != null) {
-      await PriceHistory.create({ produto_id: registro.id, plataforma: 'Amazon', preco: amz.price, emEstoque: true, data_coleta: agora });
+      await PriceHistory.create({ produto_id: registro.id, plataforma: 'Amazon', preco: amz.price, data_coleta: agora });
     }
   } catch (_) {}
 

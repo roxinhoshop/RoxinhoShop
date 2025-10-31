@@ -163,23 +163,7 @@ class FormularioCadastroVendedor {
     if (v.length !== 11) {
       return this.mostrarErro('documento', 'Informe um CPF com 11 dígitos');
     }
-    if (/^(\d)\1{10}$/.test(v)) {
-      return this.mostrarErro('documento', 'CPF inválido');
-    }
-    // Cálculo de dígitos verificadores
-    const calcDV = (base, pesoInicial) => {
-      let soma = 0;
-      for (let i = 0; i < base.length; i++) {
-        soma += parseInt(base[i], 10) * (pesoInicial - i);
-      }
-      const resto = soma % 11;
-      return resto < 2 ? 0 : 11 - resto;
-    };
-    const dv1 = calcDV(v.slice(0, 9), 10);
-    const dv2 = calcDV(v.slice(0, 10), 11);
-    if (dv1 !== parseInt(v[9], 10) || dv2 !== parseInt(v[10], 10)) {
-      return this.mostrarErro('documento', 'CPF inválido');
-    }
+    // Permitir qualquer CPF com 11 dígitos, sem validação de dígitos verificadores
     this.mostrarSucesso('documento');
     return true;
   }
@@ -237,7 +221,10 @@ class FormularioCadastroVendedor {
     if (erro) { erro.textContent = ''; erro.className = 'apenas-leitura-tela'; }
     this.previewImagem.style.display = 'none';
     this.previewImagem.innerHTML = '';
-    if (!file) { this.arquivoSelecionado.style.display = 'none'; return; }
+    if (!file) {
+      this.arquivoSelecionado.style.display = 'none';
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       this.mostrarErro('arquivoDocumento', 'Arquivo muito grande (máx. 5MB)');
       this.campoArquivo.value = '';
@@ -356,8 +343,24 @@ class FormularioCadastroVendedor {
         throw new Error(msg);
       }
 
-      this.notificar('Conta de vendedor criada! Faça login para continuar.', 'sucesso');
-  setTimeout(() => { window.location.href = '/login-vendedor'; }, 1200);
+      // Salvar também no localStorage para aparecer no painel-admin (fallback local)
+      try {
+        const emailKey = (payloadVendor.email || '').toLowerCase();
+        const extras = {
+          email: emailKey,
+          nome: payloadVendor.nome || '',
+          sobrenome: payloadVendor.sobrenome || '',
+          nomeLoja: payloadVendor.nomeLoja || '',
+          documento: payloadVendor.documento || '',
+          arquivoDocumento: arquivoBase64 || null,
+          status: 'pendente',
+          criadoEm: Date.now()
+        };
+        localStorage.setItem('vendor:pending:' + emailKey, JSON.stringify(extras));
+      } catch (_) {}
+
+      this.notificar('Cadastro enviado! Aguarde aprovação da Loja.', 'sucesso');
+      setTimeout(() => { window.location.href = '/login-vendedor'; }, 1200);
     } catch (err) {
       console.error('Cadastro vendedor falhou:', err);
       const msg = String(err && err.message) || 'Erro ao criar conta de vendedor';

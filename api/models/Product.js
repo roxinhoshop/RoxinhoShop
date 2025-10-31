@@ -10,6 +10,9 @@ const Product = sequelize.define('Produto', {
   precoAmazon: { type: DataTypes.DECIMAL(10,2), allowNull: true },
   descricao: { type: DataTypes.TEXT },
   descricaoDetalhada: { type: DataTypes.TEXT },
+  // Classificação manual/persistida
+  categoria: { type: DataTypes.STRING(100), allowNull: true },
+  subcategoria: { type: DataTypes.STRING(100), allowNull: true },
   marca: { type: DataTypes.STRING(100) },
   avaliacao: { type: DataTypes.FLOAT },
   // Novo array de imagens armazenado como JSON (string)
@@ -26,7 +29,6 @@ const Product = sequelize.define('Produto', {
   amazonAsin: { type: DataTypes.STRING(50) },
   data_coleta: { type: DataTypes.DATE },
   ativo: { type: DataTypes.BOOLEAN, allowNull: true },
-  emEstoque: { type: DataTypes.BOOLEAN, allowNull: true },
   destaque: { type: DataTypes.BOOLEAN, allowNull: true },
 }, {
   tableName: 'produto',

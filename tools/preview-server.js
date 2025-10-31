@@ -37,6 +37,22 @@ const mimeTypes = {
 function serveFile(filePath, res) {
   fs.stat(filePath, (err, stat) => {
     if (err) {
+      // Fallback para página 404 personalizada
+      try {
+        const notFoundPath = path.join(ROOT, '404.html');
+        if (fs.existsSync(notFoundPath)) {
+          const contentType = mimeTypes['.html'];
+          fs.readFile(notFoundPath, (nfErr, nfData) => {
+            if (nfErr) {
+              res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+              return res.end('Arquivo não encontrado');
+            }
+            res.writeHead(404, { 'Content-Type': contentType });
+            return res.end(nfData);
+          });
+          return;
+        }
+      } catch (_) {}
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Arquivo não encontrado');
       return;

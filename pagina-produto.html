@@ -35,13 +35,13 @@
   
   <!-- Coluna esquerda (galeria) -->
   <div class="coluna-esquerda">
-    <div class="imagem-principal">
-      <img id="imagemProduto" src="" alt="Imagem do produto" fetchpriority="high" loading="eager" decoding="async">
-    </div>
-    <!-- Breadcrumb abaixo da imagem do produto -->
+    <!-- Breadcrumb acima da imagem do produto -->
     <nav class="breadcrumb">
       <span id="breadcrumb"></span>
     </nav>
+    <div class="imagem-principal">
+      <img id="imagemProduto" src="" alt="Imagem do produto" fetchpriority="high" loading="eager" decoding="async">
+    </div>
     <div class="miniaturas" id="miniaturas"></div>
     
     <!-- Histórico de Preços abaixo das miniaturas -->
@@ -268,7 +268,7 @@
 
 <script>
   // Carregar Header e Footer
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

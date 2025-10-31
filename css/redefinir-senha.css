@@ -42,6 +42,8 @@ main {
 
 .login-section {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .login-card {
@@ -56,6 +58,7 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center; /* centraliza conteúdo dentro do card */
+  margin: 0 auto; /* centraliza horizontalmente no desktop também */
 }
 
 /* ==============================
@@ -231,6 +234,11 @@ html.dark .input-container .form-input:not(:placeholder-shown) + .form-label {
 /* ==============================
    🔹 RESPONSIVIDADE
 ============================== */
+@media (max-width: 768px) {
+  .login-card {
+    margin: 0 auto; /* garante centralização horizontal no mobile */
+  }
+}
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;

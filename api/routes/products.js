@@ -8,6 +8,14 @@ const SearchHistory = require('../models/SearchHistory');
 
 // Classificação de categorias baseada em palavras-chave no título/descrição
 function classificarProduto(p) {
+  const persistedCategoria = typeof p.categoria === 'string' ? p.categoria.trim() : '';
+  const persistedSub = typeof p.subcategoria === 'string' ? p.subcategoria.trim() : '';
+
+  // Se ambos persistidos, prioriza e retorna imediatamente
+  if (persistedCategoria && persistedSub) {
+    return { categoria: persistedCategoria, subcategoria: persistedSub };
+  }
+
   const texto = ((p.titulo || '') + ' ' + (p.descricao || '') + ' ' + (p.descricaoDetalhada || '')).toLowerCase();
 
   // Guarda de prioridade: tratar Processadores Ryzen como Hardware
@@ -15,7 +23,8 @@ function classificarProduto(p) {
   const ehRyzenHardware = /(\bryzen\b)/.test(texto);
   const ehSmartphone = /(smartphone|celular|iphone|android|galaxy|samsung|samsumg|ios)/.test(texto);
   if (ehRyzenHardware && !ehSmartphone) {
-    return { categoria: 'Hardware', subcategoria: 'Processadores' };
+    const computed = { categoria: 'Hardware', subcategoria: 'Processadores' };
+    return { categoria: persistedCategoria || computed.categoria, subcategoria: persistedSub || computed.subcategoria };
   }
 
   const regras = [
@@ -60,13 +69,20 @@ function classificarProduto(p) {
     { categoria: 'Casa Inteligente', subcategoria: 'Assistentes Virtuais', palavras: ['alexa', 'google home', 'assistant', 'echo'] },
   ];
 
+  let computed = null;
   for (const regra of regras) {
     if (regra.palavras.some(palavra => texto.includes(palavra))) {
-      return { categoria: regra.categoria, subcategoria: regra.subcategoria };
+      computed = { categoria: regra.categoria, subcategoria: regra.subcategoria };
+      break;
     }
   }
-  // Padrão caso não encaixe em nenhuma regra
-  return { categoria: 'Hardware', subcategoria: '' };
+  if (!computed) {
+    computed = { categoria: 'Hardware', subcategoria: '' };
+  }
+  return {
+    categoria: persistedCategoria || computed.categoria,
+    subcategoria: persistedSub || computed.subcategoria
+  };
 }
 
 // Normalização simples para busca
@@ -78,6 +94,26 @@ function normalizarTexto(s) {
     .replace(/[^a-z0-9\s\-\.]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+// Corrige mojibake típico (UTF-8 lido como Latin1): "numÃ©rico" -> "numérico"
+function fixMojibake(str) {
+  const s = typeof str === 'string' ? str : '';
+  // Só tenta conversão quando há padrões comuns de mojibake
+  if (!s || (!s.includes('Ã') && !s.includes('Â'))) return s;
+  try {
+    return Buffer.from(s, 'latin1').toString('utf8');
+  } catch (_) {
+    return s;
+  }
+}
+
+function sanitizeProductText(p) {
+  const c = { ...p };
+  ['titulo', 'descricao', 'descricaoDetalhada', 'marca', 'categoria', 'subcategoria'].forEach(k => {
+    if (typeof c[k] === 'string') c[k] = fixMojibake(c[k]);
+  });
+  return c;
 }
 
 // Pontuação de relevância semelhante ao cabeçalho
@@ -118,16 +154,17 @@ router.get('/search', async (req, res) => {
     const termoNorm = normalizarTexto(termoRaw);
     const tokens = termoNorm.split(' ').filter(Boolean);
 
-    // Carrega todos os produtos para aplicar regras e filtros
-    const registros = await Product.findAll({ order: [['id', 'DESC']] });
-    const base = registros.map(r => {
-      const p = r.get({ plain: true });
-      if (p.imagens && typeof p.imagens === 'string') {
-        try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
-      }
-      const { categoria, subcategoria } = classificarProduto(p);
-      return { ...p, categoria, subcategoria };
-    }).filter(p => p.ativo !== false);
+  // Carrega todos os produtos para aplicar regras e filtros
+  const registros = await Product.findAll({ order: [['id', 'DESC']] });
+  const base = registros.map(r => {
+    let p = r.get({ plain: true });
+    if (p.imagens && typeof p.imagens === 'string') {
+      try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
+    }
+    p = sanitizeProductText(p);
+    const { categoria, subcategoria } = classificarProduto(p);
+    return { ...p, categoria, subcategoria };
+  }).filter(p => p.ativo !== false);
 
     const matchTokens = (str) => {
       const s = normalizarTexto(str || '');
@@ -167,13 +204,33 @@ router.get('/search', async (req, res) => {
       .filter(c => matchTokens(c))
       .map(c => ({ tipo: 'categoria', texto: c, url: `/produtos?categoria=${encodeURIComponent(c)}` }));
 
+    // Sugestões de subcategorias (pareadas com categorias)
+    const paresSub = Array.from(
+      new Set(
+        baseFiltrada
+          .filter(p => p.subcategoria && p.categoria)
+          .map(p => `${p.categoria}|||${p.subcategoria}`)
+      )
+    );
+    const subcategoriaSugestoes = paresSub
+      .map(key => {
+        const [categoria, subcategoria] = key.split('|||');
+        if (!matchTokens(subcategoria)) return null;
+        return {
+          tipo: 'subcategoria',
+          texto: subcategoria,
+          url: `/produtos?categoria=${encodeURIComponent(categoria)}&subcategoria=${encodeURIComponent(subcategoria)}`
+        };
+      })
+      .filter(Boolean);
+
     // Sugestões de marcas
     const marcasSet = Array.from(new Set(baseFiltrada.map(p => p.marca).filter(Boolean)));
     const marcaSugestoes = marcasSet
       .filter(m => matchTokens(m))
       .map(m => ({ tipo: 'marca', texto: m, url: `/produtos?marca=${encodeURIComponent(m)}` }));
 
-    const todasSugestoes = [...produtoSugestoes, ...categoriaSugestoes, ...marcaSugestoes].slice(0, 8);
+    const todasSugestoes = [...produtoSugestoes, ...categoriaSugestoes, ...subcategoriaSugestoes, ...marcaSugestoes].slice(0, 8);
 
     // Preview de intenção
     let melhor = null;
@@ -196,11 +253,12 @@ router.get('/', async (req, res) => {
   try {
     const registros = await Product.findAll({ order: [['id', 'DESC']] });
     const produtosMapeados = registros.map(r => {
-      const p = r.get({ plain: true });
+      let p = r.get({ plain: true });
       // Converte imagens de TEXT(JSON) para array, se presente
       if (p.imagens && typeof p.imagens === 'string') {
         try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
       }
+      p = sanitizeProductText(p);
       const { categoria, subcategoria } = classificarProduto(p);
       return { ...p, categoria, subcategoria };
     });
@@ -222,13 +280,14 @@ router.get('/:id(\\d+)', async (req, res) => {
     if (!registro) {
       return res.status(404).json({ success: false, message: 'Produto não encontrado' });
     }
-    const p = registro.get({ plain: true });
+    let p = registro.get({ plain: true });
     if (p.imagens && typeof p.imagens === 'string') {
       try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
     }
     if (p.ativo === false) {
       return res.status(404).json({ success: false, message: 'Produto inativo' });
     }
+    p = sanitizeProductText(p);
     const { categoria, subcategoria } = classificarProduto(p);
     const produto = { ...p, categoria, subcategoria };
     return res.status(200).json({ success: true, data: produto });
@@ -241,10 +300,11 @@ router.get('/:id(\\d+)', async (req, res) => {
 // Utilitário: base de produtos ativos com classificação e preço mínimo
 function mapearProdutosBase(registros) {
   return registros.map(r => {
-    const p = r.get({ plain: true });
+    let p = r.get({ plain: true });
     if (p.imagens && typeof p.imagens === 'string') {
       try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
     }
+    p = sanitizeProductText(p);
     const { categoria, subcategoria } = classificarProduto(p);
     const precoML = p.precoMercadoLivre;
     const precoAMZ = p.precoAmazon;
@@ -323,34 +383,8 @@ router.get('/top-expensive', async (req, res, next) => {
 // Produtos mais pesquisados (via SearchHistory)
 router.get('/most-searched', async (req, res, next) => {
   try {
-    const limit = Math.max(1, Math.min(50, Number(req.query.limit) || 5));
-    // Agrega por predictedProductId quando presente
-    const [rows] = await sequelize.query(
-      'SELECT predictedProductId AS id, COUNT(*) AS total FROM search_history WHERE predictedProductId IS NOT NULL GROUP BY predictedProductId ORDER BY total DESC LIMIT :limit',
-      { replacements: { limit } }
-    );
-    const ids = Array.isArray(rows) ? rows.map(r => Number(r.id)).filter(Boolean) : [];
-    const produtos = ids.length
-      ? await Product.findAll({ where: { id: ids } })
-      : [];
-    const produtosMap = mapearProdutosBase(produtos).map(p => ({
-      id: p.id,
-      titulo: p.titulo || p.nome,
-      categoria: p.categoria,
-      subcategoria: p.subcategoria,
-      preco: p.precoMin
-    }));
-
-    // Termos em alta como fallback/apoio
-    const [termsRows] = await sequelize.query(
-      'SELECT term, COUNT(*) AS total FROM search_history WHERE term IS NOT NULL AND term <> "" GROUP BY term ORDER BY total DESC LIMIT :limit',
-      { replacements: { limit } }
-    );
-    const terms = Array.isArray(termsRows)
-      ? termsRows.map(r => ({ term: r.term, total: Number(r.total) || 0 }))
-      : [];
-
-    return res.status(200).json({ success: true, data: { products: produtosMap, terms } });
+    // Funcionalidade removida juntamente com a tabela obsoleta de histórico de buscas.
+    return res.status(200).json({ success: true, data: { products: [], terms: [] } });
   } catch (error) {
     error.status = 500; error.message = 'Erro ao obter produtos mais pesquisados';
     next(error);
@@ -378,7 +412,9 @@ router.put('/:id', async (req, res) => {
       linkAmazon,
       mercadoLivreId,
       amazonAsin,
-      imagens
+      imagens,
+      categoria,
+      subcategoria
     } = req.body || {};
 
     // Atualiza campos básicos, se fornecidos
@@ -391,6 +427,9 @@ router.put('/:id', async (req, res) => {
     if (typeof linkAmazon === 'string') registro.linkAmazon = linkAmazon;
     if (typeof mercadoLivreId === 'string') registro.mercadoLivreId = mercadoLivreId;
     if (typeof amazonAsin === 'string') registro.amazonAsin = amazonAsin;
+    // Atualiza classificação manual, se fornecida
+    if (typeof categoria === 'string') registro.categoria = categoria;
+    if (typeof subcategoria === 'string') registro.subcategoria = subcategoria;
 
     // Processa imagens
     let imagensArray = [];
@@ -415,11 +454,11 @@ router.put('/:id', async (req, res) => {
     await registro.save();
 
     // Monta resposta com imagens como array
-    const p = registro.get({ plain: true });
-    if (p.imagens && typeof p.imagens === 'string') {
-      try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
-    }
-    return res.status(200).json({ success: true, data: p });
+  const p = registro.get({ plain: true });
+  if (p.imagens && typeof p.imagens === 'string') {
+    try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
+  }
+  return res.status(200).json({ success: true, data: sanitizeProductText(p) });
   } catch (error) {
     console.error('Erro ao atualizar produto:', error);
     return res.status(500).json({ success: false, message: 'Erro interno ao atualizar produto' });

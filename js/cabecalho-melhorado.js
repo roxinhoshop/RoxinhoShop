@@ -160,27 +160,10 @@
             inicializarToggleMegaCategorias();
             megaMenu.dataset.toggleInit = '1';
           }
-          // Expansão inicial: garantir que pelo menos uma coluna esteja visível
-          if (!megaMenu.dataset.expandedInit) {
-            const primeiraColuna = megaMenu.querySelector('.categoria-coluna');
-            if (primeiraColuna) {
-              primeiraColuna.classList.add('expandida');
-              const header = primeiraColuna.querySelector('h4');
-              const grid = primeiraColuna.querySelector('.subcategorias-grid');
-              try {
-                if (header) header.setAttribute('aria-expanded', 'true');
-                if (grid) {
-                  grid.style.display = 'block';
-                  grid.style.opacity = '1';
-                  // Remover limite para evitar truncamento ao abrir inicialmente
-                  grid.style.maxHeight = 'none';
-                }
-              } catch (_) {}
-            }
-            megaMenu.dataset.expandedInit = '1';
-          }
           // Focar no primeiro elemento interativo do mega-menu
           focusPrimeiroItemMegaMenu();
+          // Mobile: manter todas as categorias fechadas inicialmente
+          // (removida expansão automática da primeira categoria)
         } catch (_) {}
       }
 
@@ -201,24 +184,6 @@
         if (megaMenu && !megaMenu.dataset.toggleInit) {
           inicializarToggleMegaCategorias();
           megaMenu.dataset.toggleInit = '1';
-          // Expansão inicial antecipada (quando o menu é inicializado fora da abertura)
-          if (!megaMenu.dataset.expandedInit) {
-            const primeiraColuna = megaMenu.querySelector('.categoria-coluna');
-            if (primeiraColuna) {
-              primeiraColuna.classList.add('expandida');
-              const header = primeiraColuna.querySelector('h4');
-              const grid = primeiraColuna.querySelector('.subcategorias-grid');
-              try {
-                if (header) header.setAttribute('aria-expanded', 'true');
-                if (grid) {
-                  grid.style.display = 'block';
-                  grid.style.opacity = '1';
-                  grid.style.maxHeight = 'none';
-                }
-              } catch (_) {}
-            }
-            megaMenu.dataset.expandedInit = '1';
-          }
         }
       } catch (_) {}
 
@@ -253,6 +218,14 @@
           window.addEventListener(evt, () => {
             if (dropdownPrincipal.classList.contains('open')) {
               clampMegaMenuToViewport();
+              // Garantir visibilidade das subcategorias já expandidas após redimensionamento
+              try {
+                megaMenu.querySelectorAll('.categoria-coluna.expandida .subcategorias-grid').forEach(grid => {
+                  grid.style.display = 'block';
+                  grid.style.opacity = '1';
+                  grid.style.maxHeight = 'none';
+                });
+              } catch (_) {}
             }
           });
         });
@@ -267,12 +240,12 @@
       });
 
       // Inicializa colapso/toggle das subcategorias no mega-menu
-      function inicializarToggleMegaCategorias() {
-        const colunas = megaMenu.querySelectorAll('.categoria-coluna');
-        colunas.forEach(coluna => {
-          const header = coluna.querySelector('h4');
-          const grid = coluna.querySelector('.subcategorias-grid');
-          if (!header || !grid) return;
+          function inicializarToggleMegaCategorias() {
+            const colunas = megaMenu.querySelectorAll('.categoria-coluna');
+            colunas.forEach(coluna => {
+              const header = coluna.querySelector('h4');
+              const grid = coluna.querySelector('.subcategorias-grid');
+              if (!header || !grid) return;
 
           // Adiciona ícone de seta, se não existir
           if (!header.querySelector('.toggle-icon')) {
@@ -350,6 +323,12 @@
             ev.stopPropagation();
             toggleGrid();
           });
+          // Suporte a dispositivos móveis: alternar também ao finalizar o toque
+          header.addEventListener('touchend', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleGrid();
+          }, { passive: false });
           header.addEventListener('keydown', (ev) => {
             if (ev.key === 'Enter' || ev.key === ' ') {
               ev.preventDefault();
@@ -577,6 +556,9 @@
       } catch (e) {
         // silencioso se login box não disponível
       }
+      try {
+        inicializarBuscaGlobal();
+      } catch (_) {}
     }, 100);
   }
   
@@ -603,6 +585,7 @@
         if (headerAdicionado) {
           // Quando o cabeçalho/toggle aparece, configurar o toggle de tema se necessário
           setTimeout(() => { try { configurarToggleTemaSeNecessario(); } catch (_) {} }, 50);
+          setTimeout(() => { try { inicializarBuscaGlobal(); } catch (_) {} }, 80);
         }
       }
     });
@@ -794,8 +777,8 @@ function inicializarLoginBox() {
     const avatarEl = document.getElementById('avatar-usuario');
     if (avatarEl) {
       let src = '/imagens/logos/avatar-roxo.svg';
-      if (usuario && typeof usuario.avatar_base64 === 'string' && usuario.avatar_base64.startsWith('data:image/')) {
-        src = usuario.avatar_base64;
+      if (usuario && typeof usuario.foto_perfil === 'string' && usuario.foto_perfil.startsWith('data:image/')) {
+        src = usuario.foto_perfil;
       } else if (usuario && typeof usuario.foto_perfil === 'string' && usuario.foto_perfil.trim()) {
         src = usuario.foto_perfil;
       }
@@ -805,7 +788,312 @@ function inicializarLoginBox() {
     if (setaLogin) {
       setaLogin.classList.remove('fa-arrow-right');
       setaLogin.classList.add('fa-chevron-down');
+}
+
+// ==================== BUSCA GLOBAL NO CABEÇALHO ====================
+function inicializarBuscaGlobal() {
+  const campo = document.getElementById('campo-busca-global');
+  const botao = document.getElementById('botao-busca-global');
+  const limpar = document.getElementById('botao-limpar-busca');
+  const lista = document.getElementById('sugestoes-busca');
+  const preview = document.getElementById('busca-preview');
+  const form = document.getElementById('form-busca-global') || (campo ? campo.closest('form') : null);
+
+  if (!campo || !botao) return;
+  if (campo.dataset.buscaInit === '1') return; // evitar múltiplas inicializações
+  campo.dataset.buscaInit = '1';
+
+  const API_BASE = (window.API_BASE || window.location.origin);
+
+  // ===== Pesquisas Recentes (localStorage) =====
+  const RECENTS_KEY = 'roxinho_search_recents';
+  const MAX_RECENTS = 10;
+  const lerRecentes = () => {
+    try {
+      const raw = localStorage.getItem(RECENTS_KEY);
+      const arr = JSON.parse(raw || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  };
+  const salvarRecentes = (arr) => {
+    try { localStorage.setItem(RECENTS_KEY, JSON.stringify(arr.slice(0, MAX_RECENTS))); } catch (_) {}
+  };
+  const registrarRecente = (sug) => {
+    if (!sug || !sug.texto) return;
+    const atuais = lerRecentes();
+    const filtrados = atuais.filter(x => !(String(x.texto||'') === String(sug.texto||'') && String(x.url||'') === String(sug.url||'')));
+    const novo = { tipo: sug.tipo || 'busca', texto: String(sug.texto||''), url: String(sug.url||''), ts: Date.now() };
+    const ordenado = [novo, ...filtrados].sort((a,b)=>b.ts-a.ts).slice(0, MAX_RECENTS);
+    salvarRecentes(ordenado);
+  };
+  const construirSugRecente = (texto) => ({ tipo: 'busca', texto, url: `/produtos?busca=${encodeURIComponent(texto)}` });
+
+  const debounce = (fn, delay) => {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+  };
+
+  const escapeHtml = (str) => String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  // Estado da lista de sugestões
+  let activeIndex = -1;
+  let currentSuggestions = [];
+
+  const fecharSugestoes = () => {
+    if (lista) {
+      lista.style.display = 'none';
+      lista.innerHTML = '';
     }
+    try { campo.setAttribute('aria-expanded', 'false'); } catch {}
+    if (preview) { preview.style.display = 'none'; preview.innerHTML = ''; }
+    activeIndex = -1;
+    currentSuggestions = [];
+    if (limpar) { limpar.style.display = (campo && campo.value && campo.value.trim()) ? 'flex' : 'none'; }
+  };
+
+  const setActiveIndex = (idx) => {
+    const items = lista ? Array.from(lista.querySelectorAll('.sugestao-item')) : [];
+    items.forEach((el, i) => {
+      if (i === idx) {
+        el.classList.add('active');
+        el.setAttribute('aria-selected', 'true');
+        try { campo.setAttribute('aria-activedescendant', el.id || ''); } catch {}
+      } else {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      }
+    });
+    activeIndex = idx;
+  };
+
+  const highlight = (text, term) => {
+    const t = String(term || '').trim();
+    if (!t) return escapeHtml(text);
+    try {
+      const re = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'ig');
+      return escapeHtml(text).replace(re, '<mark>$1</mark>');
+    } catch (_) {
+      return escapeHtml(text);
+    }
+  };
+
+  const renderSugestoesComCabecalho = (sugs = [], cabecalho = '') => {
+    if (!lista) return;
+    if (!Array.isArray(sugs) || sugs.length === 0) { fecharSugestoes(); return; }
+    currentSuggestions = sugs.slice(0);
+    const q = String(campo.value || '').trim();
+    const headerHtml = cabecalho ? `<div class="sugestoes-header">${escapeHtml(cabecalho)}</div>` : '';
+    const html = headerHtml + sugs.map((s, i) => {
+      const href = String(s.url || '').startsWith('/') ? s.url : ('/' + String(s.url || ''));
+      const tipo = s.tipo === 'categoria'
+        ? 'Categoria'
+        : (s.tipo === 'subcategoria'
+          ? 'Subcategoria'
+          : (s.tipo === 'marca' ? 'Marca' : (s.tipo === 'busca' ? 'Busca' : 'Produto')));
+      const icon = s.tipo === 'produto' ? 'fa-box' : (s.tipo === 'categoria' ? 'fa-list' : (s.tipo === 'subcategoria' ? 'fa-layer-group' : (s.tipo === 'marca' ? 'fa-tags' : 'fa-magnifying-glass')));
+      const precoTxt = (s.preco !== undefined && s.preco !== null) ? ` • R$ ${Number(s.preco).toFixed(2).replace('.', ',')}` : '';
+      return `<a class="sugestao-item" id="sug-item-${i}" role="option" aria-selected="false" href="${href}">
+        <i class="fa-solid ${icon}" aria-hidden="true"></i>
+        <span class="tipo">${tipo}</span>
+        <span class="texto">${q ? highlight(String(s.texto||''), q) : escapeHtml(String(s.texto||''))}</span>
+        <span class="extra">${escapeHtml(precoTxt)}</span>
+      </a>`;
+    }).join('');
+    lista.innerHTML = html;
+    lista.style.display = 'block';
+    try { campo.setAttribute('aria-expanded', 'true'); } catch {}
+
+    Array.from(lista.querySelectorAll('.sugestao-item')).forEach((el, i) => {
+      el.addEventListener('mouseenter', () => setActiveIndex(i));
+      el.addEventListener('mousemove', () => setActiveIndex(i));
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const url = el.getAttribute('href');
+        if (url) window.location.href = url;
+      });
+    });
+    setActiveIndex(0);
+  };
+
+  const renderRecentes = () => {
+    const rs = lerRecentes();
+    if (!rs.length) { fecharSugestoes(); return; }
+    renderSugestoesComCabecalho(rs, 'Pesquisas recentes');
+  };
+
+  const renderSugestoes = (sugs = []) => {
+    if (!lista) return;
+    if (!Array.isArray(sugs) || sugs.length === 0) { fecharSugestoes(); return; }
+    currentSuggestions = sugs.slice(0);
+    const q = String(campo.value || '').trim();
+    const html = sugs.map((s, i) => {
+      const href = String(s.url || '').startsWith('/') ? s.url : ('/' + String(s.url || ''));
+      const tipo = s.tipo === 'categoria'
+        ? 'Categoria'
+        : (s.tipo === 'subcategoria'
+          ? 'Subcategoria'
+          : (s.tipo === 'marca' ? 'Marca' : 'Produto'));
+      const icon = s.tipo === 'produto' ? 'fa-box' : (s.tipo === 'categoria' ? 'fa-list' : (s.tipo === 'subcategoria' ? 'fa-layer-group' : 'fa-tags'));
+      const precoTxt = (s.preco !== undefined && s.preco !== null) ? ` • R$ ${Number(s.preco).toFixed(2).replace('.', ',')}` : '';
+      return `<a class="sugestao-item" id="sug-item-${i}" role="option" aria-selected="false" href="${href}">
+        <i class="fa-solid ${icon}" aria-hidden="true"></i>
+        <span class="tipo">${tipo}</span>
+        <span class="texto">${highlight(String(s.texto||''), q)}</span>
+        <span class="extra">${escapeHtml(precoTxt)}</span>
+      </a>`;
+    }).join('');
+    lista.innerHTML = html;
+    lista.style.display = 'block';
+    try { campo.setAttribute('aria-expanded', 'true'); } catch {}
+
+    // Eventos de hover/clique para melhorar UX
+    Array.from(lista.querySelectorAll('.sugestao-item')).forEach((el, i) => {
+      el.addEventListener('mouseenter', () => setActiveIndex(i));
+      el.addEventListener('mousemove', () => setActiveIndex(i));
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const url = el.getAttribute('href');
+        if (url) window.location.href = url;
+      });
+    });
+    // Ativa primeiro por padrão, semelhante ao Google
+    setActiveIndex(0);
+  };
+
+  const renderPreview = (pv) => {
+    if (!preview) return;
+    if (!pv || !pv.produto) { preview.style.display = 'none'; preview.innerHTML = ''; return; }
+    const p = pv.produto;
+    const titulo = escapeHtml(p.titulo || p.nome || '');
+    const precoML = p.precoMercadoLivre;
+    const precoAMZ = p.precoAmazon;
+    const precoMin = (typeof precoML === 'number' || typeof precoAMZ === 'number')
+      ? Math.min(precoML ?? Number.POSITIVE_INFINITY, precoAMZ ?? Number.POSITIVE_INFINITY)
+      : p.preco;
+    const precoTxt = (typeof precoMin === 'number' && isFinite(precoMin)) ? `R$ ${Number(precoMin).toFixed(2).replace('.', ',')}` : '';
+    const href = `/pagina-produto?id=${encodeURIComponent(p.id)}`;
+    preview.innerHTML = `<button class="preview-close" aria-label="Fechar preview" title="Fechar">&times;</button>`+
+      `<a class="preview-link" href="${href}"><strong>${titulo}</strong>${precoTxt ? ` • <span class="preco">${precoTxt}</span>` : ''}</a>`;
+    preview.style.display = 'block';
+    const btnClose = preview.querySelector('.preview-close');
+    if (btnClose) btnClose.addEventListener('click', () => { preview.style.display = 'none'; preview.innerHTML = ''; });
+  };
+
+  const consultarSugestoes = debounce(async (term) => {
+    const q = String(term || '').trim();
+    if (limpar) { limpar.style.display = q ? 'flex' : 'none'; }
+    if (q.length < 2) { renderRecentes(); return; }
+    try {
+      try { campo.setAttribute('aria-busy', 'true'); } catch {}
+      const resp = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(q)}`);
+      if (!resp.ok) { fecharSugestoes(); return; }
+      const data = await resp.json();
+      renderSugestoes(Array.isArray(data.suggestions) ? data.suggestions : []);
+      renderPreview(data.preview || null);
+    } catch (_) {
+      fecharSugestoes();
+    } finally {
+      try { campo.removeAttribute('aria-busy'); } catch {}
+    }
+  }, 200);
+
+  const executarBusca = async () => {
+    const q = String(campo.value || '').trim();
+    if (!q) return;
+    fecharSugestoes();
+    // Registrar como recente, preferindo categoria/subcategoria se vierem da API
+    try {
+      const resp = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(q)}`);
+      let sug = null;
+      if (resp.ok) {
+        const data = await resp.json();
+        const list = Array.isArray(data?.suggestions) ? data.suggestions : [];
+        sug = list.find(it => it.tipo === 'subcategoria') || list.find(it => it.tipo === 'categoria') || null;
+      }
+      registrarRecente(sug || construirSugRecente(q));
+    } catch (_) { registrarRecente(construirSugRecente(q)); }
+    const destino = `/produtos?busca=${encodeURIComponent(q)}`;
+
+    // Se já estamos na página de produtos, atualiza sem redirecionar
+    if (typeof window.atualizarBuscaProdutos === 'function' && /produtos(\.html)?$/i.test(window.location.pathname)) {
+      try { window.atualizarBuscaProdutos(q); } catch (_) {}
+      try {
+        const url = new URL(window.location);
+        url.searchParams.set('busca', q);
+        window.history.pushState({}, '', url);
+      } catch (_) {}
+      return;
+    }
+    // Caso contrário, navega para a página de produtos com o termo
+    window.location.href = destino;
+  };
+
+  // Reativar sugestões ao digitar, estilo barra do Google
+  campo.addEventListener('input', (e) => {
+    const val = e.target.value;
+    if (limpar) { limpar.style.display = String(val || '').trim() ? 'flex' : 'none'; }
+    consultarSugestoes(val);
+  });
+  campo.addEventListener('keydown', (e) => {
+    const items = lista ? Array.from(lista.querySelectorAll('.sugestao-item')) : [];
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (items.length && activeIndex >= 0) {
+        const el = items[activeIndex];
+        const url = el && el.getAttribute('href');
+        if (url) { window.location.href = url; return; }
+      }
+      executarBusca();
+    }
+    else if (e.key === 'Escape') { fecharSugestoes(); }
+    else if (e.key === 'ArrowDown') {
+      if (items.length) {
+        e.preventDefault();
+        const next = Math.min((activeIndex < 0 ? 0 : activeIndex + 1), items.length - 1);
+        setActiveIndex(next);
+      }
+    } else if (e.key === 'ArrowUp') {
+      if (items.length) {
+        e.preventDefault();
+        const prev = Math.max(0, (activeIndex < 0 ? 0 : activeIndex - 1));
+        setActiveIndex(prev);
+      }
+    }
+  });
+  // Se houver formulário, preferir submit para evitar duplicidade
+  if (form) {
+    form.addEventListener('submit', (e) => { e.preventDefault(); executarBusca(); });
+  } else if (botao) {
+    botao.addEventListener('click', () => executarBusca());
+  }
+
+  // Botão limpar (X): limpar campo, sugestões e preview
+  if (limpar) {
+    limpar.addEventListener('click', () => {
+      campo.value = '';
+      fecharSugestoes();
+      limpar.style.display = 'none';
+      campo.focus();
+      renderRecentes();
+    });
+  }
+
+  // Marca como inicializado para evitar bind duplicado por scripts inline
+  try { campo.dataset.buscaInit = '1'; } catch {}
+
+  // Fechar dropdown ao clicar fora
+  document.addEventListener('click', (ev) => {
+    if (!ev.target.closest('.caixa-pesquisa')) { fecharSugestoes(); }
+  });
+
+  // Mostrar recentes ao focar no campo quando vazio
+  campo.addEventListener('focus', () => {
+    const q = String(campo.value||'').trim();
+    if (!q) renderRecentes();
+  });
+}
 
     // Inserir itens por role (vendedor/admin) acima de "Configurações"
     try {
@@ -817,29 +1105,36 @@ function inicializarLoginBox() {
 
         // Painel do Vendedor
         const linkVend = opcoes.querySelector('#link-painel-vendedor');
-        if (ehVendedor && !linkVend) {
+        // Admin também enxerga Painel do Vendedor
+        if ((ehVendedor || ehAdmin) && !linkVend) {
           const aPainel = document.createElement('a');
           aPainel.href = '/painel-vendedor';
           aPainel.id = 'link-painel-vendedor';
           aPainel.innerHTML = '<i class="fa-solid fa-store"></i> Painel do Vendedor';
-          const primeiroLink = opcoes.querySelector('a');
-          if (primeiroLink) opcoes.insertBefore(aPainel, primeiroLink); else opcoes.appendChild(aPainel);
-        } else if (!ehVendedor && linkVend) {
+          const linkConfig = opcoes.querySelector('a[href="/configuracoes"]');
+          if (linkConfig) opcoes.insertBefore(aPainel, linkConfig); else opcoes.appendChild(aPainel);
+        } else if (!ehVendedor && !ehAdmin && linkVend) {
           linkVend.remove();
         }
 
-        // Administração: Vendedores
-        const linkAdminVend = opcoes.querySelector('#link-admin-vendedores');
-        if (ehAdmin && !linkAdminVend) {
+        // Administração (todos com role admin)
+        const linkPainelAdmin = opcoes.querySelector('#link-administracao');
+        if (ehAdmin && !linkPainelAdmin) {
           const aAdmin = document.createElement('a');
-          aAdmin.href = '/vendedores';
-          aAdmin.id = 'link-admin-vendedores';
-          aAdmin.innerHTML = '<i class="fa-solid fa-users-gear"></i> Vendedores';
-          const primeiroLink = opcoes.querySelector('a');
-          if ( primeiroLink) opcoes.insertBefore(aAdmin, primeiroLink); else opcoes.appendChild(aAdmin);
-        } else if (!ehAdmin && linkAdminVend) {
-          linkAdminVend.remove();
+          aAdmin.href = '/administracao.html';
+          aAdmin.id = 'link-administracao';
+          aAdmin.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Administração';
+          const linkConfig = opcoes.querySelector('a[href="/configuracoes"]');
+          if (linkConfig) opcoes.insertBefore(aAdmin, linkConfig); else opcoes.appendChild(aAdmin);
+        } else if (!ehAdmin && linkPainelAdmin) {
+          linkPainelAdmin.remove();
         }
+
+        // Remover quaisquer alternadores de modo do dropdown
+        try {
+          opcoes.querySelector('#link-switch-vendedor')?.remove();
+          opcoes.querySelector('#link-switch-cliente')?.remove();
+        } catch {}
       }
     } catch {}
     caixaLogin.onclick = function(e) {

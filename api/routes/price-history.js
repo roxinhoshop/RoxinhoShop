@@ -31,7 +31,6 @@ router.get('/', async (req, res) => {
       produto_id: r.produto_id,
       plataforma: r.plataforma,
       preco: Number(r.preco),
-      emEstoque: r.emEstoque,
       data_coleta: r.data_coleta
     }));
 
@@ -43,4 +42,3 @@ router.get('/', async (req, res) => {
 });
 
 module.exports = router;
-

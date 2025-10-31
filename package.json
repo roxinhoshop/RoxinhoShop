@@ -8,7 +8,6 @@
     "dev": "nodemon api/server.js",
     "test:regression": "node scripts/regression-tests.js",
     "import:batch": "node api/scripts/import-batch.js",
-    "cleanup:db": "node api/scripts/cleanup-db.js",
     "test:auth": "node api/scripts/test-auth.js"
   },
   "keywords": [

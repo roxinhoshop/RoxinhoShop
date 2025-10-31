@@ -11,6 +11,17 @@
   <link rel="stylesheet" href="/css/responsivo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
+  <style>
+    /* Layout local: manter rodapé no fim e dar respiro à main */
+    html, body { height: 100%; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    #header-placeholder { flex: 0 0 auto; }
+    main.painel-vendedor { flex: 1 0 auto; margin: 32px auto; }
+    #footer-placeholder { flex: 0 0 auto; }
+    @media (max-width: 640px) {
+      main.painel-vendedor { margin: 24px 8px; }
+    }
+  </style>
   
 </head>
 <body>
@@ -25,7 +36,7 @@
       <nav class="abas" aria-label="Navegação do painel">
         <button class="aba ativa" data-alvo="#aba-dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</button>
         <button class="aba" data-alvo="#aba-produtos"><i class="fa-solid fa-box"></i> Produtos & Inventário</button>
-        <button class="aba" data-alvo="#aba-vendedores"><i class="fa-solid fa-users"></i> Vendedores</button>
+        <!-- removido: link para Vendedores foi movido ao Painel Admin -->
         <button class="aba" data-alvo="#aba-historico"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</button>
         <button class="aba" data-alvo="#aba-config"><i class="fa-solid fa-gear"></i> Configurações</button>
       </nav>
@@ -59,20 +70,50 @@
     <section id="aba-produtos" class="conteudo-aba" aria-labelledby="Produtos & Inventário">
       <header class="cabecalho-secao">
         <h2 class="titulo-secao"><i class="fa-solid fa-box"></i> Produtos & Inventário</h2>
-        <p class="subtitulo-secao">Cadastre, edite e gerencie seu estoque (MVP local)</p>
+        <p class="subtitulo-secao">Cadastre, edite e gerencie seu estoque</p>
       </header>
       <form id="formProduto" class="form-produto" autocomplete="off">
-        <div class="grupo">
+        <div class="grupo grupo-nome">
           <label>Nome</label>
           <input id="produtoNome" type="text" required placeholder="Ex.: Teclado Mecânico" />
         </div>
-        <div class="grupo">
-          <label>Preço (R$)</label>
-          <input id="produtoPreco" type="number" min="0" step="0.01" required placeholder="0,00" />
+        <div class="grupo grupo-descricao">
+          <label>Descrição</label>
+          <textarea id="produtoDescricao" rows="3" placeholder="Detalhes do produto"></textarea>
         </div>
-        <div class="grupo">
-          <label>Quantidade</label>
-          <input id="produtoQtd" type="number" min="0" step="1" required placeholder="0" />
+        <div class="grupo grupo-preco-ml">
+          <label>Preço Mercado Livre</label>
+          <input id="produtoPrecoML" type="number" min="0" step="0.01" required placeholder="0,00" />
+          <small class="preco-formatado" id="precoMLFormatado" aria-live="polite"></small>
+        </div>
+        <div class="grupo grupo-preco-amazon">
+          <label>Preço Amazon</label>
+          <input id="produtoPrecoAmazon" type="number" min="0" step="0.01" placeholder="0,00" />
+          <small class="preco-formatado" id="precoAmazonFormatado" aria-live="polite"></small>
+        </div>
+        <div class="grupo grupo-foto">
+          <label>Foto (URL)</label>
+          <input id="produtoFoto" type="url" placeholder="https://..." />
+        </div>
+        <div class="grupo grupo-ml">
+          <label>Link Mercado Livre</label>
+          <input id="produtoLinkML" type="url" placeholder="https://www.mercadolivre.com.br/..." />
+        </div>
+        <div class="grupo grupo-amazon">
+          <label>Link Amazon</label>
+          <input id="produtoLinkAmazon" type="url" placeholder="https://www.amazon.com.br/..." />
+        </div>
+        <div class="grupo grupo-cat">
+          <label>Categoria</label>
+          <select id="produtoCategoria">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="grupo grupo-subcat">
+          <label>Subcategoria</label>
+          <select id="produtoSubcategoria">
+            <option value="">Selecione...</option>
+          </select>
         </div>
         <div class="acoes-form">
           <button class="btn-primario" type="submit"><i class="fa-solid fa-plus"></i> Adicionar</button>
@@ -83,9 +124,9 @@
         <table class="tabela-generic">
           <thead>
             <tr>
+              <th>Foto</th>
               <th>Nome</th>
               <th>Preço</th>
-              <th>Qtd</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -95,68 +136,27 @@
       </div>
     </section>
 
-    <section id="aba-vendedores" class="conteudo-aba" aria-labelledby="Vendedores">
-      <section class="cabecalho-secao">
-        <h2 class="titulo-secao"><i class="fa-solid fa-users"></i> Vendedores</h2>
-        <p class="subtitulo-secao">Gerencie contas de vendedores – MVP local</p>
-      </section>
-      <section class="filtros-secao" aria-label="Filtros da tabela de vendedores">
-        <div class="grupo-filtro">
-          <label for="filtroBusca"><i class="fa-solid fa-magnifying-glass"></i> Buscar</label>
-          <input id="filtroBusca" type="text" placeholder="Nome, e-mail ou CPF" autocomplete="off">
-        </div>
-        <div class="grupo-filtro">
-          <label for="filtroStatus"><i class="fa-solid fa-toggle-on"></i> Status</label>
-          <select id="filtroStatus">
-            <option value="todos">Todos</option>
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
-          </select>
-        </div>
-        <div class="grupo-filtro">
-          <label for="filtroAtividade"><i class="fa-solid fa-clock-rotate-left"></i> Atividade</label>
-          <select id="filtroAtividade">
-            <option value="todos">Todos</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-          </select>
-        </div>
-        <div class="grupo-filtro grupo-itens-por-pagina">
-          <label for="itensPorPagina"><i class="fa-solid fa-list-ol"></i> Itens</label>
-          <select id="itensPorPagina">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-      </section>
-
-      <section class="tabela-secao" aria-label="Tabela de vendedores">
-        <div class="tabela-wrapper">
-          <table class="tabela-vendedores">
-            <thead>
-              <tr>
-                <th data-sort="nome">Nome <i class="fa-solid fa-sort"></i></th>
-                <th data-sort="cpf">CPF <i class="fa-solid fa-sort"></i></th>
-                <th data-sort="email">E-mail <i class="fa-solid fa-sort"></i></th>
-                <th data-sort="status">Status <i class="fa-solid fa-sort"></i></th>
-                <th data-sort="criadoEm">Criado em <i class="fa-solid fa-sort"></i></th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaVendedoresBody"></tbody>
-          </table>
-        </div>
-        <div class="paginacao" id="paginacao" aria-label="Paginação"></div>
-      </section>
-    </section>
+    <!-- Seção de Vendedores removida: conteúdo movido para Painel Admin -->
 
     <section id="aba-historico" class="conteudo-aba" aria-labelledby="Histórico">
       <header class="cabecalho-secao">
         <h2 class="titulo-secao"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</h2>
         <p class="subtitulo-secao">Registro de ações recentes</p>
       </header>
+      <div class="controles-historico" style="display:flex; align-items:center; gap:8px; justify-content:flex-end; padding:8px 0;">
+        <label for="historicoItensPorPagina">Itens por página:</label>
+        <select id="historicoItensPorPagina" aria-label="Itens por página">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+        </select>
+      </div>
       <ul id="listaHistorico" class="lista-historico"></ul>
+      <div id="paginacaoHistorico" class="paginacao" aria-label="Paginação do histórico">
+        <button id="btnHistPrev" type="button" class="anterior">Anterior</button>
+        <span id="histPageInfo" aria-live="polite"></span>
+        <button id="btnHistNext" type="button" class="proximo">Próximo</button>
+      </div>
     </section>
 
     <section id="aba-config" class="conteudo-aba" aria-labelledby="Configurações">
@@ -183,16 +183,19 @@
       </form>
     </section>
 
+    <!-- Container para toasts/notificações -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
   </main>
 
   <div id="footer-placeholder"></div>
 
+  <script src="/js/site-popup.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/cabecalho-melhorado.js"></script>
   <script src="/js/painel-vendedor.js"></script>
-  <script src="/js/vendedores.js"></script>
+  <!-- script vendedores.js removido: agora utilizado no Painel Admin -->
   <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
       .then(r => r.text())
       .then(html => {
         const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -209,6 +212,39 @@
           document.body.appendChild(ns);
         });
       });
+  </script>
+  <script>
+    // Guard de acesso: exige sessão válida de vendedor (ou admin)
+    (async () => {
+      try {
+        const r = await fetch('/api/vendors/products/me', { credentials: 'include', cache: 'no-store' });
+        const ct = (r.headers.get('content-type') || '').toLowerCase();
+        const data = ct.includes('application/json') ? await r.json().catch(() => ({})) : {};
+        if (!r.ok || !data || !data.success) {
+          try { window.sitePopup && window.sitePopup.alert('Faça login como vendedor para acessar seu painel.', 'Acesso restrito'); } catch {}
+          const main = document.querySelector('main.painel-vendedor');
+          if (main) {
+            main.innerHTML = `
+              <header class="painel-header">
+                <div class="titulo-area">
+                  <h1><i class="fa-solid fa-store"></i> Painel do Vendedor</h1>
+                  <p class="subtitulo">Acesso restrito ao vendedor</p>
+                </div>
+              </header>
+              <section class="conteudo-aba visivel" aria-labelledby="Acesso restrito">
+                <p class="subtitulo-secao">Você precisa estar logado como <strong>vendedor</strong> para visualizar esta página.</p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top: 12px;">
+                  <a class="btn btn-primario" href="/login-vendedor.html"><i class="fa-solid fa-right-to-bracket"></i> Login de vendedor</a>
+                  <a class="btn btn-secundario" href="/"><i class="fa-solid fa-house"></i> Ir para a Home</a>
+                </div>
+              </section>
+            `;
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao verificar sessão de vendedor:', e);
+      }
+    })();
   </script>
 </body>
 </html>

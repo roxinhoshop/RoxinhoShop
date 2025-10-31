@@ -10,8 +10,7 @@ const User = sequelize.define('Usuario', {
   sobrenome: { type: DataTypes.STRING, allowNull: true },
   email: { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
   senha: { type: DataTypes.STRING, allowNull: false },
-  foto_perfil: { type: DataTypes.STRING, allowNull: true },
-  avatar_base64: { type: DataTypes.TEXT('long'), allowNull: true },
+  foto_perfil: { type: DataTypes.TEXT('long'), allowNull: true },
   role: { type: DataTypes.STRING, allowNull: false, defaultValue: 'cliente' },
 }, {
   timestamps: false,

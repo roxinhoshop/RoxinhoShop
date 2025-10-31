@@ -6,7 +6,7 @@
   height: clamp(260px, 42vh, 500px); /* altura responsiva do carrossel */
   overflow: hidden;
   display: block;
-  background: transparent; /* evitar faixas/brancos na transição entre slides */
+  background: #833dd0; /* fundo roxo durante transições */
 }
 
 .container-carrossel {
@@ -17,31 +17,54 @@
 
 .slides-wrapper {
   position: relative;
-  width: calc(100% * var(--total-slides, 1));
+  width: 100%; /* empilhar slides para crossfade */
   height: 100%;
-  display: flex;
-  transform: translate3d(0, 0, 0);
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+  /* sem translate: transição será por opacidade */
   will-change: transform;
   backface-visibility: hidden;
 }
 
+/* Acessibilidade: respeitar usuários que preferem menos animação */
+@media (prefers-reduced-motion: reduce) {
+  .slides-wrapper {
+    transition: none;
+  }
+  .slide {
+    transition: none;
+  }
+}
+
 .slide {
-  position: relative;
+  position: absolute; /* empilhar slides para crossfade */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  flex: 0 0 100%;
   cursor: pointer;
   overflow: hidden;
-  background-color: transparent; /* remover fundo branco entre trocas de slides */
+  background-color: #833dd0; /* manter roxo visível caso a imagem não cubra 100% */
+  opacity: 0; /* invisível por padrão */
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+  will-change: opacity;
+  z-index: 1;
+}
+
+.slide.ativo {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
 }
 
 .slide img {
   width: 100%;
   height: 100%;
   display: block; /* evitar espaçamento inline e garantir renderização */
-  object-fit: cover; /* preencher o container, evitando espaços em branco */
-  object-position: center;
+  object-fit: cover; /* preencher o container como antes */
+  object-position: center center; /* centralizar a imagem como antes */
   background-color: transparent; /* evitar flashes brancos ao trocar slides */
   transition: transform 0.6s ease;
   will-change: transform;
@@ -119,10 +142,10 @@
   background: rgba(255, 255, 255, 0.34);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 9999px;
-  width: clamp(32px, 4.5vw, 50px);
-  height: clamp(32px, 4.5vw, 50px);
-  min-width: clamp(32px, 4.5vw, 50px);
-  min-height: clamp(32px, 4.5vw, 50px);
+  width: clamp(28px, 3.6vw, 44px);
+  height: clamp(28px, 3.6vw, 44px);
+  min-width: clamp(28px, 3.6vw, 44px);
+  min-height: clamp(28px, 3.6vw, 44px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,7 +164,7 @@
 
 .btn-controle i {
   color: #eab308;
-  font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+  font-size: clamp(0.75rem, 2vw, 0.95rem);
 }
 
 .btn-controle:active {
@@ -172,8 +195,8 @@
 }
 
 .indicador {
-  width: 32px;
-  height: 6px;
+  width: 26px;
+  height: 5px;
   border-radius: 9999px;
   border: 0;
   background: rgba(255, 255, 255, 0.34);
@@ -200,8 +223,8 @@
   background: rgba(255, 255, 255, 0.34);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 9999px;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,7 +242,7 @@
 
 .btn-play-pause i {
   color: #eab308;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
 }
 
 .btn-play-pause:focus-visible {
@@ -229,9 +252,10 @@
 
 /* Responsividade dos controles */
 @media (max-width: 640px) {
-  .btn-controle { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
-  .btn-controle i { font-size: 0.85rem; }
-  .btn-play-pause { width: 28px; height: 28px; }
+  .btn-controle { width: 28px; height: 28px; min-width: 28px; min-height: 28px; }
+  .btn-controle i { font-size: 0.8rem; }
+  .btn-play-pause { width: 24px; height: 24px; }
+  .indicador { width: 24px; height: 4px; }
 }
 
 /* Pause dentro dos indicadores: manter alinhamento lateral */
@@ -557,8 +581,8 @@
   }
   
   .btn-slide {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
   }
   
   .carrossel-controles {
@@ -566,8 +590,8 @@
   }
   
   .btn-controle {
-    width: clamp(34px, 6vw, 44px);
-    height: clamp(34px, 6vw, 44px);
+    width: clamp(30px, 5vw, 40px);
+    height: clamp(30px, 5vw, 40px);
   }
   
   .video-content h2 {
@@ -599,7 +623,42 @@
 
 @media (max-width: 480px) {
   .carrossel-moderno {
-    height: clamp(200px, 35vh, 320px);
+    height: clamp(130px, 26vh, 240px);
+    margin-top: 0 !important; /* colar o carrossel logo abaixo da barra de departamentos */
+  }
+  .slide img {
+    object-fit: contain;
+    object-position: top center; /* encostar o topo da imagem no topo do carrossel */
+  }
+  .carrossel-controles {
+    padding: 0 0.5rem; /* reduzir padding lateral para caber no banner mobile */
+  }
+  .carrossel-indicadores {
+    bottom: 0.5rem; /* aproximar indicadores do limite do banner */
+    gap: 0.5rem; /* diminuir espaçamento entre indicadores */
+    padding: 0.25rem 0.5rem; /* reduzir padding da cápsula */
+  }
+  /* Botões menores no mobile */
+  .btn-controle {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+  }
+  .btn-controle i {
+    font-size: 0.7rem;
+  }
+  .btn-play-pause {
+    width: 22px;
+    height: 22px;
+  }
+  .indicador {
+    width: 22px;
+    height: 4px;
+  }
+  .btn-slide {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
   
   .slide-content {
@@ -630,8 +689,8 @@
     height: clamp(420px, 60vh, 720px); /* mais área para banners completos */
   }
   .slide img {
-    object-fit: contain; /* exibir o banner por completo no desktop */
-    object-position: left center; /* alinhar mais à esquerda no desktop */
+    object-fit: cover; /* voltar ao preenchimento completo no desktop */
+    object-position: center center; /* centralizado no desktop */
   }
 }
 

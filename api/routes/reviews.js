@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Op } = require('sequelize');
 const Review = require('../models/Review');
+const { saveBase64Image, removeLocalImage } = require('../utils/saveBase64');
 
 // Util para mapear review do BD para formato do frontend atual
 const mapReviewToFrontend = (r) => {
@@ -46,6 +47,22 @@ router.post('/', async (req, res) => {
     const notaInt = parseInt(nota, 10);
     if (!notaInt || notaInt < 1 || notaInt > 5) return res.status(400).json({ success: false, message: 'nota deve ser 1..5' });
 
+    // Processar fotos: salvar base64 como arquivos locais e manter URLs existentes
+    const fotosInput = Array.isArray(fotos) ? fotos : [];
+    const fotosUrls = [];
+    for (const f of fotosInput) {
+      if (typeof f === 'string' && f.startsWith('data:image/')) {
+        const saved = await saveBase64Image(
+          f,
+          'reviews',
+          `prod-${produto_id}-user-${usuario_id || 'anon'}`
+        );
+        if (saved) fotosUrls.push(saved);
+      } else if (typeof f === 'string' && f.trim()) {
+        fotosUrls.push(f.trim());
+      }
+    }
+
     const created = await Review.create({
       produto_id,
       usuario_id: usuario_id || null,
@@ -53,7 +70,7 @@ router.post('/', async (req, res) => {
       nota: notaInt,
       titulo: titulo || null,
       comentario: comentario || null,
-      fotos: Array.isArray(fotos) ? fotos : [],
+      fotos: fotosUrls,
       data_postagem: new Date(),
     });
 
@@ -77,6 +94,12 @@ router.delete('/:id', async (req, res) => {
     const review = await Review.findByPk(id);
     if (!review) {
       return res.status(404).json({ success: false, message: 'Avaliação não encontrada' });
+    }
+
+    // Remover imagens locais associadas à avaliação (se houver)
+    const fotosList = Array.isArray(review.fotos) ? review.fotos : [];
+    for (const f of fotosList) {
+      await removeLocalImage(f);
     }
 
     await Review.destroy({ where: { id } });

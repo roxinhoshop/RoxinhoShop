@@ -174,9 +174,9 @@ class SistemaAvaliacoes {
         const maior = ofertas.reduce((acc, o) => (o.preco > acc.preco ? o : acc));
         const diferenca = Math.abs(menor.preco - maior.preco);
         const percentual = (numML > 0 && numAMZ > 0) ? Math.round((diferenca / Math.max(numML, numAMZ)) * 100) : 0;
-        const amazonLogo = (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function') ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png';
-        const logoMenor = menor.plat === 'ml' ? '/imagens/logos/mercado-livre.png' : amazonLogo;
-        const logoMaior = maior.plat === 'ml' ? '/imagens/logos/mercado-livre.png' : amazonLogo;
+        const amazonLogo = '/imagens/logos/amazon-icon.png';
+        const logoMenor = menor.plat === 'ml' ? '/imagens/logos/mercadolivre-icon.png' : amazonLogo;
+        const logoMaior = maior.plat === 'ml' ? '/imagens/logos/mercadolivre-icon.png' : amazonLogo;
 
         comparativoEl.innerHTML = `
           <div class="menor-preco-label"><img src="${logoMenor}" class="icone-plataforma" ${menor.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${menor.loja}" /> menor preço via ${menor.loja}</div>
@@ -189,8 +189,8 @@ class SistemaAvaliacoes {
           </div>
           <div class="detalhes-comparativo">
             ${iguais 
-              ? `Preços iguais entre <span class="valor-ml"><img src="/imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> e <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span>`
-              : ofertas.length > 1 ? `<span class="valor-ml"><img src="/imagens/logos/mercado-livre.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> vs <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span> • diferença de ${this.formatarMoeda(diferenca)} (${percentual}%)` : ''}
+              ? `Preços iguais entre <span class="valor-ml"><img src="/imagens/logos/mercadolivre-icon.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> e <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span>`
+              : ofertas.length > 1 ? `<span class="valor-ml"><img src="/imagens/logos/mercadolivre-icon.png" class="icone-plataforma" alt="Mercado Livre" /> ${this.formatarMoeda(numML)}</span> vs <span class="valor-amazon"><img src="${amazonLogo}" class="icone-plataforma" data-store="amazon" alt="Amazon" /> ${this.formatarMoeda(numAMZ)}</span> • diferença de ${this.formatarMoeda(diferenca)} (${percentual}%)` : ''}
           </div>
         `;
 
@@ -640,7 +640,7 @@ class SistemaAvaliacoes {
               <div class="parcelamento">ou 10x de ${this.formatarMoeda(o.preco / 10)}</div>
             </div>
             <div class="oferta-loja">
-              <span class="loja"><img src="${o.plat === 'ml' ? '/imagens/logos/mercadolivre-icon.png' : (typeof window !== 'undefined' && typeof window.getAmazonIconByTheme === 'function' ? window.getAmazonIconByTheme() : '/imagens/logos/amazon-icon.png')}" class="icone-plataforma" ${o.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${o.loja}" /> ${o.loja}</span>
+               <span class="loja"><img src="${o.plat === 'ml' ? '/imagens/logos/mercadolivre-icon.png' : '/imagens/logos/amazon-icon.png'}" class="icone-plataforma" ${o.plat === 'amazon' ? 'data-store="amazon"' : ''} alt="${o.loja}" /> ${o.loja}</span>
             </div>
             <div class="oferta-acao">
               ${o.link ? `<a class="btn-ir-loja" href="${o.link}" target="_blank" rel="noopener noreferrer">Ir à loja</a>` : ''}

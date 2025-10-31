@@ -318,20 +318,12 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 4px 12px rgba(199, 199, 199, 0.3);
 }
 
-/* Ícone */
+/* Ícones dentro da caixa de pesquisa: evitar posicionamento absoluto genérico */
 .caixa-pesquisa i {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #883fd8; /* roxo */
-  font-size: 1rem;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.caixa-pesquisa i:hover {
-  color: #883fd8; /* roxo mais claro no hover */
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
 }
 
 /* ======================= ICONES HEADER ======================= */
@@ -383,6 +375,7 @@ input:focus, select:focus, textarea:focus {
   transform: translateY(-2px);
   filter: brightness(1.05);
   box-shadow: 0 10px 28px rgba(0,0,0,0.16);
+  color: #fff !important; /* manter ícone branco no hover */
 }
 .history-button:active {
   transform: translateY(0);
@@ -791,12 +784,20 @@ input:focus, select:focus, textarea:focus {
 
 .rodape-redes a {
   font-size: 1.4rem;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #833dd0;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .rodape-redes a:hover {
-  color: #883fd8; /* Roxo no hover */
+  color: #833dd0; /* Roxo consistente no hover */
   transform: scale(1.2);
+  background-color: rgba(131, 61, 208, 0.16);
 }
 
 .payment-icons {
@@ -853,11 +854,20 @@ input:focus, select:focus, textarea:focus {
 .rodape-redes a {
   font-size: 1.2rem;
   color: #fff;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #833dd0;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .rodape-redes a:hover {
-  color: #7c3aed;
+  color: #833dd0;
+  transform: scale(1.2);
+  background-color: rgba(131, 61, 208, 0.16);
 }
 
 /* texto descritivo do rodapé */
@@ -1523,6 +1533,17 @@ input:focus, select:focus, textarea:focus {
   overflow-y: auto;
 }
 
+.sugestoes-busca .sugestoes-header {
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  color: #6b6b6b;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
 .sugestao-item {
   padding: 0.8rem 1rem;
   cursor: pointer;
@@ -1752,6 +1773,15 @@ input:focus, select:focus, textarea:focus {
 
 .categoria-coluna h4 i {
   color: #833dd0;
+}
+
+/* Ícone de toggle para acordeão das subcategorias no mobile */
+.categoria-coluna h4 .toggle-icon {
+  margin-left: auto;
+  transition: transform 200ms ease;
+}
+.categoria-coluna.expandida h4 .toggle-icon {
+  transform: rotate(180deg);
 }
 
 .subcategorias-grid {
@@ -2082,6 +2112,8 @@ input:focus, select:focus, textarea:focus {
 
 .rodape-redes a:hover {
   color: #833dd0;
+  transform: scale(1.2);
+  background-color: rgba(131, 61, 208, 0.16);
 }
 
 
@@ -2325,13 +2357,27 @@ html.dark .site-popup-input::placeholder { color: #FFFFFF; opacity: 0.85; }
   overflow: visible;
 }
 
-/* Overrides móveis para manter centralização */
+/* Overrides móveis para manter centralização e ampliar subcategorias */
 @media (max-width: 768px) {
   .mega-menu {
     left: 8px; /* alinhar mais à esquerda no mobile */
     width: calc(100vw - 1.5rem);
     max-width: calc(100vw - 1.5rem);
     transform: translateY(0);
+  }
+  /* Ampliar visibilidade das subcategorias no mobile */
+  .mega-menu .subcategorias-grid {
+    padding: 12px 10px;
+    gap: 8px;
+  }
+  .mega-menu .subcategorias-grid li {
+    margin: 6px 0;
+  }
+  .mega-menu .subcategorias-grid a {
+    display: block;
+    font-size: 0.98rem;
+    padding: 10px 12px;
+    line-height: 1.35;
   }
 }
 .barra-categorias li.tem-submenu .submenu li a:hover {
@@ -2427,7 +2473,25 @@ html.dark .mega-menu ul li a:hover { background: #3a3a3a; color: #FFFFFF; }
 }
 @media (max-width: 480px) {
   .dropdown-usuario,
-  .dropdown-login { width: 96vw; right: -8px; left: auto; }
+  .dropdown-login { width: 94vw; right: -8px; left: auto; }
+}
+
+/* Compactar dropdown de login no mobile: reduzir espaços e fontes ligeiramente */
+@media (max-width: 768px) {
+  .dropdown-login .opcoes-usuario,
+  .dropdown-usuario .opcoes-usuario { padding: 0.25rem 0; }
+  .dropdown-login .opcoes-usuario a,
+  .dropdown-usuario .opcoes-usuario a { padding: 0.55rem 0.75rem; gap: 0.55rem; font-size: 0.92rem; }
+  .dropdown-login .opcoes-usuario a i,
+  .dropdown-usuario .opcoes-usuario a i { width: 14px; font-size: 0.92rem; }
+}
+
+/* Ainda mais compacto em telas muito pequenas */
+@media (max-width: 480px) {
+  .dropdown-login .opcoes-usuario a,
+  .dropdown-usuario .opcoes-usuario a { padding: 0.5rem 0.7rem; gap: 0.5rem; font-size: 0.9rem; }
+  .dropdown-login .opcoes-usuario a i,
+  .dropdown-usuario .opcoes-usuario a i { width: 13px; font-size: 0.9rem; }
 }
 
 /* Subcategorias aparentes no celular/tablet: clique na categoria e lista vertical */
@@ -2435,4 +2499,30 @@ html.dark .mega-menu ul li a:hover { background: #3a3a3a; color: #FFFFFF; }
   .barra-categorias .submenu { position: static; top: auto; left: auto; width: 100%; max-width: none; box-shadow: none; }
   .barra-categorias li.tem-submenu .submenu { position: static; left: auto; top: auto; }
   .barra-categorias .submenu ul { display: block; column-count: 1; }
+}
+/* ======================= AJUSTES: BOTÃO LIMPAR E CANCEL NATIVO ======================= */
+.botao-limpar-busca {
+  position: absolute;
+  right: 52px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #7c3aed;
+  cursor: pointer;
+  display: none; /* aparece quando há texto */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 2;
+}
+.botao-limpar-busca:hover { background: #f7f7f7; }
+
+/* Remover botão de limpar nativo do WebKit para evitar sobreposição */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }

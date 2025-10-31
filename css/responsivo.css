@@ -121,7 +121,7 @@
 /* Mobile (<768px): dropdown acionado por ícone */
 @media (max-width: 768px) {
   .barra-categorias { position: relative; }
-  .barra-categorias .btn-quero-vender { display: none; }
+  .barra-categorias .btn-quero-vender { display: inline-flex; }
   .barra-categorias ul > li:not(.mega-dropdown) { display: none; }
   .barra-categorias ul { justify-content: center; gap: 8px; }
   .barra-categorias ul li a { min-height: 48px; display: inline-flex; align-items: center; }
@@ -218,6 +218,7 @@
   
   .slide img {
     object-fit: contain; /* manter o banner inteiro no mobile */
+    object-position: left center; /* alinhar imagem para a esquerda no mobile */
     background-color: #ffffff; /* evitar barras pretas no mobile */
   }
 }
@@ -394,13 +395,13 @@
 }
 
 @media (max-width: 1024px) {
-  .slide img { object-fit: cover; object-position: center; }
+  .slide img { object-fit: contain; object-position: left center; }
 }
 @media (max-width: 768px) {
-  .slide img { object-fit: cover; object-position: center; }
+  .slide img { object-fit: contain; object-position: left center; }
 }
 @media (max-width: 480px) {
-  .slide img { object-fit: cover; object-position: center; }
+  .slide img { object-fit: contain; object-position: left center; }
 }
 
 /* ===== CTA "Quero Vender" em tablet: evitar sobreposição ===== */
@@ -653,6 +654,7 @@
 
 /* ===== Ajustes mobile para barra de categorias e CTA "Quero Vender" ===== */
 @media (max-width: 768px) {
+  .barra-categorias { justify-content: space-between; align-items: center; }
   .barra-categorias .btn-quero-vender {
     position: static;
     order: 2;

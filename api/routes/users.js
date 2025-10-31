@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-const SearchHistory = require('../models/SearchHistory');
+// saveBase64 utilities não são necessários para avatar em base64 no banco
+// SearchHistory removido: funcionalidades de histórico de busca foram descontinuadas
 
 // Middleware para verificar autenticação (Cookie httpOnly ou Bearer)
 const auth = async (req, res, next) => {
@@ -54,8 +53,7 @@ router.put('/profile', auth, async (req, res) => {
         nome: user.nome,
         sobrenome: user.sobrenome,
         email: user.email,
-        foto_perfil: user.foto_perfil,
-        avatar_base64: user.avatar_base64
+        foto_perfil: user.foto_perfil
       }
     });
   } catch (error) {
@@ -97,33 +95,19 @@ router.post('/avatar', auth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Imagem inválida' });
     }
 
-    // Guardar referência do avatar anterior para eventual exclusão
-    const oldUrl = (typeof req.user.foto_perfil === 'string' ? req.user.foto_perfil.trim() : null);
-    // Persistir diretamente no banco (LONGTEXT) ao invés de salvar em arquivo
-    req.user.avatar_base64 = imageBase64;
-    // Limpar URL de arquivo para preferir base64
-    req.user.foto_perfil = null;
+    // Armazenar imagem diretamente em foto_perfil (base64)
+    req.user.foto_perfil = imageBase64;
     await req.user.save();
-
-    // Excluir arquivo anterior se era local em /imagens/avatars
-    try {
-      if (oldUrl && /^\/?imagens\/avatars\//.test(oldUrl)) {
-        const normalized = oldUrl.replace(/^\//, '');
-        const oldPath = path.join(__dirname, '../../', normalized);
-        await fs.promises.unlink(oldPath).catch(() => {});
-      }
-    } catch (_) {}
 
     res.status(200).json({
       success: true,
-      avatar_base64: req.user.avatar_base64,
+      foto_perfil: req.user.foto_perfil,
       user: {
         id: req.user.id,
         nome: req.user.nome,
         sobrenome: req.user.sobrenome,
         email: req.user.email,
-        foto_perfil: null,
-        avatar_base64: req.user.avatar_base64
+        foto_perfil: req.user.foto_perfil
       }
     });
   } catch (error) {
@@ -137,23 +121,11 @@ router.post('/avatar', auth, async (req, res) => {
 // @access  Private
 router.delete('/avatar', auth, async (req, res) => {
   try {
-    const oldUrl = (typeof req.user.foto_perfil === 'string' ? req.user.foto_perfil.trim() : null);
-
-    // Excluir arquivo anterior apenas se for local em /imagens/avatars
-    try {
-      if (oldUrl && /^\/?imagens\/avatars\//.test(oldUrl)) {
-        const normalized = oldUrl.replace(/^\//, '');
-        const oldPath = path.join(__dirname, '../../', normalized);
-        await fs.promises.unlink(oldPath).catch(() => {});
-      }
-    } catch (_) {}
-
-    // Limpar referência no banco (arquivo e base64)
+    // Limpar referência no banco
     req.user.foto_perfil = null;
-    req.user.avatar_base64 = null;
     await req.user.save();
 
-    return res.status(200).json({ success: true, foto_perfil: null, avatar_base64: null });
+    return res.status(200).json({ success: true, foto_perfil: null });
   } catch (error) {
     console.error('Erro ao remover avatar:', error);
     return res.status(500).json({ success: false, message: 'Erro ao remover avatar' });
@@ -166,50 +138,13 @@ module.exports = router;
 // @desc    Registrar evento de busca/previsão
 // @route   POST /api/users/search-history
 // @access  Private
-router.post('/search-history', auth, async (req, res) => {
-  try {
-    let { term, predictedProductId, eventType } = req.body || {}
-
-    term = (typeof term === 'string' ? term.trim().slice(0, 255) : null)
-    const tipo = (typeof eventType === 'string' && /^(search|preview)$/i.test(eventType))
-      ? eventType.toLowerCase() : 'search'
-    const produtoId = (predictedProductId != null && Number.isFinite(Number(predictedProductId)))
-      ? Number(predictedProductId) : null
-
-    if (!term && !produtoId) {
-      return res.status(400).json({ success: false, message: 'Dados insuficientes para registrar histórico' })
-    }
-
-    const item = await SearchHistory.create({
-      userId: req.user.id,
-      term,
-      predictedProductId: produtoId,
-      eventType: tipo,
-      createdAt: new Date()
-    })
-
-    res.status(201).json({ success: true, item })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ success: false, message: 'Erro ao registrar histórico de busca' })
-  }
+router.post('/search-history', auth, async (_req, res) => {
+  return res.status(410).json({ success: false, message: 'Funcionalidade removida' })
 })
 
 // @desc    Obter histórico de buscas do usuário logado
 // @route   GET /api/users/search-history
 // @access  Private
-router.get('/search-history', auth, async (req, res) => {
-  try {
-    const limitRaw = req.query.limit
-    const limit = (limitRaw != null && Number.isFinite(Number(limitRaw))) ? Math.max(1, Math.min(50, Number(limitRaw))) : 10
-    const itens = await SearchHistory.findAll({
-      where: { userId: req.user.id },
-      order: [['id', 'DESC']],
-      limit
-    })
-    res.status(200).json({ success: true, items: itens })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ success: false, message: 'Erro ao obter histórico de busca' })
-  }
+router.get('/search-history', auth, async (_req, res) => {
+  return res.status(410).json({ success: false, message: 'Funcionalidade removida' })
 })

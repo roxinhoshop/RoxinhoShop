@@ -79,7 +79,6 @@ const inputPrecoMaximo = document.getElementById('precoMaximo');
 const seletorPreco = document.getElementById('seletorPreco');
 const filtroAvaliacao = document.getElementById('filtroAvaliacao');
 const valorAvaliacao = document.getElementById('valorAvaliacao');
-const apenasEmEstoque = document.getElementById('apenasEmEstoque');
 const apenasComDesconto = document.getElementById('apenasComDesconto');
 const apenasFreteGratis = document.getElementById('apenasFreteGratis');
 const botaoLimparFiltros = document.getElementById('limparFiltros');
@@ -139,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (_) {}
         return p;
       });
+      // Garante ocultar produtos desativados mesmo em cenários de cache ou dados legados
+      produtos = produtos.filter(p => (p.ativo !== false) && (String(p.status || 'ativo').toLowerCase() !== 'inativo'));
       produtosFiltrados = [...produtos];
       // Popular seletor de marcas com dados carregados
       popularMarcas();
@@ -257,6 +258,7 @@ function processarParametrosURL() {
   const categoriaParam = urlParams.get('categoria');
   const subcategoriaParam = urlParams.get('subcategoria');
   const buscaParam = urlParams.get('busca');
+  const marcaParam = urlParams.get('marca');
   
   if (categoriaParam) {
     filtrosAtuais.categoria = categoriaParam;
@@ -272,6 +274,13 @@ function processarParametrosURL() {
   if (buscaParam && campoBusca) {
     filtrosAtuais.busca = buscaParam;
     campoBusca.value = buscaParam;
+  }
+
+  if (marcaParam) {
+    filtrosAtuais.marca = marcaParam;
+    if (seletorMarca) {
+      try { seletorMarca.value = marcaParam; } catch (_) {}
+    }
   }
 }
 
@@ -683,8 +692,11 @@ function aplicarFiltros() {
     const correspondeACategoria = !filtrosAtuais.categoria || produto.categoria === filtrosAtuais.categoria;
     const correspondeASubcategoria = !filtrosAtuais.subcategoria || produto.subcategoria === filtrosAtuais.subcategoria;
     const correspondeMarca = !filtrosAtuais.marca || (produto.marca || '').toLowerCase() === (filtrosAtuais.marca || '').toLowerCase();
-    const precoNum = numero(obterPrecoProduto(produto));
-    const correspondeAoPreco = precoNum >= filtrosAtuais.precoMinimo && precoNum <= filtrosAtuais.precoMaximo;
+    const precoNumRaw = obterPrecoProduto(produto);
+    const precoNum = numero(precoNumRaw);
+    const correspondeAoPreco = Number.isFinite(precoNum)
+      ? (precoNum >= filtrosAtuais.precoMinimo && precoNum <= filtrosAtuais.precoMaximo)
+      : true;
     const correspondeAAvaliacao = numero(produto.avaliacao) >= filtrosAtuais.avaliacaoMinima;
 
     return correspondeABusca && correspondeACategoria && correspondeASubcategoria && correspondeMarca &&
@@ -876,6 +888,7 @@ function parseValorTextoPreco(str) {
 
 function formatarMoeda(valor) {
   const n = numero(valor);
+  if (!Number.isFinite(n)) return 'R$ 0,00';
   return 'R$ ' + n.toFixed(2).replace('.', ',');
 }
 
@@ -1169,7 +1182,7 @@ function limparFiltros() {
   if (faixaPrecoMinimo) faixaPrecoMinimo.value = 0;
   if (faixaPrecoMaximo) faixaPrecoMaximo.value = 15000;
   if (filtroAvaliacao) filtroAvaliacao.value = 0;
-  // removido reset de apenasEmEstoque
+  // filtro apenasEmEstoque removido
   if (apenasComDesconto) apenasComDesconto.checked = false;
   if (apenasFreteGratis) apenasFreteGratis.checked = false;
   if (spanPrecoMinimo) spanPrecoMinimo.textContent = 0;

@@ -228,7 +228,7 @@ body.dark #btn-redefinir-perfil:hover {
 
 /* Senha */
 /* (mantido vazio; entradas usam .form-input) */
-.mensagem-status { font-size:0.85rem; margin-top:8px; }
+.mensagem-status { font-size:0.85rem; margin-top:8px; color: #000000; }
 .mensagem-status.sucesso { color: var(--success); }
 .mensagem-status.erro { color: var(--error); }
 

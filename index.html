@@ -35,7 +35,7 @@
   <div class="container-carrossel">
     <div class="slides-wrapper" id="slidesWrapper">
       <!-- Slide 1: Banner principal -->
-      <div class="slide ativo" data-link="produtos">
+      <div class="slide ativo" data-link="/quem-somos.html">
         <img src="/imagens/banner1.png" alt="Destaques RoxinhoShop">
       </div>
 
@@ -45,7 +45,7 @@
       </div>
 
       <!-- Slide 3: Banner gamer -->
-      <div class="slide" data-link="computadores">
+      <div class="slide" data-link="/produtos?categoria=Computadores">
         <img src="/imagens/banner-gamer.jpeg" alt="Linha gamer">
       </div>
     </div>
@@ -157,7 +157,7 @@
 
   
   <script>
-  fetch('/cabecalho-rodape')
+  fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

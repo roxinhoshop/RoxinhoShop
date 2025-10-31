@@ -30,21 +30,25 @@
       text-align: center;
       margin-bottom: 1.5rem;
       font-weight: 700;
+      color: #000000; /* preto no light */
     }
 
     .termos p {
       margin-bottom: 1rem;
       line-height: 1.6;
+      color: #000000; /* preto no light */
     }
 
     .termos ul {
       list-style: disc;
       padding-left: 1.5rem;
       line-height: 1.6;
+      color: #000000; /* preto no light */
     }
 
     .termos li {
       margin-bottom: 0.8rem;
+      color: #000000; /* preto no light */
     }
 
     /* ===== Dark Mode (html.dark) ===== */
@@ -60,5 +64,5 @@
     html.dark .termos p,
     html.dark .termos ul,
     html.dark .termos li {
-      color: #cbd5e1;
+      color: #ffffff; /* branco no dark */
     }

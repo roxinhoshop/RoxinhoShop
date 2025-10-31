@@ -31,10 +31,11 @@
       </a>
 
       <!-- BARRA DE PESQUISA CENTRALIZADA -->
-      <div class="caixa-pesquisa" role="search">
+      <form class="caixa-pesquisa" role="search" id="form-busca-global" action="/produtos" method="GET">
         <input
-          type="text"
+          type="search"
           id="campo-busca-global"
+          name="busca"
           placeholder="Buscar produtos, marcas ou categorias..."
           autocomplete="off"
           aria-label="Buscar produtos, marcas ou categorias"
@@ -43,7 +44,8 @@
           aria-controls="sugestoes-busca"
           aria-expanded="false"
         >
-        <button type="button" id="botao-busca-global" class="botao-busca" aria-label="Pesquisar">
+        <button type="button" id="botao-limpar-busca" class="botao-limpar-busca" aria-label="Limpar busca" title="Limpar">&times;</button>
+        <button type="submit" id="botao-busca-global" class="botao-busca" aria-label="Pesquisar">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
         <!-- Dropdown de sugestões -->
@@ -52,7 +54,7 @@
         </div>
         <!-- Preview de produto previsto pela intenção -->
         <div id="busca-preview" class="busca-preview" aria-live="polite" aria-label="Prévia de produto" style="display: none;"></div>
-      </div>
+      </form>
       
       <!-- Ações à direita: botão histórico original + caixa de login -->
       <div class="icones">
@@ -340,8 +342,8 @@
           Economizar nunca foi tão leve.
         </p>
         <div class="rodape-redes">
-          <a href="https://www.instagram.com/roxinhoshop" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.tiktok.com/@roxinhoshop" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://www.instagram.com/roxinhoshop" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@roxinhoshop" aria-label="TikTok" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok"></i></a>
         </div>
       </section>
 
@@ -993,7 +995,8 @@ if (!img) img = '/imagens/logos/logo-cabecalho.png';
     }
   }
 
-  if (campoBusca && botaoBusca) {
+  // Evita conflito com inicialização da busca global em js/cabecalho-melhorado.js
+  if (campoBusca && botaoBusca && !campoBusca.dataset.buscaInit) {
     botaoBusca.addEventListener('click', executarBusca);
     campoBusca.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {

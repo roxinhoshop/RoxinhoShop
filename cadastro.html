@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200..1000&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="pagina-cadastro">
   <!-- Placeholder para Header -->
   <div id="header-placeholder"></div>
   
   <main class="container">
-    <section class="auth-container" aria-label="Criar conta">
+    <section class="auth-container" aria-label="Cadastre-se">
       <aside class="auth-aside">
         <div class="auth-banner" aria-hidden="true">
     <img src="/imagens/cadastro-banner.png" alt="" />
@@ -31,7 +31,7 @@
       <div class="auth-content">
     <div class="secao-cadastro">
       <form class="cartao-cadastro" id="formularioCadastro" novalidate>
-        <h2 class="texto-titulo">Crie sua Conta</h2>
+        <h2 class="texto-titulo">Cadastre-se</h2>
         <p class="texto-subtitulo">Preencha seus dados para começar</p>
 
         <!-- Nome e Sobrenome -->
@@ -86,7 +86,7 @@
             </div>
             <div id="aviso-senha-curta" class="aviso-senha-curta">
               <span class="icone-aviso"></span>
-              <span>Mínimo 8 caracteres</span>
+              <span>Mínimo 8 caracteres — números e símbolos são opcionais</span>
             </div>
           </div>
           
@@ -108,7 +108,7 @@
         
         <!-- Botão de cadastro -->
         <button type="submit" class="botao-cadastro" id="botaoCadastro">
-          <span>Criar Conta</span>
+          <span>Cadastre-se</span>
         </button>
         
         <!-- Link para login -->
@@ -130,7 +130,7 @@
   <script src="/js/cadastro.js"></script>
   
   <script>
-  fetch('/cabecalho-rodape')
+fetch('/cabecalho-rodape.html')
     .then(response => response.text())
     .then(data => {
       const parser = new DOMParser();

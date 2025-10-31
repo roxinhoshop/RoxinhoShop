@@ -41,14 +41,43 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // ==================== FUNÇÕES DO CARROSSEL ====================
+  // Ajuste dinâmico de altura para que o banner apareça por inteiro
+  function obterProporcaoImagem(img) {
+    const w = img?.naturalWidth || img?.width || 0;
+    const h = img?.naturalHeight || img?.height || 0;
+    if (w > 0 && h > 0) return w / h;
+    return 16 / 9; // proporção padrão caso não disponível
+  }
+
+  function limitesPorViewport() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isDesktop = vw >= 1025;
+    const isMobile = vw <= 480;
+    // limite em pixels baseado em viewport para evitar alturas exageradas
+    const maxPx = Math.round(vh * (isDesktop ? 0.8 : (isMobile ? 0.26 : 0.7)));
+    const minPx = isDesktop ? 420 : (isMobile ? 130 : 240);
+    return { minPx, maxPx };
+  }
+
+  function atualizarAlturaCarrossel(indice) {
+    const container = document.querySelector('.carrossel-moderno');
+    if (!container) return;
+    const slidesEls = document.querySelectorAll('.slide');
+    const slideEl = slidesEls[indice];
+    if (!slideEl) return;
+    const img = slideEl.querySelector('img');
+    if (!img) return;
+    const proporcao = obterProporcaoImagem(img);
+    const largura = container.clientWidth || window.innerWidth;
+    let alturaIdeal = Math.round(largura / proporcao);
+    const { minPx, maxPx } = limitesPorViewport();
+    const alturaFinal = Math.max(minPx, Math.min(alturaIdeal, maxPx));
+    container.style.height = alturaFinal + 'px';
+  }
+
   function irParaSlide(indice) {
     carrossel.slideAtual = indice;
-    
-    if (carrossel.elementos.slidesWrapper) {
-      const translateX = -indice * 100;
-      // Usar translate3d para evitar cortes/flicker entre banners durante a transição
-      carrossel.elementos.slidesWrapper.style.transform = `translate3d(${translateX}%, 0, 0)`;
-    }
     
     // Atualizar indicadores
     carrossel.elementos.indicadores.forEach((indicador, i) => {
@@ -60,6 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
     slides.forEach((slide, i) => {
       slide.classList.toggle('ativo', i === indice);
     });
+
+    // Atualizar altura do carrossel de acordo com o banner ativo
+    requestAnimationFrame(() => atualizarAlturaCarrossel(indice));
   }
   
   function proximoSlide() {
@@ -313,6 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Iniciar carrossel
     // Garantir estado visual inicial
     irParaSlide(0);
+    atualizarAlturaCarrossel(0);
     iniciarAutoPlay();
     
     // Configurar animações
@@ -414,7 +447,21 @@ document.addEventListener('DOMContentLoaded', function() {
   // ==================== EVENT LISTENERS GLOBAIS ====================
   
   // Redimensionamento da janela
-  window.addEventListener('resize', ajustarParaMobile);
+  window.addEventListener('resize', function() {
+    ajustarParaMobile();
+    atualizarAlturaCarrossel(carrossel.slideAtual);
+  });
+
+  // Atualizar altura quando imagens carregarem
+  const imgsSlides = document.querySelectorAll('.slide img');
+  imgsSlides.forEach(img => {
+    if (img.complete) {
+      // já carregada
+      atualizarAlturaCarrossel(carrossel.slideAtual);
+    } else {
+      img.addEventListener('load', () => atualizarAlturaCarrossel(carrossel.slideAtual));
+    }
+  });
   
   // Visibilidade da página (pausar quando não visível)
   document.addEventListener('visibilitychange', function() {

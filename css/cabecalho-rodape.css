@@ -172,7 +172,7 @@ a:hover, a:focus { color: var(--link-hover); }
 
 /* ======================= ESTILOS BASE: SUPERFÍCIES E DIVISORES ======================= */
 .card, .surface, .dropdown-usuario, .dropdown-login, .mega-menu, .sugestoes-busca, .busca-preview, .site-popup,
-.categoria-card, .cartao-produto, .modal-avaliacao, .lista-ofertas, .comparativo-precos, .grade-produtos {
+.categoria-card, .cartao-produto, .lista-ofertas, .comparativo-precos, .grade-produtos {
   background: var(--bg-surface);
   color: var(--text-primary);
   border-color: var(--border);

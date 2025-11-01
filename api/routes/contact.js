@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
     }
 
     const sql = `
-      INSERT INTO contato_cliente (nome, email, mensagem, telefone, created_at)
+      INSERT INTO contato_clientes (nome, email, mensagem, telefone, created_at)
       VALUES (:nome, :email, :mensagem, :telefone, CURRENT_TIMESTAMP)
     `
     await sequelize.query(sql, { replacements: { nome, email, mensagem, telefone } })

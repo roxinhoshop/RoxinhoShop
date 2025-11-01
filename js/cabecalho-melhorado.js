@@ -539,6 +539,53 @@
     });
   }
   
+  // ==================== CTA "Quero Vender" ====================
+  function configurarQueroVenderCTA() {
+    const links = Array.from(document.querySelectorAll('a.btn-quero-vender'));
+    if (!links.length) return;
+    const API_BASE = (window.API_BASE || window.location.origin);
+    links.forEach(link => {
+      if (link.dataset.qvInit === '1') return;
+      link.dataset.qvInit = '1';
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        let isLogged = false;
+        let role = '';
+        try {
+          const resp = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include', keepalive: true, cache: 'no-store' });
+          if (resp && resp.ok) {
+            const data = await resp.json().catch(() => null);
+            if (data && data.success && data.user) {
+              isLogged = true;
+              role = String(data.user.role || '').toLowerCase();
+            }
+          }
+        } catch (_) {}
+        if (!isLogged) {
+          try {
+            const vend = localStorage.getItem('vendedor:perfil');
+            const cli = localStorage.getItem('cliente:perfil');
+            const authVend = localStorage.getItem('auth:vendor') === '1';
+            const authCli = localStorage.getItem('auth:customer') === '1';
+            isLogged = !!(vend || cli || authVend || authCli);
+            if (vend) role = 'vendedor'; else if (authVend) role = 'vendedor'; else if (cli || authCli) role = 'cliente';
+          } catch (_) {}
+        }
+        if (isLogged) {
+          if (role === 'vendedor' || role === 'admin') {
+            window.location.href = '/painel-vendedor';
+          } else {
+            const msg = 'Você já está logado. Para vender, acesse “Minha Conta” > Painel do Vendedor ou faça logout para cadastrar outra conta.';
+            try { window.sitePopup && window.sitePopup.alert(msg, 'Aviso'); } catch (_) { alert(msg); }
+            window.location.href = '/painel-vendedor';
+          }
+        } else {
+          window.location.href = '/cadastro-vendedor';
+        }
+      });
+    });
+  }
+  
   // ==================== INICIALIZAÇÃO ====================
   function inicializar() {
     // Aguardar um pouco para garantir que o DOM esteja completamente carregado
@@ -549,6 +596,7 @@
       melhorarSubmenus();
       adicionarEventoFecharMenus();
       adicionarSuporteTouch();
+      configurarQueroVenderCTA();
       // Configurar toggle do tema se necessário (páginas que não injetam scripts do cabeçalho)
       try { configurarToggleTemaSeNecessario(); } catch (_) {}
       try {
@@ -739,6 +787,10 @@ function inicializarLoginBox() {
       if (linkConfigFooter) linkConfigFooter.style.display = 'none';
       const linkHistoricoFooter = document.getElementById('link-historico-footer');
       if (linkHistoricoFooter) linkHistoricoFooter.style.display = 'none';
+      const linkLoginFooter = document.getElementById('link-login-footer');
+      if (linkLoginFooter) linkLoginFooter.style.display = '';
+      const linkSairFooter = document.getElementById('link-sair-footer');
+      if (linkSairFooter) linkSairFooter.style.display = 'none';
     } catch {}
   };
 
@@ -1228,6 +1280,26 @@ function inicializarBuscaGlobal() {
       if (linkConfigFooter) linkConfigFooter.style.display = '';
       const linkHistoricoFooter = document.getElementById('link-historico-footer');
       if (linkHistoricoFooter) linkHistoricoFooter.style.display = '';
+      const linkLoginFooter = document.getElementById('link-login-footer');
+      if (linkLoginFooter) linkLoginFooter.style.display = 'none';
+      const linkSairFooter = document.getElementById('link-sair-footer');
+      if (linkSairFooter) {
+        linkSairFooter.style.display = '';
+        if (!linkSairFooter.dataset.logoutInit) {
+          linkSairFooter.dataset.logoutInit = '1';
+          linkSairFooter.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+            } catch {}
+            limparSessaoVendedorLocal();
+            limparSessaoClienteLocal();
+            try { localStorage.setItem('auth:event', 'logout:' + Date.now()); } catch {}
+            aplicarNaoLogado();
+            window.location.href = '/login';
+          });
+        }
+      }
     } catch {}
 
     // Removido: link do Painel Admin não existe mais

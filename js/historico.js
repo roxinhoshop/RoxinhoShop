@@ -3,6 +3,9 @@
   const HIST_KEY = 'historico_visualizacoes';
   const listaEl = document.getElementById('listaHistorico');
   const vazioEl = document.getElementById('estadoVazio');
+  const pagEl = document.getElementById('paginacaoHistorico');
+  const ITENS_POR_PAGINA = 10;
+  let paginaAtual = 1;
 
   async function verificarAutenticacao() {
     try {
@@ -92,7 +95,7 @@
 
     const historico = obterHistorico()
       .sort((a, b) => new Date(b.visualizadoEm) - new Date(a.visualizadoEm))
-      .slice(0, 5);
+      ;
 
     const vazio = historico.length === 0;
     if (vazioEl) {
@@ -110,7 +113,14 @@
     }
     try { listaEl.style.display = ''; } catch (_) {}
 
-    const itensHTML = historico.map(item => {
+    // Paginação
+    const totalPaginas = Math.max(1, Math.ceil(historico.length / ITENS_POR_PAGINA));
+    if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    const fim = inicio + ITENS_POR_PAGINA;
+    const pagina = historico.slice(inicio, fim);
+
+    const itensHTML = pagina.map(item => {
       const p = mapaProdutos.get(String(item.id));
   const thumb = (item.imagem || (p && p.imagem)) || '/imagens/thumbs/produto1.webp';
       const nome = (p && (p.titulo || p.nome)) || item.titulo || item.nome || 'Produto';
@@ -149,6 +159,29 @@
 
     listaEl.innerHTML = itensHTML;
     listaEl.setAttribute('aria-busy', 'false');
+
+    // Renderiza controles de paginação
+    renderizarPaginacao(historico.length);
+  }
+
+  function renderizarPaginacao(totalItens) {
+    if (!pagEl) return;
+    const totalPaginas = Math.max(1, Math.ceil(totalItens / ITENS_POR_PAGINA));
+    if (totalItens <= ITENS_POR_PAGINA) {
+      pagEl.style.display = 'none';
+      pagEl.innerHTML = '';
+      return;
+    }
+    pagEl.style.display = '';
+    pagEl.innerHTML = `
+      <button type="button" id="histPrev" ${paginaAtual === 1 ? 'disabled' : ''}>Anterior</button>
+      <span> Página ${paginaAtual} de ${totalPaginas} </span>
+      <button type="button" id="histNext" ${paginaAtual === totalPaginas ? 'disabled' : ''}>Próxima</button>
+    `;
+    const prev = pagEl.querySelector('#histPrev');
+    const next = pagEl.querySelector('#histNext');
+    prev && prev.addEventListener('click', () => { paginaAtual = Math.max(1, paginaAtual - 1); renderizar(); });
+    next && next.addEventListener('click', () => { paginaAtual = Math.min(totalPaginas, paginaAtual + 1); renderizar(); });
   }
 
   // Delegação para remover

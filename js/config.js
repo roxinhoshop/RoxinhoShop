@@ -64,3 +64,46 @@
     }
   } catch(_) {}
 })();
+
+// ===== Utilitário: criar token JWT de admin para desenvolvimento local =====
+(function(){
+  // Gera um JWT HS256 assinado com 'devsecret' para o usuário ID 1
+  async function createDevAdminToken() {
+    try {
+      const loc = window.location || {};
+      const host = String(loc.hostname || '').toLowerCase();
+      const isLocal = host === 'localhost' || host === '127.0.0.1';
+      if (!isLocal) return null;
+      const header = { alg: 'HS256', typ: 'JWT' };
+      const now = Math.floor(Date.now() / 1000);
+      const payload = { id: 1, role: 'admin', iat: now, exp: now + 6 * 3600 };
+
+      const enc = new TextEncoder();
+      const toB64Url = (strOrBytes) => {
+        let bytes = strOrBytes instanceof Uint8Array ? strOrBytes : enc.encode(String(strOrBytes));
+        let b64 = btoa(String.fromCharCode.apply(null, Array.from(bytes))).replace(/=+$/,'');
+        return b64.replace(/\+/g, '-').replace(/\//g, '_');
+      };
+      const headerB64 = toB64Url(JSON.stringify(header));
+      const payloadB64 = toB64Url(JSON.stringify(payload));
+      const data = `${headerB64}.${payloadB64}`;
+      const key = await crypto.subtle.importKey(
+        'raw',
+        enc.encode('devsecret'),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
+      const sigB64 = toB64Url(new Uint8Array(sig));
+      const token = `${data}.${sigB64}`;
+      // Define cookie de sessão (httpOnly não é possível via JS)
+      document.cookie = `token=${token}; path=/; max-age=${6 * 3600}; samesite=lax`;
+      return token;
+    } catch (e) {
+      console.warn('Falha ao criar token de desenvolvimento:', e && e.message || e);
+      return null;
+    }
+  }
+  try { window.createDevAdminToken = createDevAdminToken; } catch(_) { window.createDevAdminToken = createDevAdminToken; }
+})();

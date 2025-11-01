@@ -22,12 +22,18 @@
         background: var(--erro-bg);
         color: var(--erro-text);
         margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
       .erro-container {
         max-width: 920px;
         margin: 0 auto;
-        padding: 48px 16px 72px;
+        padding: 24px 16px;
         text-align: center;
+        flex: 1 0 auto;
+        display: grid;
+        place-items: center;
       }
       .erro-card {
         background: #fff;
@@ -75,7 +81,7 @@
       }
       .btn-erro:hover { border-color: #d1d5db; transform: translateY(-1px); }
       .btn-erro-primaria { background: var(--erro-accent); color: #fff; border-color: var(--erro-accent); }
-      .btn-erro-primaria:hover { filter: brightness(1.05); }
+      .btn-erro-primaria:hover { filter: brightness(1.05); color: #fff; }
 
       .rodape-hint { margin-top: 18px; font-size: 13px; color: var(--erro-subtext); }
     </style>
@@ -95,14 +101,14 @@
         <div class="rodape-hint">Se você veio por um link, pode ter sido removido ou movido.</div>
       </div>
     </main>
-    <footer id="rodape"></footer>
+    <!-- Rodapé removido nesta página para manter foco e centralização -->
 
     <script src="/js/site-popup.js"></script>
     <script src="/js/config.js"></script>
     <script src="/js/cabecalho-melhorado.js"></script>
     <script>
       // Insere cabeçalho e rodapé padrões
-      (function inserirCabecalhoRodape() {
+      (function inserirCabecalhoSemRodape() {
         fetch('/cabecalho-rodape.html')
           .then(r => r.ok ? r.text() : '')
           .then(html => {
@@ -110,9 +116,7 @@
             const tmp = document.createElement('div');
             tmp.innerHTML = html;
             const head = tmp.querySelector('header');
-            const foot = tmp.querySelector('footer');
             if (head) document.getElementById('cabecalho').replaceWith(head);
-            if (foot) document.getElementById('rodape').replaceWith(foot);
           })
           .catch(() => {});
       })();

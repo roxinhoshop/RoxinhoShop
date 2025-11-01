@@ -446,6 +446,37 @@ body.dark .sku { color: var(--texto-secundario); }
   box-shadow: 0 4px 12px rgba(17, 17, 17, 0.4);
 }
 
+/* Botão de edição (admin) na página do produto */
+.btn-editar-admin {
+  background: #6d28d9; /* Roxo principal */
+  color: #ffffff;
+  border: none;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transicao-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  width: 100%;
+}
+.btn-editar-admin:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.35);
+  color: #ffffff;
+}
+.btn-editar-admin:hover i {
+  color: #ffffff;
+}
+html.dark .btn-editar-admin {
+  background: #833dd0;
+}
+
 /* Preços por plataforma (unificado com produtos.css) */
 .precos-plataformas {
   display: grid;
@@ -1094,6 +1125,9 @@ html.dark .oferta-acao .btn-ir-loja {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  /* Suave desfoque de fundo para destacar o modal */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 1000;
   align-items: center;
   justify-content: center;

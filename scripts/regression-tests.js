@@ -35,7 +35,7 @@ async function run() {
   const pages = [
     '', 'produtos', 'pagina-produto', 'login', 'cadastro', 'configuracoes', 'historico',
     'quem-somos', 'contato', 'vendedores', 'termos', 'politicas', 'redefinir-senha',
-    'login-vendedor', 'cadastro-vendedor', 'editar-produto'
+    'login-vendedor', 'cadastro-vendedor', 'painel-vendedor'
   ];
   // Slugs antigos que devem continuar funcionando (alias)
   const oldAliases = {

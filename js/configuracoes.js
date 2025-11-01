@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
   const btnRedefinirPerfil = document.getElementById('btn-redefinir-perfil');
   const statusPerfil = document.getElementById('status-perfil');
+  const grupoLoja = document.getElementById('grupo-loja');
+  const campoNomeLoja = document.getElementById('nome-loja');
+  const statusLoja = document.getElementById('status-loja');
 
   const formSenha = document.getElementById('form-senha');
   const campoSenhaAtual = document.getElementById('senha-atual');
@@ -186,6 +189,28 @@ document.addEventListener('DOMContentLoaded', () => {
           src = u.foto_perfil;
         }
         headerAvatar.src = src;
+      }
+
+      // Exibir e carregar nome da loja se for vendedor
+      const role = String(u.role || '').toLowerCase();
+      if (role === 'vendedor' && grupoLoja) {
+        grupoLoja.style.display = 'block';
+        if (statusLoja) setStatus(statusLoja, 'Carregando dados da loja...', 'info');
+        try {
+          const r = await fetch(`${API_BASE}/api/vendors/store/me`, { credentials: 'include' });
+          const d = await r.json().catch(() => null);
+          if (r.ok && d && d.success) {
+            const nomeLoja = String(d?.data?.nomeLoja || '').trim();
+            if (campoNomeLoja) campoNomeLoja.value = nomeLoja || '';
+            if (statusLoja) setStatus(statusLoja, nomeLoja ? '' : 'Nenhuma loja configurada.', 'info');
+          } else {
+            if (statusLoja) setStatus(statusLoja, (d && d.message) || 'Erro ao carregar loja.', 'erro');
+          }
+        } catch (e) {
+          if (statusLoja) setStatus(statusLoja, 'Erro ao carregar loja.', 'erro');
+        }
+      } else if (grupoLoja) {
+        grupoLoja.style.display = 'none';
       }
 
       // Finalizar estado de carregamento (sem mensagem persistente)

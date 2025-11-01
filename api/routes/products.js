@@ -5,6 +5,49 @@ const fetch = require('node-fetch');
 const { withRetry } = require('../utils/retry');
 const { sequelize } = require('../config/db');
 const SearchHistory = require('../models/SearchHistory');
+// Auth/Admin middleware (espelhado de users.js)
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const Review = require('../models/Review');
+const PriceHistory = require('../models/PriceHistory');
+const { removeLocalImage } = require('../utils/saveBase64');
+
+// Middleware para verificar autenticação (Cookie httpOnly ou Bearer)
+const auth = async (req, res, next) => {
+  try {
+    const bearer = req.headers.authorization?.split(' ')[1];
+    const token = bearer || req.parsedCookies?.token;
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Não autorizado' });
+    }
+    const secrets = [process.env.JWT_SECRET, 'devsecret'].filter(Boolean);
+    let decoded = null;
+    for (const s of secrets) {
+      try { decoded = jwt.verify(token, s); break; } catch (e) {}
+    }
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: 'Não autorizado' });
+    }
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Usuário não encontrado' });
+    }
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Não autorizado' });
+  }
+};
+
+// Middleware admin (somente Admin Roxinho Shop ID 1)
+const requireAdmin = (req, res, next) => {
+  const isAdminRole = req.user && String(req.user.role).toLowerCase() === 'admin';
+  const isRoxinhoShop = req.user && Number(req.user.id) === 1;
+  if (!req.user || !isAdminRole || !isRoxinhoShop) {
+    return res.status(403).json({ success: false, message: 'Acesso restrito ao Admin Roxinho Shop (ID 1)' });
+  }
+  next();
+};
 
 // Classificação de categorias baseada em palavras-chave no título/descrição
 function classificarProduto(p) {
@@ -393,8 +436,8 @@ router.get('/most-searched', async (req, res, next) => {
 
 module.exports = router;
 
-// Atualiza produto manualmente (imagens, preços, links e IDs)
-router.put('/:id', async (req, res) => {
+// Atualiza produto manualmente (imagens, preços, links, IDs e status/ativo) [Admin]
+router.put('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     const registro = await Product.findByPk(id);
@@ -413,8 +456,10 @@ router.put('/:id', async (req, res) => {
       mercadoLivreId,
       amazonAsin,
       imagens,
+      fotoUrl,
       categoria,
-      subcategoria
+      subcategoria,
+      status
     } = req.body || {};
 
     // Atualiza campos básicos, se fornecidos
@@ -430,14 +475,30 @@ router.put('/:id', async (req, res) => {
     // Atualiza classificação manual, se fornecida
     if (typeof categoria === 'string') registro.categoria = categoria;
     if (typeof subcategoria === 'string') registro.subcategoria = subcategoria;
+    // Atualiza status/ativo, se fornecido
+    if (typeof status === 'string') {
+      const s = status.trim().toLowerCase();
+      if (s === 'ativo' || s === 'inativo') {
+        registro.ativo = (s === 'ativo');
+      }
+    }
 
     // Processa imagens
     let imagensArray = [];
-    if (Array.isArray(imagens)) {
+    // Prioriza fotoUrl (alinhado com fluxo do vendedor)
+    if (typeof fotoUrl === 'string' && fotoUrl.trim()) {
+      imagensArray = [fotoUrl.trim()];
+    } else if (Array.isArray(imagens)) {
       imagensArray = imagens.filter(x => typeof x === 'string' && x.trim() !== '');
     } else if (typeof imagens === 'string') {
-      // aceita string separada por vírgulas
-      imagensArray = imagens.split(',').map(s => s.trim()).filter(s => s);
+      // Aceita JSON string ou string separada por vírgulas
+      let parsed;
+      try { parsed = JSON.parse(imagens); } catch (_) { parsed = null; }
+      if (Array.isArray(parsed)) {
+        imagensArray = parsed.filter(x => typeof x === 'string' && x.trim() !== '');
+      } else {
+        imagensArray = imagens.split(',').map(s => s.trim()).filter(s => s);
+      }
     }
 
     if (imagensArray.length > 0) {
@@ -454,14 +515,51 @@ router.put('/:id', async (req, res) => {
     await registro.save();
 
     // Monta resposta com imagens como array
-  const p = registro.get({ plain: true });
-  if (p.imagens && typeof p.imagens === 'string') {
-    try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
-  }
-  return res.status(200).json({ success: true, data: sanitizeProductText(p) });
+    const p = registro.get({ plain: true });
+    if (p.imagens && typeof p.imagens === 'string') {
+      try { p.imagens = JSON.parse(p.imagens); } catch (_) {}
+    }
+    // Acrescenta status derivado para consumo no frontend admin
+    const statusOut = (p.ativo === false) ? 'inativo' : 'ativo';
+    const out = { ...sanitizeProductText(p), status: statusOut };
+    return res.status(200).json({ success: true, data: out });
   } catch (error) {
     console.error('Erro ao atualizar produto:', error);
     return res.status(500).json({ success: false, message: 'Erro interno ao atualizar produto' });
+  }
+});
+
+// Exclui produto [Admin] com deleção em cascata (histórico de preços e avaliações)
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'ID inválido' });
+    }
+
+    const registro = await Product.findByPk(id);
+    if (!registro) {
+      return res.status(404).json({ success: false, message: 'Produto não encontrado' });
+    }
+
+    await sequelize.transaction(async (t) => {
+      // Remover imagens locais associadas às avaliações do produto (se houver)
+      const reviews = await Review.findAll({ where: { produto_id: id }, transaction: t });
+      for (const r of reviews) {
+        const fotosList = Array.isArray(r.fotos) ? r.fotos : [];
+        for (const f of fotosList) {
+          await removeLocalImage(f);
+        }
+      }
+      await Review.destroy({ where: { produto_id: id }, transaction: t });
+      await PriceHistory.destroy({ where: { produto_id: id }, transaction: t });
+      await Product.destroy({ where: { id }, transaction: t });
+    });
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao excluir produto:', error);
+    return res.status(500).json({ success: false, message: 'Erro interno ao excluir produto' });
   }
 });
 

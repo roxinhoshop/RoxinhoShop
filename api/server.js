@@ -3,6 +3,8 @@ const fs = require('fs')
 const morgan = require('morgan')
 const path = require('path')
 const cors = require('cors')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const { connectDB, sequelize } = require('./config/db')
 const { DataTypes } = require('sequelize')
@@ -14,26 +16,35 @@ const app = express()
 // Permite localhost/127.0.0.1 em qualquer porta no desenvolvimento
 // e origens configuradas para produção.
 const DEFAULT_ORIGINS = [
+  // Preview/local frontends
   'http://localhost:5526',
-  'http://localhost:3000',
-  'http://localhost:3001',
+  'http://localhost:5529',
   'http://localhost:3010',
   'http://localhost:3011',
   'http://localhost:3012',
+  'http://localhost:3015',
   'http://localhost:3017',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173',
   'http://127.0.0.1:5526',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
+  'http://127.0.0.1:5529',
   'http://127.0.0.1:3010',
   'http://127.0.0.1:3011',
   'http://127.0.0.1:3012',
+  'http://127.0.0.1:3015',
   'http://127.0.0.1:3017',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'http://127.0.0.1:5173',
+  // Deploy
   'https://roxinhoshop.vercel.app'
 ]
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://roxinhoshop.vercel.app'
 const ALLOWED_ORIGINS = Array.from(new Set([...DEFAULT_ORIGINS, FRONTEND_ORIGIN].filter(Boolean)))
 
-const LOCAL_DEV_REGEX = /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?$/
+// Permite qualquer porta em localhost/127.0.0.1 (corrige escape incorreto de \d)
+const LOCAL_DEV_REGEX = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -90,28 +101,67 @@ app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/price-history', require('./routes/price-history'))
 app.use('/api/vendors', require('./routes/vendors'))
+// Helper de autenticação simples para verificar admin via JWT (Authorization ou cookie "token")
+async function verifyAdminFromReq(req) {
+  try {
+    const bearer = req.headers.authorization?.split(' ')[1]
+    const token = bearer || req.parsedCookies?.token
+    if (!token) return null
+    const secrets = [process.env.JWT_SECRET, 'devsecret'].filter(Boolean)
+    let decoded = null
+    for (const s of secrets) {
+      try { decoded = jwt.verify(token, s); break } catch (_) {}
+    }
+    if (!decoded || !decoded.id) return null
+    // Se o token já indica admin (dev/local), aceitar sem consulta ao banco
+    const tokenRole = String(decoded.role || '').toLowerCase()
+    if (tokenRole === 'admin') return { id: decoded.id, role: 'admin' }
+    const [rows] = await sequelize.query(`SELECT id, role FROM usuario WHERE id = :id LIMIT 1`, { replacements: { id: decoded.id } })
+    const u = Array.isArray(rows) ? rows[0] : rows
+    if (!u) return null
+    const role = String(u.role || '').toLowerCase()
+    if (role !== 'admin') return null
+    return u
+  } catch (_) { return null }
+}
 // Rota de contato inline para garantir funcionamento (evita 404 inesperado)
 app.post('/api/contact', async (req, res) => {
   try {
-    let { nome, email, mensagem, telefone } = req.body || {}
+    let { nome, email, mensagem } = req.body || {}
     nome = typeof nome === 'string' ? nome.trim() : ''
     email = typeof email === 'string' ? email.trim() : ''
     mensagem = typeof mensagem === 'string' ? mensagem.trim() : ''
-    telefone = typeof telefone === 'string' ? telefone.trim() : null
 
     if (!nome || !email || !mensagem) {
       return res.status(400).json({ ok: false, message: 'Campos obrigatórios: nome, email, mensagem.' })
     }
 
     const sql = `
-      INSERT INTO contato_cliente (nome, email, mensagem, telefone, created_at)
-      VALUES (:nome, :email, :mensagem, :telefone, CURRENT_TIMESTAMP)
+      INSERT INTO contato_clientes (nome, email, mensagem, created_at)
+      VALUES (:nome, :email, :mensagem, CURRENT_TIMESTAMP)
     `
-    await sequelize.query(sql, { replacements: { nome, email, mensagem, telefone } })
+    await sequelize.query(sql, { replacements: { nome, email, mensagem } })
 
     return res.status(201).json({ ok: true, message: 'Contato registrado com sucesso.' })
   } catch (e) {
     return res.status(500).json({ ok: false, message: 'Erro interno ao registrar contato.', error: String(e && e.message || e) })
+  }
+})
+
+// Lista contatos do cliente (apenas admin)
+app.get('/api/contact/list', async (req, res) => {
+  try {
+    const admin = await verifyAdminFromReq(req)
+    if (!admin) return res.status(401).json({ ok: false, message: 'Não autorizado' })
+    const [rows] = await sequelize.query(`
+      SELECT id, nome, email, mensagem, created_at
+      FROM contato_clientes
+      ORDER BY id DESC
+      LIMIT 200
+    `)
+    return res.json({ ok: true, data: rows })
+  } catch (e) {
+    return res.status(500).json({ ok: false, message: 'Erro ao listar contatos.', error: String(e && e.message || e) })
   }
 })
 
@@ -187,15 +237,18 @@ const initOnce = () => {
       await ensureProductMarcaColumn()
       await ensureProductCategoryColumns()
       await ensureLegacyEnglishRenames()
-      await ensureProductManualFields()
+  await ensureProductManualFields()
   await ensureUserSobrenomeColumn()
   await ensureUserRoleColumn()
+  await ensureDevAdminUser()
   await migrateUserAvatarColumnToFotoPerfil()
   await ensureVendorTable()
   await ensureVendorNomeVendedorColumn()
   await ensureProductVendorIdColumn()
   await ensureVendorStoresTable()
+  await ensureLojasVendedoresTable()
   await ensureContactClienteTable()
+  await ensureProdutoAvaliacaoTable()
   })()
   }
   return readyPromise
@@ -378,6 +431,35 @@ const ensureUserRoleColumn = async () => {
   }
 }
 
+// Provisiona o usuário Admin (ID 1) para desenvolvimento
+// Necessário porque as rotas admin exigem role 'admin' e ID 1
+const ensureDevAdminUser = async () => {
+  try {
+    // Verifica se o usuário ID 1 existe
+    const [rows] = await sequelize.query(`SELECT * FROM usuario WHERE id = 1 LIMIT 1`)
+    const u = Array.isArray(rows) ? rows[0] : rows
+    if (!u) {
+      // Cria usuário admin ID 1 com senha padrão 'admin'
+      const hash = await bcrypt.hash('admin', 10)
+      await sequelize.query(
+        `INSERT INTO usuario (id, nome, sobrenome, email, senha, foto_perfil, role)
+         VALUES (1, 'Admin', 'Roxinho', 'admin@local', :senha, NULL, 'admin')`,
+        { replacements: { senha: hash } }
+      )
+      console.log('Usuário Admin (ID 1) criado para desenvolvimento.')
+    } else {
+      // Garante role 'admin' para ID 1
+      const role = String(u.role || '').toLowerCase()
+      if (role !== 'admin') {
+        await sequelize.query(`UPDATE usuario SET role = 'admin' WHERE id = 1`)
+        console.log('Usuário ID 1 promovido a Admin.')
+      }
+    }
+  } catch (e) {
+    console.warn('Falha ao provisionar Admin ID 1:', e && e.message ? e.message : e)
+  }
+}
+
 // Garante que a coluna "avatar_base64" exista na tabela usuario (LONGTEXT)
 const ensureUserAvatarColumn = async () => {
   try {
@@ -503,14 +585,50 @@ const ensureVendorNomeVendedorColumn = async () => {
 const ensureVendorStoresTable = async () => {
   const qi = sequelize.getQueryInterface()
   try {
-    await qi.describeTable('cadastros_pendentes')
-    // Se não lançar erro, a tabela existe
+    const desc = await qi.describeTable('cadastros_pendentes')
+    // Se não lançar erro, a tabela existe; garantir colunas novas
+    const ensureCol = async (name, def) => {
+      if (!desc[name]) {
+        await qi.addColumn('cadastros_pendentes', name, def)
+        console.log(`Coluna "${name}" adicionada à tabela "cadastros_pendentes".`)
+      }
+    }
+    // Tornar colunas pessoais opcionais para permitir uso pós-aprovação
+    const ensureNullable = async (name, def) => {
+      if (desc[name] && desc[name].allowNull === false) {
+        await qi.changeColumn('cadastros_pendentes', name, { ...def, allowNull: true })
+        console.log(`Coluna "${name}" atualizada para permitir NULL em "cadastros_pendentes".`)
+      }
+    }
+    // Inputs do cadastro de vendedor
+    await ensureCol('nome', { type: DataTypes.STRING(255), allowNull: true })
+    await ensureCol('sobrenome', { type: DataTypes.STRING(255), allowNull: true })
+    await ensureCol('email', { type: DataTypes.STRING(255), allowNull: true })
+    await ensureCol('documento', { type: DataTypes.STRING(30), allowNull: true })
+    await ensureNullable('nome', { type: DataTypes.STRING(255) })
+    await ensureNullable('sobrenome', { type: DataTypes.STRING(255) })
+    await ensureNullable('email', { type: DataTypes.STRING(255) })
+    await ensureNullable('documento', { type: DataTypes.STRING(30) })
+    // Base64 do arquivo de documento (pode ser grande); usa TEXT long quando suportado
+    await ensureCol('arquivoDocumentoBase64', { type: DataTypes.TEXT('long'), allowNull: true })
+    // Campos de informações da loja que podem ser atualizados pelo vendedor
+    await ensureCol('nomeLoja', { type: DataTypes.STRING(255), allowNull: false })
+    await ensureCol('telefone', { type: DataTypes.STRING(30), allowNull: true })
+    await ensureCol('sobre', { type: DataTypes.TEXT, allowNull: true })
+    await ensureCol('criadoEm', { type: DataTypes.DATE, allowNull: true })
+    await ensureCol('atualizadoEm', { type: DataTypes.DATE, allowNull: true })
   } catch (e) {
     console.log('Criando tabela "cadastros_pendentes"...')
     await qi.createTable('cadastros_pendentes', {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       vendedorId: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+      // Inputs do cadastro de vendedor
+      nome: { type: DataTypes.STRING(255), allowNull: true },
+      sobrenome: { type: DataTypes.STRING(255), allowNull: true },
+      email: { type: DataTypes.STRING(255), allowNull: true },
       nomeLoja: { type: DataTypes.STRING(255), allowNull: false },
+      documento: { type: DataTypes.STRING(30), allowNull: true },
+      arquivoDocumentoBase64: { type: DataTypes.TEXT('long'), allowNull: true },
       telefone: { type: DataTypes.STRING(30), allowNull: true },
       sobre: { type: DataTypes.TEXT, allowNull: true },
       criadoEm: { type: DataTypes.DATE, allowNull: true },
@@ -524,19 +642,103 @@ const ensureVendorStoresTable = async () => {
 const ensureContactClienteTable = async () => {
   const qi = sequelize.getQueryInterface()
   try {
-    await qi.describeTable('contato_cliente')
-    // Já existe, não faz nada
+    // Preferir tabela no plural: contato_clientes
+    const existsPlural = await qi.describeTable('contato_clientes').then(() => true).catch(() => false)
+    const existsSingular = await qi.describeTable('contato_cliente').then(() => true).catch(() => false)
+
+    if (!existsPlural && existsSingular) {
+      // Renomeia a tabela singular para plural para alinhar com a planilha (contato_clientes)
+      console.log('Renomeando tabela "contato_cliente" para "contato_clientes"...')
+      await qi.renameTable('contato_cliente', 'contato_clientes')
+    }
+
+    // Após possíveis renomes, garanta a existência da tabela plural com colunas esperadas
+    const desc = await qi.describeTable('contato_clientes')
+    const ensureCol = async (name, def) => {
+      if (!desc[name]) {
+        await qi.addColumn('contato_clientes', name, def)
+        console.log(`Coluna "${name}" adicionada à tabela "contato_clientes".`)
+      }
+    }
+    await ensureCol('id', { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true })
+    await ensureCol('nome', { type: DataTypes.STRING(255), allowNull: false })
+    await ensureCol('email', { type: DataTypes.STRING(255), allowNull: false })
+    await ensureCol('mensagem', { type: DataTypes.TEXT, allowNull: false })
+    await ensureCol('created_at', { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') })
+
+    // Remover coluna obsoleta "telefone" se existir
+    if (desc['telefone']) {
+      await qi.removeColumn('contato_clientes', 'telefone')
+      console.log('Coluna "telefone" removida de "contato_clientes".')
+    }
   } catch (e) {
-    console.log('Criando tabela "contato_cliente"...')
-    await qi.createTable('contato_cliente', {
+    console.log('Criando tabela "contato_clientes"...')
+    await qi.createTable('contato_clientes', {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       nome: { type: DataTypes.STRING(255), allowNull: false },
       email: { type: DataTypes.STRING(255), allowNull: false },
       mensagem: { type: DataTypes.TEXT, allowNull: false },
-      telefone: { type: DataTypes.STRING(50), allowNull: true },
       created_at: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') }
     })
-    console.log('Tabela "contato_cliente" criada.')
+    console.log('Tabela "contato_clientes" criada.')
+  }
+}
+
+// Garante que a tabela de avaliações de produto exista (produto_avaliacao)
+const ensureProdutoAvaliacaoTable = async () => {
+  const qi = sequelize.getQueryInterface()
+  try {
+    await qi.describeTable('produto_avaliacao')
+    // já existe
+  } catch (e) {
+    console.log('Criando tabela "produto_avaliacao"...')
+    await qi.createTable('produto_avaliacao', {
+      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+      produto_id: { type: DataTypes.INTEGER, allowNull: false },
+      usuario_id: { type: DataTypes.INTEGER, allowNull: true },
+      usuario_nome: { type: DataTypes.STRING, allowNull: true },
+      nota: { type: DataTypes.INTEGER, allowNull: false },
+      titulo: { type: DataTypes.STRING, allowNull: true },
+      comentario: { type: DataTypes.TEXT, allowNull: true },
+      fotos: { type: DataTypes.JSON, allowNull: true, defaultValue: [] },
+      data_postagem: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') }
+    })
+    console.log('Tabela "produto_avaliacao" criada.')
+  }
+}
+
+// Garante que a tabela de lojas dos vendedores exista (produção)
+const ensureLojasVendedoresTable = async () => {
+  const qi = sequelize.getQueryInterface()
+  try {
+    const desc = await qi.describeTable('lojas_vendedores')
+    // garantir colunas principais caso não existam
+    const ensureCol = async (name, def) => {
+      if (!desc[name]) {
+        await qi.addColumn('lojas_vendedores', name, def)
+        console.log(`Coluna "${name}" adicionada à tabela "lojas_vendedores".`)
+      }
+    }
+    await ensureCol('vendedorId', { type: DataTypes.INTEGER, allowNull: false, unique: true })
+    await ensureCol('userId', { type: DataTypes.INTEGER, allowNull: false })
+    await ensureCol('nomeLoja', { type: DataTypes.STRING(255), allowNull: false })
+    await ensureCol('telefone', { type: DataTypes.STRING(30), allowNull: true })
+    await ensureCol('sobre', { type: DataTypes.TEXT, allowNull: true })
+    await ensureCol('criadoEm', { type: DataTypes.DATE, allowNull: true })
+    await ensureCol('atualizadoEm', { type: DataTypes.DATE, allowNull: true })
+  } catch (e) {
+    console.log('Criando tabela "lojas_vendedores"...')
+    await qi.createTable('lojas_vendedores', {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      vendedorId: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+      userId: { type: DataTypes.INTEGER, allowNull: false },
+      nomeLoja: { type: DataTypes.STRING(255), allowNull: false },
+      telefone: { type: DataTypes.STRING(30), allowNull: true },
+      sobre: { type: DataTypes.TEXT, allowNull: true },
+      criadoEm: { type: DataTypes.DATE, allowNull: true },
+      atualizadoEm: { type: DataTypes.DATE, allowNull: true }
+    })
+    console.log('Tabela "lojas_vendedores" criada.')
   }
 }
 
@@ -583,6 +785,23 @@ const dropObsoleteTables = async () => {
     }
   } catch (e) {
     console.warn('Falha ao remover "produtos_vendedor" (pode não existir):', e.message)
+  }
+  // Histórico de preços removido: tabela não é mais utilizada
+  try {
+    if (await exists('produto_preco_historico')) {
+      await qi.dropTable('produto_preco_historico')
+      console.log('Tabela "produto_preco_historico" removida.')
+    }
+  } catch (e) {
+    console.warn('Falha ao remover "produto_preco_historico" (pode não existir):', e.message)
+  }
+  try {
+    if (await exists('price_history')) {
+      await qi.dropTable('price_history')
+      console.log('Tabela "price_history" removida.')
+    }
+  } catch (e) {
+    console.warn('Falha ao remover "price_history" (pode não existir):', e.message)
   }
 }
 

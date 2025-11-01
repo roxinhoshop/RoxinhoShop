@@ -21,9 +21,13 @@
     /* Light-mode: documento (file-pill) */
     .file-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .6rem; border-radius: 999px; background: #ffffff; color: #000000; border: 1px solid #e5e7eb; }
     .file-pill i { color: inherit; }
-    /* Área de preview com fundo preto para destacar imagens/documentos */
-    #previewImagem { display: none; background: #000000; color: #ffffff; padding: 8px; border-radius: 8px; border: 1px solid #111; max-width: 100%; }
-    #previewImagem img { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #222; }
+    /* Área de preview de imagem/documento:
+       - Light-mode: fundo branco
+       - Dark-mode: fundo preto */
+    #previewImagem { display: none; background: #ffffff; color: #000000; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb; max-width: 100%; }
+    #previewImagem img { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #e5e7eb; }
+    body.dark #previewImagem { background: #000000; color: #ffffff; border-color: #111; }
+    body.dark #previewImagem img { border-color: #222; }
     .mensagem-erro.visivel { color: #cc0000; margin-top: .25rem; }
     /* Oculta a caixa de login do cabeçalho nesta página */
     #caixa-login { display: none !important; }

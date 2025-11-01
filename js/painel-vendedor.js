@@ -7,6 +7,15 @@
     vendedores: 'vendor:vendedores',
   };
   let vendorProdutos = []
+  // Paginação de produtos do vendedor
+  let vendorPaginaAtual = 1
+  let vendorItensPorPagina = (() => {
+    try {
+      const v = parseInt(localStorage.getItem('vendor:produtos:perPage') || '6', 10)
+      return isNaN(v) || v < 1 ? 6 : v
+    } catch { return 6 }
+  })()
+  let vendorTotalPaginas = 1
 
   // Mapa de categorias e subcategorias (espelhado de js/produtos.js)
   const sistemaCategorias = {
@@ -63,14 +72,35 @@
   function initAbas() {
     const botoes = document.querySelectorAll('.abas .aba');
     const conteudos = document.querySelectorAll('.conteudo-aba');
+
+    const setAba = (alvoSel) => {
+      const btn = Array.from(botoes).find(b => b.dataset.alvo === alvoSel);
+      const alvo = document.querySelector(alvoSel);
+      if (!btn || !alvo) return;
+      botoes.forEach(b => b.classList.remove('ativa'));
+      conteudos.forEach(c => c.classList.remove('visivel'));
+      btn.classList.add('ativa');
+      alvo.classList.add('visivel');
+      try {
+        localStorage.setItem('vendor:abaAtiva', alvoSel);
+        // Atualiza a URL sem provocar scroll
+        const newUrl = `${window.location.pathname}${window.location.search}${alvoSel}`;
+        window.history.replaceState(null, '', newUrl);
+      } catch {}
+    };
+
+    // Restaurar aba ativa (hash > localStorage > default existente)
+    const hash = window.location.hash;
+    const salva = (() => { try { return localStorage.getItem('vendor:abaAtiva'); } catch { return null; } })();
+    const alvoInicial = (hash && Array.from(botoes).some(b => b.dataset.alvo === hash))
+      ? hash
+      : (salva && Array.from(botoes).some(b => b.dataset.alvo === salva))
+        ? salva
+        : null;
+    if (alvoInicial) setAba(alvoInicial);
+
     botoes.forEach(btn => {
-      btn.addEventListener('click', () => {
-        botoes.forEach(b => b.classList.remove('ativa'));
-        conteudos.forEach(c => c.classList.remove('visivel'));
-        btn.classList.add('ativa');
-        const alvo = document.querySelector(btn.dataset.alvo);
-        if (alvo) alvo.classList.add('visivel');
-      });
+      btn.addEventListener('click', () => setAba(btn.dataset.alvo));
     });
   }
 
@@ -102,7 +132,10 @@
       if (!data || !data.success) {
         mostrarToast(data?.message || 'Não autorizado. Faça login como vendedor.', 'error')
       }
+      vendorPaginaAtual = 1
+      vendorTotalPaginas = Math.max(1, Math.ceil((vendorProdutos?.length || 0) / vendorItensPorPagina))
       renderProdutos()
+      renderPaginacaoProdutosVend()
       updateStats()
     } catch (e) {
       console.warn('Falha ao obter produtos do vendedor:', e)
@@ -118,6 +151,8 @@
 
     // Inicializar selects de Categoria/Subcategoria
     initCategoriaSubcategoria();
+    // Inicializar controle de Itens por página
+    initItensPorPaginaProdutos();
 
     // Formatação de preço (preview em BRL nos inputs de preço)
     const precoMLEl = document.getElementById('produtoPrecoML');
@@ -144,6 +179,9 @@
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
+      const btnSubmit = form.querySelector('button[type="submit"]');
+      const originalHTML = btnSubmit ? btnSubmit.innerHTML : '';
+      if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adicionando...'; }
       const nome = document.getElementById('produtoNome').value.trim();
       const descricao = (document.getElementById('produtoDescricao')?.value || '').trim();
       const precoML = parseFloat(document.getElementById('produtoPrecoML').value);
@@ -154,7 +192,7 @@
       const linkAmazon = (document.getElementById('produtoLinkAmazon')?.value || '').trim();
       const categoria = (document.getElementById('produtoCategoria')?.value || '').trim();
       const subcategoria = (document.getElementById('produtoSubcategoria')?.value || '').trim();
-      if (!nome || isNaN(precoML)) return;
+      if (!nome || isNaN(precoML)) { if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.innerHTML = originalHTML; } return; }
       try {
         const r = await fetch('/api/vendors/products/import', {
           method: 'POST',
@@ -175,19 +213,45 @@
         const data = await r.json()
         if (data && data.success) {
           logHistorico(`Produto importado: ${nome}`)
+          mostrarToast('Produto adicionado com sucesso.', 'success')
           form.reset()
           await refreshProdutos()
+          if (btnSubmit) {
+            btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Adicionado';
+            setTimeout(() => { btnSubmit.innerHTML = originalHTML; }, 1200);
+          }
         } else {
           logHistorico('Falha ao importar produto')
+          mostrarToast(data?.message || 'Falha ao adicionar produto.', 'error')
+          if (btnSubmit) btnSubmit.innerHTML = originalHTML;
         }
       } catch (e) {
         console.warn('Erro ao importar produto:', e)
         logHistorico('Erro ao importar produto')
+        mostrarToast('Erro ao adicionar produto.', 'error')
+        if (btnSubmit) btnSubmit.innerHTML = originalHTML;
+      } finally {
+        if (btnSubmit) btnSubmit.disabled = false;
       }
     });
 
     btnLimpar?.addEventListener('click', () => form.reset());
     refreshProdutos();
+  }
+
+  function initItensPorPaginaProdutos() {
+    const sel = document.getElementById('prodItensPorPagina')
+    if (!sel) return
+    try { sel.value = String(vendorItensPorPagina) } catch {}
+    sel.addEventListener('change', () => {
+      const val = parseInt(sel.value, 10)
+      vendorItensPorPagina = isNaN(val) || val < 1 ? 6 : val
+      try { localStorage.setItem('vendor:produtos:perPage', String(vendorItensPorPagina)) } catch {}
+      vendorPaginaAtual = 1
+      vendorTotalPaginas = Math.max(1, Math.ceil((vendorProdutos?.length || 0) / vendorItensPorPagina))
+      renderProdutos()
+      renderPaginacaoProdutosVend()
+    })
   }
 
   function initCategoriaSubcategoria() {
@@ -209,7 +273,16 @@
     const tbody = document.getElementById('tbodyProdutos');
     if (!tbody) return;
     const produtos = Array.isArray(vendorProdutos) ? vendorProdutos : [];
-    tbody.innerHTML = produtos.map(p => {
+    if (!produtos.length) {
+      tbody.innerHTML = '<tr><td colspan="4">Nenhum produto encontrado</td></tr>'
+      const cont = document.getElementById('paginacaoProdutosVend')
+      if (cont) cont.style.display = 'none'
+      return
+    }
+    const inicio = (vendorPaginaAtual - 1) * vendorItensPorPagina
+    const fim = inicio + vendorItensPorPagina
+    const pagina = produtos.slice(inicio, fim)
+    tbody.innerHTML = pagina.map(p => {
       let img = ''
       try {
         const arr = JSON.parse(p.imagens || '[]')
@@ -218,24 +291,20 @@
       const precoML = p.precoMercadoLivre !== undefined ? Number(p.precoMercadoLivre) : Number(p.precoML ?? 0)
       const precoAZ = p.precoAmazon !== undefined ? Number(p.precoAmazon) : Number(p.precoAZ ?? 0)
       const preco = Number(!isNaN(precoML) && precoML > 0 ? precoML : (!isNaN(precoAZ) && precoAZ > 0 ? precoAZ : 0))
-      const statusLower = String(p.status || '').toLowerCase()
-      const statusClass = statusLower === 'ativo' ? 'ativo' : 'inativo'
-      const toggleText = statusLower === 'ativo' ? 'Desativar' : 'Ativar'
       return `
       <tr data-id="${p.id}">
-        <td>${img ? `<img src="${img}" alt="${p.titulo || ''}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;"/>` : ''}</td>
-        <td class="col-nome">${p.titulo || ''}</td>
+        <td>${img ? `<a href="/pagina-produto?id=${p.id}" class="link-produto"><img src="${img}" alt="${p.titulo || ''}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;"/></a>` : ''}</td>
+        <td class="col-nome"><a href="/pagina-produto?id=${p.id}" class="link-produto">${p.titulo || ''}</a></td>
         <td class="col-preco">${formatBRL(preco)}</td>
-        <td><span class="badge ${statusClass}">${p.status || 'inativo'}</span></td>
         <td class="acoes">
           <button class="btn editar" data-acao="editar"><i class="fa-solid fa-pen"></i> Editar</button>
-          <button class="btn desativar" data-acao="toggle"><i class="fa-solid fa-power-off"></i> ${toggleText}</button>
+          <button class="btn desativar" data-acao="excluir"><i class="fa-solid fa-trash"></i> Excluir</button>
         </td>
       </tr>
       <tr class="detalhes-produto" data-id="${p.id}">
-        <td colspan="5">
+        <td colspan="4">
           <div class="conteudo">
-            <span class="preco">Preço ML: ${precoML > 0 ? formatBRL(precoML) : '—'}</span>
+            <span class="preco">Preço Mercado Livre: ${precoML > 0 ? formatBRL(precoML) : '—'}</span>
             <span class="preco">Preço Amazon: ${precoAZ > 0 ? formatBRL(precoAZ) : '—'}</span>
             <div class="acoes">
               <button class="btn desativar" data-acao="excluir"><i class="fa-solid fa-trash"></i> Excluir</button>
@@ -245,6 +314,68 @@
       </tr>`
     }).join('');
     tbody.querySelectorAll('button').forEach(btn => btn.addEventListener('click', onAcaoProduto));
+    // Interatividade: clique na linha alterna exibição dos detalhes
+    tbody.querySelectorAll('tr[data-id]').forEach(row => {
+      row.addEventListener('click', (ev) => {
+        // Evitar conflito quando clicar nos botões de ação
+        if (ev.target.closest('button')) return;
+        if (ev.target.closest('a')) return;
+        const id = row.getAttribute('data-id');
+        const detalhes = tbody.querySelector(`tr.detalhes-produto[data-id="${id}"]`);
+        if (detalhes) detalhes.classList.toggle('aberto');
+      });
+    });
+  }
+
+  function renderPaginacaoProdutosVend() {
+    const cont = document.getElementById('paginacaoProdutosVend')
+    if (!cont) return
+    cont.innerHTML = ''
+    vendorTotalPaginas = Math.max(1, Math.ceil((vendorProdutos?.length || 0) / vendorItensPorPagina))
+    if (vendorTotalPaginas <= 1) { cont.style.display = 'none'; return }
+    cont.style.display = 'flex'
+
+    const info = document.createElement('span')
+    info.className = 'info-pagina'
+    info.textContent = `Página ${vendorPaginaAtual} de ${vendorTotalPaginas}`
+    cont.appendChild(info)
+
+    const mkBtn = (label, onClick, disabled, ativo) => {
+      const b = document.createElement('button')
+      b.textContent = label
+      b.disabled = !!disabled
+      b.className = ativo ? 'ativo' : ''
+      b.addEventListener('click', onClick)
+      return b
+    }
+
+    const prev = mkBtn('‹ Anterior', () => {
+      if (vendorPaginaAtual > 1) {
+        vendorPaginaAtual -= 1
+        renderProdutos()
+        renderPaginacaoProdutosVend()
+      }
+    }, vendorPaginaAtual === 1, false)
+    cont.appendChild(prev)
+
+    const start = Math.max(1, vendorPaginaAtual - 2)
+    const end = Math.min(vendorTotalPaginas, vendorPaginaAtual + 2)
+    if (start > 1) cont.appendChild(mkBtn('1', () => { vendorPaginaAtual = 1; renderProdutos(); renderPaginacaoProdutosVend() }, false, false))
+    if (start > 2) { const el = document.createElement('span'); el.textContent = '...'; cont.appendChild(el) }
+    for (let p = start; p <= end; p++) {
+      cont.appendChild(mkBtn(String(p), () => { vendorPaginaAtual = p; renderProdutos(); renderPaginacaoProdutosVend() }, false, p === vendorPaginaAtual))
+    }
+    if (end < vendorTotalPaginas - 1) { const el = document.createElement('span'); el.textContent = '...'; cont.appendChild(el) }
+    if (end < vendorTotalPaginas) cont.appendChild(mkBtn(String(vendorTotalPaginas), () => { vendorPaginaAtual = vendorTotalPaginas; renderProdutos(); renderPaginacaoProdutosVend() }, false, false))
+
+    const next = mkBtn('Próxima ›', () => {
+      if (vendorPaginaAtual < vendorTotalPaginas) {
+        vendorPaginaAtual += 1
+        renderProdutos()
+        renderPaginacaoProdutosVend()
+      }
+    }, vendorPaginaAtual === vendorTotalPaginas, false)
+    cont.appendChild(next)
   }
 
   function onAcaoProduto(e) {
@@ -255,70 +386,74 @@
     const idx = vendorProdutos.findIndex(p => String(p.id) === String(id));
     if (idx === -1) return;
     const atual = vendorProdutos[idx]
-    if (acao === 'toggle') {
-      const novo = String(atual.status || '').toLowerCase() === 'ativo' ? 'inativo' : 'ativo'
-      ;(async () => {
-        try {
-          const r = await fetch(`/api/vendors/products/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ status: novo })
-          })
-          const data = await r.json()
-          if (data && data.success) {
-            logHistorico(`Produto ${novo === 'ativo' ? 'ativado' : 'desativado'}: ${atual.titulo || ''}`)
-            mostrarToast(`Produto ${novo === 'ativo' ? 'ativado' : 'desativado'} com sucesso.`, 'success')
-            await refreshProdutos()
-          } else {
-            logHistorico('Falha ao atualizar status do produto')
-            mostrarToast(data?.message || 'Falha ao atualizar status do produto.', 'error')
-          }
-        } catch (e) {
-          console.warn('Erro ao atualizar produto:', e)
-          logHistorico('Erro ao atualizar status do produto')
-          mostrarToast('Erro ao atualizar status do produto.', 'error')
-        }
-      })()
-    }
+    // toggle removido
     if (acao === 'editar') {
-      ;(async () => {
+      const modal = document.getElementById('modalEditarProduto');
+      const form = document.getElementById('formEditarProdutoVend');
+      if (modal && form) {
+        // Prefill campos do formulário inline
+        form.dataset.id = String(id);
+        const get = (x) => document.getElementById(x);
+        const nomeEl = get('editProdutoNome');
+        const descEl = get('editProdutoDescricao');
+        const precoMLEl = get('editProdutoPrecoML');
+        const precoAZEl = get('editProdutoPrecoAmazon');
+        const fmtMLEl = get('editPrecoMLFormatado');
+        const fmtAZEl = get('editPrecoAmazonFormatado');
+        const fotoEl = get('editProdutoFoto');
+        const linkMLEl = get('editProdutoLinkML');
+        const linkAZEl = get('editProdutoLinkAmazon');
+        const catEl = get('editProdutoCategoria');
+        const subEl = get('editProdutoSubcategoria');
+        // status removido do formulário
+
+        if (nomeEl) nomeEl.value = atual.titulo || '';
+        if (descEl) descEl.value = atual.descricao || '';
+        let img = '';
         try {
-          const promptFn = (window.sitePopup && window.sitePopup.prompt)
-            ? window.sitePopup.prompt
-            : async (msg) => {
-                const val = prompt(msg)
-                return val === null ? null : val
-              }
-          const mlStr = await promptFn('Novo preço Mercado Livre (deixe em branco para não alterar):', 'Entrada', 'Ex.: 199.90')
-          const azStr = await promptFn('Novo preço Amazon (deixe em branco para não alterar):', 'Entrada', 'Ex.: 209.90')
-          const precoMLNum = (mlStr === null || mlStr === '') ? NaN : Number(mlStr)
-          const precoAZNum = (azStr === null || azStr === '') ? NaN : Number(azStr)
-          if (isNaN(precoMLNum) && isNaN(precoAZNum)) return
-          const payload = {}
-          if (!isNaN(precoMLNum)) payload.precoMercadoLivre = precoMLNum
-          if (!isNaN(precoAZNum)) payload.precoAmazon = precoAZNum
-          const r = await fetch(`/api/vendors/products/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          })
-          const data = await r.json()
-          if (data && data.success) {
-            logHistorico(`Produto editado: ${atual.titulo || ''}`)
-            mostrarToast('Produto editado com sucesso.', 'success')
-            await refreshProdutos()
-          } else {
-            logHistorico('Falha ao editar produto')
-            mostrarToast(data?.message || 'Falha ao editar produto.', 'error')
-          }
-        } catch (e) {
-          console.warn('Erro ao editar produto:', e)
-          logHistorico('Erro ao editar produto')
-          mostrarToast('Erro ao editar produto.', 'error')
+          const arr = JSON.parse(atual.imagens || '[]');
+          img = Array.isArray(arr) && arr.length ? arr[0] : '';
+        } catch { img = ''; }
+        if (fotoEl) fotoEl.value = img || '';
+
+        const precoML = atual.precoMercadoLivre !== undefined ? Number(atual.precoMercadoLivre) : Number(atual.precoML ?? NaN);
+        const precoAZ = atual.precoAmazon !== undefined ? Number(atual.precoAmazon) : Number(atual.precoAZ ?? NaN);
+        if (precoMLEl) precoMLEl.value = !isNaN(precoML) ? String(precoML) : '';
+        if (precoAZEl) precoAZEl.value = !isNaN(precoAZ) ? String(precoAZ) : '';
+        const updateFmt = (el, out) => { if (!el || !out) return; const val = parseFloat(el.value); out.textContent = !isNaN(val) ? formatBRL(val) : ''; };
+        updateFmt(precoMLEl, fmtMLEl);
+        updateFmt(precoAZEl, fmtAZEl);
+        ['input','change','blur'].forEach(ev => {
+          if (precoMLEl && fmtMLEl) precoMLEl.addEventListener(ev, () => updateFmt(precoMLEl, fmtMLEl));
+          if (precoAZEl && fmtAZEl) precoAZEl.addEventListener(ev, () => updateFmt(precoAZEl, fmtAZEl));
+        });
+
+        if (linkMLEl) linkMLEl.value = atual.linkMercadoLivre || atual.linkML || '';
+        if (linkAZEl) linkAZEl.value = atual.linkAmazon || '';
+
+        // Popular selects de categoria/subcategoria
+        if (catEl) {
+          const categorias = Object.keys(sistemaCategorias);
+          catEl.innerHTML = ['<option value="">Selecione...</option>', ...categorias.map(c => `<option value="${c}">${c}</option>`)].join('');
+          catEl.value = atual.categoria || '';
         }
-      })()
+        if (subEl) {
+          const cat = (catEl?.value || atual.categoria || '');
+          const subs = cat ? (sistemaCategorias[cat]?.subcategorias || []) : [];
+          subEl.innerHTML = ['<option value="">Selecione...</option>', ...subs.map(s => `<option value="${s}">${s}</option>`)].join('');
+          subEl.value = atual.subcategoria || '';
+        }
+        catEl?.addEventListener('change', () => {
+          const cat = catEl.value;
+          const subs = cat ? (sistemaCategorias[cat]?.subcategorias || []) : [];
+          subEl.innerHTML = ['<option value="">Selecione...</option>', ...subs.map(s => `<option value="${s}">${s}</option>`)].join('');
+        });
+
+        // status removido do formulário
+
+        modal.classList.add('visivel');
+        try { document.body.classList.add('modal-aberto'); } catch (_) {}
+      }
     }
 
     if (acao === 'excluir') {
@@ -351,17 +486,28 @@
     }
   }
 
-  // Toast simples para feedback ao usuário
+  // Feedback ao usuário via toast no canto inferior esquerdo
   function mostrarToast(msg, tipo = 'info') {
-    const cont = document.getElementById('toastContainer')
-    if (!cont) { try { window.sitePopup && window.sitePopup.alert(String(msg), tipo === 'error' ? 'Erro' : 'Aviso') } catch {} return }
-    const el = document.createElement('div')
-    el.className = `toast ${tipo}`
-    el.innerHTML = `<span>${msg}</span><span class="acao">Fechar</span>`
-    const remover = () => { try { el.remove() } catch {} }
-    el.querySelector('.acao')?.addEventListener('click', remover)
-    cont.appendChild(el)
-    setTimeout(remover, 4000)
+    const cont = document.getElementById('toastContainer');
+    if (!cont) {
+      // Fallback para popup central se container não existir
+      try {
+        const titulo = tipo === 'error' ? 'Erro' : (tipo === 'success' ? 'Sucesso' : 'Aviso');
+        if (window.sitePopup && typeof window.sitePopup.alert === 'function') {
+          window.sitePopup.alert(String(msg), titulo);
+          return;
+        }
+      } catch (_) {}
+      try { alert(String(msg)); } catch {}
+      return;
+    }
+    const el = document.createElement('div');
+    el.className = `toast ${tipo}`;
+    el.innerHTML = `<span>${String(msg)}</span><span class="acao" role="button" aria-label="Fechar">Fechar</span>`;
+    const remover = () => { try { el.remove(); } catch (_) {} };
+    el.querySelector('.acao')?.addEventListener('click', remover);
+    cont.appendChild(el);
+    setTimeout(remover, 4000);
   }
 
   // Vendedores - tabela integrada
@@ -512,6 +658,9 @@
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
+      const btnSubmit = form.querySelector('button[type="submit"]');
+      const originalHTML = btnSubmit ? btnSubmit.innerHTML : '';
+      if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
       const novo = {
         nomeLoja: (nomeEl?.value || '').trim(),
         telefone: (telEl?.value || '').trim(),
@@ -528,12 +677,23 @@
         if (data && data.success) {
           setJSON(STORAGE_KEYS.config, novo);
           logHistorico('Configurações salvas no servidor');
+          mostrarToast('Configurações salvas com sucesso.', 'success');
+          if (btnSubmit) {
+            btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Salvo';
+            setTimeout(() => { btnSubmit.innerHTML = originalHTML; }, 1200);
+          }
         } else {
           logHistorico('Falha ao salvar configurações no servidor');
+          mostrarToast(data?.message || 'Falha ao salvar configurações.', 'error');
+          if (btnSubmit) btnSubmit.innerHTML = originalHTML;
         }
       } catch (e) {
         console.warn('Erro ao salvar loja do vendedor:', e);
         logHistorico('Erro ao salvar configurações no servidor');
+        mostrarToast('Erro ao salvar configurações.', 'error');
+        if (btnSubmit) btnSubmit.innerHTML = originalHTML;
+      } finally {
+        if (btnSubmit) btnSubmit.disabled = false;
       }
     });
   }
@@ -639,7 +799,78 @@
     initConfig();
     initHistoricoControls();
     renderHistorico();
-    updateStats();
     aplicarBoasVindas();
+    // Modal de edição: fechar, cancelar e salvar
+    const modal = document.getElementById('modalEditarProduto');
+    const fechar = document.getElementById('fecharModalEditar');
+    const formEdit = document.getElementById('formEditarProdutoVend');
+    const btnCancelar = document.getElementById('btnCancelarEdicaoProduto');
+
+    const fecharModalEdicao = () => {
+      if (modal) modal.classList.remove('visivel');
+      try { document.body.classList.remove('modal-aberto'); } catch (_) {}
+      if (formEdit) {
+        formEdit.reset();
+        delete formEdit.dataset.id;
+        // Limpar previews de preço
+        const fmtML = document.getElementById('editPrecoMLFormatado');
+        const fmtAZ = document.getElementById('editPrecoAmazonFormatado');
+        if (fmtML) fmtML.textContent = '';
+        if (fmtAZ) fmtAZ.textContent = '';
+      }
+    };
+    if (fechar && modal) fechar.addEventListener('click', () => { fecharModalEdicao(); refreshProdutos(); });
+    if (btnCancelar) btnCancelar.addEventListener('click', () => { fecharModalEdicao(); });
+
+    if (formEdit) {
+      formEdit.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = formEdit.dataset.id;
+        if (!id) { fecharModalEdicao(); return; }
+        const get = (x) => document.getElementById(x);
+        const btnSubmit = document.getElementById('btnSalvarEdicaoProduto');
+        const originalHTML = btnSubmit ? btnSubmit.innerHTML : '';
+        if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
+        const nome = (get('editProdutoNome')?.value || '').trim();
+        const descricao = (get('editProdutoDescricao')?.value || '').trim();
+        const fotoUrl = (get('editProdutoFoto')?.value || '').trim();
+        const linkMercadoLivre = (get('editProdutoLinkML')?.value || '').trim();
+        const linkAmazon = (get('editProdutoLinkAmazon')?.value || '').trim();
+        const categoria = (get('editProdutoCategoria')?.value || '').trim();
+        const subcategoria = (get('editProdutoSubcategoria')?.value || '').trim();
+        const precoMLRaw = get('editProdutoPrecoML')?.value;
+        const precoAZRaw = get('editProdutoPrecoAmazon')?.value;
+        const precoMercadoLivre = precoMLRaw !== undefined && precoMLRaw !== '' ? Number(precoMLRaw) : undefined;
+        const precoAmazon = precoAZRaw !== undefined && precoAZRaw !== '' ? Number(precoAZRaw) : undefined;
+        try {
+          const r = await fetch(`/api/vendors/products/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ nome, descricao, fotoUrl, linkMercadoLivre, linkAmazon, categoria, subcategoria, precoMercadoLivre, precoAmazon })
+          });
+          const data = await r.json();
+          if (data && data.success) {
+            mostrarToast('Produto atualizado com sucesso.', 'success');
+            logHistorico(`Produto editado: ${nome || data.data?.titulo || ''}`);
+            fecharModalEdicao();
+            await refreshProdutos();
+            if (btnSubmit) {
+              btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Salvo';
+              setTimeout(() => { btnSubmit.innerHTML = originalHTML; }, 1200);
+            }
+          } else {
+            mostrarToast(data?.message || 'Falha ao atualizar produto.', 'error');
+            if (btnSubmit) btnSubmit.innerHTML = originalHTML;
+          }
+        } catch (err) {
+          console.warn('Erro ao salvar produto do vendedor:', err);
+          mostrarToast('Erro ao salvar produto.', 'error');
+          if (btnSubmit) btnSubmit.innerHTML = originalHTML;
+        } finally {
+          if (btnSubmit) btnSubmit.disabled = false;
+        }
+      });
+    }
   });
 })();

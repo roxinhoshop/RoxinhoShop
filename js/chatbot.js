@@ -479,18 +479,54 @@ function formatProductsNode(items) {
   return list;
 }
 
-// Formata datas diversas para dd/mm/aaaa
+// Formata datas diversas para dd/mm/aaaa HH:mm (pt-BR)
 function formatDate(d) {
   try {
-    if (!d) return null;
-    const date = (d instanceof Date) ? d : new Date(d);
+    if (d == null) return null;
+    let date = null;
+    if (d instanceof Date) {
+      date = d;
+    } else if (typeof d === 'number') {
+      // Trata timestamp em segundos ou milissegundos
+      const ms = d < 1e12 ? d * 1000 : d;
+      date = new Date(ms);
+    } else if (typeof d === 'string') {
+      const s = d.trim();
+      if (!s) return null;
+      if (/^\d+$/.test(s)) {
+        // Apenas dígitos: segundos (10) ou milissegundos (13)
+        const num = parseInt(s, 10);
+        const ms = s.length <= 10 ? num * 1000 : num;
+        date = new Date(ms);
+      } else {
+        // Normaliza "YYYY-MM-DD HH:mm:ss" para "YYYY-MM-DDTHH:mm:ss"
+        const normalized = s.replace(' ', 'T');
+        date = new Date(normalized);
+        if (isNaN(date.getTime())) {
+          // Fallback robusto para formatos comuns
+          const m = s.match(/^([0-9]{4})[-\/]([0-9]{2})[-\/]([0-9]{2})(?:[ T]([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?)?$/);
+          if (m) {
+            const Y = parseInt(m[1], 10);
+            const M = parseInt(m[2], 10) - 1;
+            const D = parseInt(m[3], 10);
+            const h = parseInt(m[4] || '00', 10);
+            const min = parseInt(m[5] || '00', 10);
+            const sec = parseInt(m[6] || '00', 10);
+            date = new Date(Y, M, D, h, min, sec);
+          }
+        }
+      }
+    }
+    if (!date) return null;
     const time = date.getTime();
     if (isNaN(time)) return null;
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const yyyy = date.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-  } catch (_) { return null; }
+    // Usa fuso de São Paulo para consistência no Brasil
+    const dataPt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(date);
+    const horaPt = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Sao_Paulo' }).format(date);
+    return `${dataPt} ${horaPt}`;
+  } catch (_) {
+    return null;
+  }
 }
 
 // Link estilizado para páginas fixas do site (Vercel)

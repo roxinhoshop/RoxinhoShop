@@ -1,46 +1,61 @@
-// Configuração da conexão exclusivamente com MySQL (Railway/produção)
+// Configuração da conexão com banco de dados (MySQL com fallback opcional para SQLite em desenvolvimento)
 const { Sequelize } = require('sequelize');
+// Garante que o bundler da Vercel inclua o driver mysql2
+// (Sequelize carrega dinamicamente, mas em serverless pode não ser detectado)
 require('mysql2');
 const path = require('path');
+// Carrega .env do root do projeto para garantir disponibilidade em scripts executados dentro de /api
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const getSequelizeInstance = () => {
-  // Preferir URL completa; se ausente, montar a partir de variáveis discretas
-  const mysqlUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
-  const host = process.env.MYSQL_HOST;
-  const user = process.env.MYSQL_USER;
-  const password = process.env.MYSQL_PASSWORD;
-  const database = process.env.MYSQL_DB || process.env.MYSQL_DATABASE;
-  const port = Number(process.env.MYSQL_PORT || 3306);
+  // Fallback de desenvolvimento: usar SQLite se SQLITE_PATH estiver definido
+  const sqlitePath = process.env.SQLITE_PATH;
+  if (sqlitePath) {
+    return new Sequelize({
+      dialect: 'sqlite',
+      storage: sqlitePath,
+      logging: false,
+    });
+  }
 
-  if (mysqlUrl) {
-    return new Sequelize(mysqlUrl, {
+  // Preferir URL completa se disponível (Railway / conexões remotas)
+  const url = process.env.MYSQL_URL || process.env.DB_PUBLIC_URL;
+  if (url) {
+    return new Sequelize(url, {
       dialect: 'mysql',
       logging: false,
       dialectOptions: {
         ssl: process.env.DB_SSL === 'true' ? { require: true, rejectUnauthorized: false } : undefined,
         charset: 'utf8mb4'
       },
-      define: { charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci' }
+      define: {
+        charset: 'utf8mb4',
+        collate: 'utf8mb4_unicode_ci'
+      }
     });
   }
 
-  if (host && user && password && database) {
-    return new Sequelize(database, user, password, {
-      host,
-      port,
-      dialect: 'mysql',
-      logging: false,
-      dialectOptions: {
-        ssl: process.env.DB_SSL === 'true' ? { require: true, rejectUnauthorized: false } : undefined,
-        charset: 'utf8mb4'
-      },
-      define: { charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci' }
-    });
-  }
+  // Mapeia variáveis padrão (DB_* ou MYSQL*)
+  const name = process.env.DB_NAME || process.env.MYSQLDATABASE;
+  const user = process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_ROOT_USER || 'root';
+  const pass = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD || '';
+  const host = process.env.DB_HOST || process.env.MYSQLHOST || 'localhost';
+  const port = parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306', 10);
 
-  // Sem SQLite fallback: falha claramente quando MySQL não está configurado
-  throw new Error('Configuração MySQL ausente. Defina MYSQL_URL ou (MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB, MYSQL_PORT).');
+  return new Sequelize(name, user, pass, {
+    host,
+    port,
+    dialect: 'mysql',
+    logging: false,
+    dialectOptions: {
+      ssl: process.env.DB_SSL === 'true' ? { require: true, rejectUnauthorized: false } : undefined,
+      charset: 'utf8mb4'
+    },
+    define: {
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_unicode_ci'
+    }
+  });
 };
 
 const sequelize = getSequelizeInstance();
@@ -49,11 +64,6 @@ const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log('MySQL conectado com sucesso.');
-    try {
-      await sequelize.query("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'");
-    } catch (err) {
-      console.warn('Falha ao aplicar SET NAMES utf8mb4:', err && err.message ? err.message : err);
-    }
   } catch (error) {
     console.error(`Erro ao conectar ao MySQL: ${error.message}`);
     process.exit(1);

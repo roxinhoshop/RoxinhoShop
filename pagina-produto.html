@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="/css/cabecalho-rodape.css">
   <link rel="stylesheet" href="/css/home.css">
   <link rel="stylesheet" href="/css/responsivo.css">
+  <!-- Reuso de estilos de modal do vendedor -->
+  <link rel="stylesheet" href="/css/vendedores.css">
 
   <!-- Chart.js para o gráfico de histórico de preços -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -245,6 +247,66 @@
       <button class="btn-enviar-avaliacao" id="btnEnviarAvaliacao">Publicar avaliação</button>
     </div>
   </div>
+</div>
+
+<!-- Modal de Edição (Admin) -->
+<div class="modal" id="modalEditarAdmin" aria-hidden="true">
+  <div class="modal-conteudo">
+    <div class="modal-cabecalho">
+      <h3>Editar produto</h3>
+      <button class="btn-fechar-modal" id="btnFecharEditarAdmin" aria-label="Fechar">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <label>
+        Título
+        <input type="text" id="editTitulo" placeholder="Título do produto">
+      </label>
+      <label>
+        Descrição
+        <textarea id="editDescricao" placeholder="Descrição breve"></textarea>
+      </label>
+      <label>
+        Preço Mercado Livre
+        <input type="number" step="0.01" id="editPrecoML" placeholder="0,00">
+      </label>
+      <label>
+        Preço Amazon
+        <input type="number" step="0.01" id="editPrecoAMZ" placeholder="0,00">
+      </label>
+      <label>
+        Link Mercado Livre
+        <input type="url" id="editLinkML" placeholder="https://...">
+      </label>
+      <label>
+        Link Amazon
+        <input type="url" id="editLinkAMZ" placeholder="https://...">
+      </label>
+      <label>
+        Categoria
+        <input type="text" id="editCategoria" placeholder="Categoria">
+      </label>
+      <label>
+        Subcategoria
+        <input type="text" id="editSubcategoria" placeholder="Subcategoria">
+      </label>
+      <label>
+        Status
+        <select id="editStatus">
+          <option value="ativo">Ativo</option>
+          <option value="inativo">Inativo</option>
+        </select>
+      </label>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn-cancelar" id="btnCancelarEditarAdmin">Cancelar</button>
+      <button class="btn-enviar-avaliacao" id="btnSalvarEditarAdmin">Salvar alterações</button>
+    </div>
+  </div>
+  <!-- A classe .visivel controla exibição via CSS do vendedores.css -->
+  <!-- body.modal-aberto evita rolagem quando modal está aberto -->
+  
 </div>
 
 <!-- Produtos Relacionados -->

@@ -1,7 +1,7 @@
 // Configuração global de API com fallback automático e variável central
 (function(){
   // Ajuste: deixe vazio para usar window.location.origin via fallback
-  const CONFIG_API_BASE = 'https://backend.roxinhoshopoficial.workers.dev';
+  const CONFIG_API_BASE = '';
 
   try {
     // Respeita valor já definido externamente, senão usa a constante acima

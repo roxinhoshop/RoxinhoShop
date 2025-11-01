@@ -240,8 +240,13 @@ html.dark .cabecalho-historico h1 { color: #ffffff; }
   cursor: pointer;
   color: #111827;
 }
+.paginacao span {
+  color: #000000; /* texto preto no light mode */
+  font-weight: 600;
+}
 .paginacao button:disabled { opacity: .5; cursor: not-allowed; }
 html.dark .paginacao button { background: #000000; color: #e5e7eb; border-color: #334155; }
+html.dark .paginacao span { color: #e5e7eb; }
 html.dark .thumb-produto { background: #000000; }
 html.dark .nome-produto { color: #ffffff; }
 html.dark .data-visualizacao .label { color: #9ca3af; }

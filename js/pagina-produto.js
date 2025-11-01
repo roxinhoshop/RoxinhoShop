@@ -147,7 +147,6 @@ class SistemaAvaliacoes {
         this.src = '/imagens/thumbs/produto1.webp';
       };
     }
-    this.definirElementoTexto("marcaProduto", produto.marca || '');
     this.definirElementoTexto("nomeProduto", produto.titulo || '');
     this.definirElementoTexto("descricaoProduto", produto.descricao || '');
     
@@ -357,8 +356,7 @@ class SistemaAvaliacoes {
 
       // Seleção robusta de relacionados:
       // 1) Mesma categoria (se existir)
-      // 2) Mesma marca (fallback)
-      // 3) Destaques ou demais ativos para completar até 4 itens
+      // 2) Destaques ou demais ativos para completar até 4 itens
       const candidatosBase = todos
         .filter(p => p && p.ativo !== false && Number(p.id) !== Number(this.produtoAtual.id));
 
@@ -369,15 +367,7 @@ class SistemaAvaliacoes {
         relacionados = candidatosBase.filter(p => p.categoria === this.produtoAtual.categoria);
       }
 
-      // Fallback por marca
-      if (relacionados.length < 4 && this.produtoAtual && this.produtoAtual.marca) {
-        const marcaAtual = String(this.produtoAtual.marca || '').toLowerCase();
-        const porMarca = candidatosBase.filter(p => String(p.marca || '').toLowerCase() === marcaAtual);
-        // Mesclar sem duplicar
-        const mapa = new Map();
-        [...relacionados, ...porMarca].forEach(item => mapa.set(item.id, item));
-        relacionados = Array.from(mapa.values());
-      }
+      // Fallback por marca removido
 
       // Completar com destaques e depois restantes
       if (relacionados.length < 4) {
@@ -439,7 +429,7 @@ class SistemaAvaliacoes {
                 ${imagemHTML}
               </div>
               <div class="conteudo-produto">
-                <div class="marca-produto">${produto.marca || ''}</div>
+                
                 <h3 class="nome-produto">${produto.titulo}</h3>
                 <div class="avaliacao-produto">
                   <div class="estrelas">${this.gerarEstrelas(produto.avaliacao || 0)}</div>

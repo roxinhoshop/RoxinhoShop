@@ -180,8 +180,7 @@
                     <li><a href="/produtos?categoria=Games&subcategoria=Jogos%20PC">Jogos PC</a></li>
                     <li><a href="/produtos?categoria=Games&subcategoria=Jogos%20Console">Jogos Console</a></li>
                     <li><a href="/produtos?categoria=Games&subcategoria=Acessórios%20Gaming">Acessórios Gaming</a></li>
-                    <li><a href="/produtos?categoria=Games&subcategoria=Cadeiras%20Gamer">Cadeiras Gamer</a></li>
-                    <li><a href="/produtos?categoria=Games&subcategoria=Mesas%20Gamer">Mesas Gamer</a></li>
+                    <!-- Removidos para evitar duplicação com Espaço Gamer -->
                     <li><a href="/produtos?categoria=Games&subcategoria=Controles">Controles</a></li>
                     <li><a href="/produtos?categoria=Games&subcategoria=Volantes">Volantes</a></li>
                       </ul>
@@ -579,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
         campoBusca.setAttribute('aria-expanded', 'true');
       }
       // Mensagem mais clara via popup
-      try { window.sitePopup && window.sitePopup.alert('Digite ao menos 2 caracteres com letras ou números.', 'Busca inválida'); } catch {}
+      try { window.sitePopup && window.sitePopup.alert('Digite ao menos 1 caractere com letras ou números.', 'Busca inválida'); } catch {}
       return;
     }
 
@@ -602,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== Validação de termo de busca =====
   function validarTermoBusca(termo) {
     const t = String(termo || '').trim();
-    if (t.length < 2) return false;
+    if (t.length < 1) return false;
     // Exigir ao menos um caractere alfanumérico
     return /[a-z0-9á-ú]/i.test(t);
   }
@@ -978,12 +977,7 @@ if (!img) img = '/imagens/logos/logo-cabecalho.png';
         sugestoes.push({ tipo: 'categoria', texto: categoria, url: `/produtos?categoria=${encodeURIComponent(categoria)}` });
       }
     });
-    const marcas = [...new Set((base || []).map(p => p.marca).filter(Boolean))];
-    marcas.forEach(marca => {
-      if (match(marca)) {
-        sugestoes.push({ tipo: 'marca', texto: marca, url: `/produtos?marca=${encodeURIComponent(marca)}` });
-      }
-    });
+    // sugestões de marca removidas
 
     const sugestoesLimitadas = sugestoes.slice(0, 8);
     renderSugestoes(sugestoesLimitadas);

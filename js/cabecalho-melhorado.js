@@ -801,10 +801,10 @@ function inicializarLoginBox() {
   try {
     setTimeout(() => {
       const assets = [
-        { href: '/login', rel: 'prefetch' },
+        { href: '/login.html', rel: 'prefetch' },
         { href: 'css/login.css', rel: 'prefetch' },
         { href: 'js/login.js', rel: 'prefetch' },
-        { href: '/login-vendedor', rel: 'prefetch' },
+        { href: '/login-vendedor.html', rel: 'prefetch' },
         { href: 'js/login-vendedor.js', rel: 'prefetch' }
       ];
       assets.forEach(({ href, rel }) => {
@@ -933,11 +933,12 @@ function inicializarBuscaGlobal() {
 
   const renderSugestoesComCabecalho = (sugs = [], cabecalho = '') => {
     if (!lista) return;
-    if (!Array.isArray(sugs) || sugs.length === 0) { fecharSugestoes(); return; }
-    currentSuggestions = sugs.slice(0);
+    const items = Array.isArray(sugs) ? sugs.filter(s => s.tipo !== 'marca') : [];
+    if (items.length === 0) { fecharSugestoes(); return; }
+    currentSuggestions = items.slice(0);
     const q = String(campo.value || '').trim();
     const headerHtml = cabecalho ? `<div class="sugestoes-header">${escapeHtml(cabecalho)}</div>` : '';
-    const html = headerHtml + sugs.map((s, i) => {
+    const html = headerHtml + items.map((s, i) => {
       const href = String(s.url || '').startsWith('/') ? s.url : ('/' + String(s.url || ''));
       const tipo = s.tipo === 'categoria'
         ? 'Categoria'
@@ -977,10 +978,11 @@ function inicializarBuscaGlobal() {
 
   const renderSugestoes = (sugs = []) => {
     if (!lista) return;
-    if (!Array.isArray(sugs) || sugs.length === 0) { fecharSugestoes(); return; }
-    currentSuggestions = sugs.slice(0);
+    const items = Array.isArray(sugs) ? sugs.filter(s => s.tipo !== 'marca') : [];
+    if (items.length === 0) { fecharSugestoes(); return; }
+    currentSuggestions = items.slice(0);
     const q = String(campo.value || '').trim();
-    const html = sugs.map((s, i) => {
+    const html = items.map((s, i) => {
       const href = String(s.url || '').startsWith('/') ? s.url : ('/' + String(s.url || ''));
       const tipo = s.tipo === 'categoria'
         ? 'Categoria'
@@ -1036,16 +1038,40 @@ function inicializarBuscaGlobal() {
   const consultarSugestoes = debounce(async (term) => {
     const q = String(term || '').trim();
     if (limpar) { limpar.style.display = q ? 'flex' : 'none'; }
-    if (q.length < 2) { renderRecentes(); return; }
+    if (q.length < 1) { renderRecentes(); return; }
     try {
       try { campo.setAttribute('aria-busy', 'true'); } catch {}
       const resp = await fetch(`${API_BASE}/api/products/search?q=${encodeURIComponent(q)}`);
-      if (!resp.ok) { fecharSugestoes(); return; }
+      if (!resp.ok) {
+        // Backend falhou: usar fallback local
+        const fallback = await gerarSugestoesLocais(q);
+        if (fallback && fallback.length) { renderSugestoes(fallback); } else { fecharSugestoes(); }
+        renderPreview(null);
+        return;
+      }
       const data = await resp.json();
-      renderSugestoes(Array.isArray(data.suggestions) ? data.suggestions : []);
-      renderPreview(data.preview || null);
+      const suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
+      if (suggestions.length > 0) {
+        renderSugestoes(suggestions);
+        renderPreview(data.preview || null);
+      } else {
+        // Sem sugestões do backend: criar sugestões úteis baseadas no termo
+        const fallback = await gerarSugestoesLocais(q);
+        if (fallback && fallback.length) {
+          renderSugestoes(fallback);
+          // Prévia local baseada em produto mais relevante, se disponível
+          const pvLocal = await gerarPreviewLocal(q);
+          renderPreview(pvLocal || null);
+        } else {
+          fecharSugestoes();
+          renderPreview(null);
+        }
+      }
     } catch (_) {
-      fecharSugestoes();
+      // Erro na chamada: usar fallback local
+      const fallback = await gerarSugestoesLocais(q);
+      if (fallback && fallback.length) { renderSugestoes(fallback); } else { fecharSugestoes(); }
+      renderPreview(null);
     } finally {
       try { campo.removeAttribute('aria-busy'); } catch {}
     }
@@ -1145,6 +1171,119 @@ function inicializarBuscaGlobal() {
     const q = String(campo.value||'').trim();
     if (!q) renderRecentes();
   });
+
+  // ===== Helpers locais para fallback de sugestões =====
+  const normalize = (s) => String(s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+  const carregarBaseProdutos = async () => {
+    try {
+      if (Array.isArray(window.__produtosCacheLocal) && window.__produtosCacheLocal.length) return window.__produtosCacheLocal;
+      const resp = await fetch(`${API_BASE}/api/products`);
+      const json = await resp.json();
+      const lista = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      window.__produtosCacheLocal = lista || [];
+      return window.__produtosCacheLocal;
+    } catch (_) {
+      return [];
+    }
+  };
+
+  const extrairCategoriasDoMenu = () => {
+    try {
+      const links = Array.from(document.querySelectorAll('.barra-categorias a[href*="/produtos?categoria="]'));
+      const cats = links.map(a => {
+        try {
+          const url = new URL(a.getAttribute('href'), window.location.origin);
+          return url.searchParams.get('categoria') || a.textContent.trim();
+        } catch (_) { return a.textContent.trim(); }
+      }).filter(Boolean);
+      return Array.from(new Set(cats));
+    } catch (_) {
+      return [];
+    }
+  };
+
+  const gerarSugestoesLocais = async (q) => {
+    const term = normalize(q);
+    if (!term) return [];
+    const tokens = term.split(/\s+/).filter(Boolean);
+
+    // Sempre incluir opção de pesquisar pelo termo completo
+    const base = [];
+    base.push({ tipo: 'busca', texto: q, url: `/produtos?busca=${encodeURIComponent(q)}` });
+
+    // Categorias do menu que combinam com os tokens digitados
+    const categorias = extrairCategoriasDoMenu();
+    categorias.forEach(cat => {
+      const cNorm = normalize(cat);
+      const ok = tokens.every(t => cNorm.includes(t));
+      if (ok) base.push({ tipo: 'categoria', texto: cat, url: `/produtos?categoria=${encodeURIComponent(cat)}` });
+    });
+
+    // Produtos locais (se houver) que combinam com o termo
+    try {
+      const produtos = await carregarBaseProdutos();
+      const encontrados = [];
+      (produtos || []).forEach(p => {
+        const titulo = normalize(p.titulo || p.nome || '');
+        const marca = normalize(p.marca || '');
+        const cat = normalize(p.categoria || '');
+        const ok = tokens.every(t => titulo.includes(t) || marca.includes(t) || cat.includes(t));
+        if (ok) {
+          const precoML = p.precoMercadoLivre;
+          const precoAMZ = p.precoAmazon;
+          const precoMin = (typeof precoML === 'number' || typeof precoAMZ === 'number')
+            ? Math.min(precoML ?? Number.POSITIVE_INFINITY, precoAMZ ?? Number.POSITIVE_INFINITY)
+            : p.preco;
+          encontrados.push({ tipo: 'produto', texto: p.titulo || p.nome || '', preco: precoMin, url: `/pagina-produto?id=${encodeURIComponent(p.id)}` });
+        }
+      });
+      // Limitar e priorizar: produtos primeiro, depois categorias, mantendo a opção de busca no topo
+      const produtosTop = encontrados.slice(0, 6);
+      const catsTop = base.filter(x => x.tipo === 'categoria').slice(0, 4);
+      const buscar = base.find(x => x.tipo === 'busca');
+      const outros = base.filter(x => x.tipo !== 'categoria' && x.tipo !== 'busca');
+      const final = [buscar, ...produtosTop, ...catsTop, ...outros].filter(Boolean);
+      return final;
+    } catch (_) {
+      // Apenas categorias + buscar quando não há produtos
+      const catsTop = base.filter(x => x.tipo === 'categoria').slice(0, 6);
+      const buscar = base.find(x => x.tipo === 'busca');
+      return [buscar, ...catsTop].filter(Boolean);
+    }
+  };
+
+  const gerarPreviewLocal = async (q) => {
+    try {
+      const term = normalize(q);
+      const tokens = term.split(/\s+/).filter(Boolean);
+      const produtos = await carregarBaseProdutos();
+      let melhor = null;
+      let melhorScore = 0;
+      const scoreProduto = (p) => {
+        const titulo = normalize(p.titulo || p.nome || '');
+        const marca = normalize(p.marca || '');
+        const cat = normalize(p.categoria || '');
+        let s = 0;
+        if (titulo === term) s += 100;
+        if (titulo.startsWith(term)) s += 50;
+        if (tokens.every(t => titulo.includes(t))) s += 40;
+        if (tokens.some(t => marca.includes(t))) s += 20;
+        if (tokens.some(t => cat.includes(t))) s += 10;
+        return s;
+      };
+      (produtos || []).forEach(p => {
+        const s = scoreProduto(p);
+        if (s > melhorScore) { melhorScore = s; melhor = p; }
+      });
+      if (!melhor) return null;
+      return { produto: melhor };
+    } catch (_) { return null; }
+  };
 }
 
     // Inserir itens por role (vendedor/admin) acima de "Configurações"
@@ -1306,10 +1445,37 @@ function inicializarBuscaGlobal() {
   };
 
   // Consultar usuário atual via cookie (backend) usando base única
+  const deveConsultarAuthApi = () => {
+    try {
+      const loc = window.location || {};
+      const host = String(loc.hostname || '').toLowerCase();
+      const port = String(loc.port || '');
+      const isLocalDev = (host === 'localhost' || host === '127.0.0.1') && port && port !== '3000';
+      const api = String(window.API_BASE || '');
+      const apiIsLocal3000 = /localhost:3000|127\.0\.0\.1:3000/i.test(api);
+      const hasTokenCookie = typeof document.cookie === 'string' && /(^|;\s*)token=/.test(document.cookie);
+      // Em desenvolvimento local sem cookie de sessão, evite chamar a API para reduzir erros de rede
+      if (isLocalDev && apiIsLocal3000 && !hasTokenCookie) return false;
+    } catch (_) {}
+    return true;
+  };
   const checarAuth = async () => {
     if (window.__authCheckInFlight) return;
     window.__authCheckInFlight = true;
     try {
+      if (!deveConsultarAuthApi()) {
+        // Fallback: vendedor ou cliente local
+        const perfilVend = getPerfilVendedorLocal();
+        const perfilCli = getPerfilClienteLocal();
+        if (perfilVend) {
+          aplicarLogado(perfilVend);
+        } else if (perfilCli) {
+          aplicarLogado(perfilCli);
+        } else {
+          aplicarNaoLogado();
+        }
+        return;
+      }
       const resp = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include', keepalive: true, cache: 'no-store' });
       const ok = resp && resp.ok;
       let data = null;

@@ -162,11 +162,9 @@ function sanitizeProductText(p) {
 // Pontuação de relevância semelhante ao cabeçalho
 function pontuarProduto(produto, tokens, termoRaw) {
   const titulo = produto?.titulo || produto?.nome || '';
-  const marca = produto?.marca || '';
   const categoria = produto?.categoria || '';
   const termo = normalizarTexto(termoRaw);
   const tituloNorm = normalizarTexto(titulo);
-  const marcaNorm = normalizarTexto(marca);
   const catNorm = normalizarTexto(categoria);
 
   let score = 0;
@@ -174,8 +172,6 @@ function pontuarProduto(produto, tokens, termoRaw) {
   if (tituloNorm.startsWith(termo)) score += 60;
   const todasNoTitulo = tokens.every(t => tituloNorm.includes(t));
   if (todasNoTitulo) score += 40;
-  const temMarca = tokens.some(t => marcaNorm.includes(t));
-  if (temMarca) score += 25;
   const temCat = tokens.some(t => catNorm.includes(t));
   if (temCat) score += 15;
   const temModelo = /(?:rtx|gtx|rx|i3|i5|i7|i9|ryzen|m[1-3]|a\d{2}|\b\w{2,}\d{2,}\b)/i.test(termoRaw);
@@ -191,7 +187,7 @@ router.get('/search', async (req, res) => {
   try {
     const termoRaw = String(req.query.q ?? req.query.term ?? req.query.termo ?? '').trim();
     const categoriaFiltro = String(req.query.categoria ?? '').trim();
-    if (!termoRaw || termoRaw.length < 2) {
+    if (!termoRaw || termoRaw.length < 1) {
       return res.status(400).json({ success: false, message: 'Termo de busca muito curto' });
     }
     const termoNorm = normalizarTexto(termoRaw);
@@ -223,9 +219,8 @@ router.get('/search', async (req, res) => {
     const produtoSugestoes = [];
     for (const produto of baseFiltrada) {
       const titulo = produto.titulo || produto.nome || '';
-      const marca = produto.marca || '';
       const categoria = produto.categoria || '';
-      if (matchTokens(titulo) || matchTokens(marca) || matchTokens(categoria)) {
+      if (matchTokens(titulo) || matchTokens(categoria)) {
         const precoML = produto.precoMercadoLivre;
         const precoAMZ = produto.precoAmazon;
         const precoMin = (typeof precoML === 'number' || typeof precoAMZ === 'number')
@@ -267,13 +262,8 @@ router.get('/search', async (req, res) => {
       })
       .filter(Boolean);
 
-    // Sugestões de marcas
-    const marcasSet = Array.from(new Set(baseFiltrada.map(p => p.marca).filter(Boolean)));
-    const marcaSugestoes = marcasSet
-      .filter(m => matchTokens(m))
-      .map(m => ({ tipo: 'marca', texto: m, url: `/produtos?marca=${encodeURIComponent(m)}` }));
-
-    const todasSugestoes = [...produtoSugestoes, ...categoriaSugestoes, ...subcategoriaSugestoes, ...marcaSugestoes].slice(0, 8);
+    // sugestões de marca removidas
+    const todasSugestoes = [...produtoSugestoes, ...categoriaSugestoes, ...subcategoriaSugestoes].slice(0, 8);
 
     // Preview de intenção
     let melhor = null;
@@ -309,7 +299,42 @@ router.get('/', async (req, res) => {
     // Filtra ativos com segurança mesmo sem coluna
     const produtosAtivos = produtosMapeados.filter(p => p.ativo !== false);
 
-    return res.status(200).json({ success: true, count: produtosAtivos.length, data: produtosAtivos });
+    // Agregar avaliações por produto (média e total) a partir da tabela de reviews
+    // Utiliza funções de agregação do Sequelize para evitar N+1 consultas
+    let agregados = [];
+    try {
+      agregados = await Review.findAll({
+        attributes: [
+          'produto_id',
+          [sequelize.fn('AVG', sequelize.col('nota')), 'media'],
+          [sequelize.fn('COUNT', sequelize.col('id')), 'total']
+        ],
+        group: ['produto_id'],
+        raw: true
+      });
+    } catch (e) {
+      agregados = [];
+    }
+
+    const ratingPorProduto = {};
+    for (const row of agregados) {
+      const pid = Number(row.produto_id);
+      const media = Number(row.media);
+      const total = Number(row.total);
+      ratingPorProduto[pid] = {
+        avaliacao: Number.isFinite(media) ? media : 0,
+        totalAvaliacoes: Number.isFinite(total) ? total : 0
+      };
+    }
+
+    const produtosComAval = produtosAtivos.map(p => {
+      const r = ratingPorProduto[Number(p.id)] || { avaliacao: 0, totalAvaliacoes: 0 };
+      // Arredonda para 2 casas para suportar meia-estrela no frontend
+      const avaliacaoOut = Number.isFinite(r.avaliacao) ? Number(r.avaliacao.toFixed(2)) : 0;
+      return { ...p, avaliacao: avaliacaoOut, totalAvaliacoes: r.totalAvaliacoes || 0 };
+    });
+
+    return res.status(200).json({ success: true, count: produtosComAval.length, data: produtosComAval });
   } catch (error) {
     console.error('Erro ao listar produtos:', error);
     return res.status(500).json({ success: false, message: 'Erro interno ao listar produtos' });

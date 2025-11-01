@@ -255,7 +255,8 @@ router.get('/pending', auth, requireAdmin, async (_req, res) => {
 
         -- (C) Cadastros pendentes órfãos (sem vendedor) - incluem apenas dados de loja
         SELECT 
-          cp.vendedorId AS id,
+          cp.id AS id,
+          cp.vendedorId AS vendedorId,
           NULL AS userId,
           NULL AS nomeVendedor,
           cp.nomeLoja AS nomeLoja,
@@ -878,12 +879,17 @@ router.post('/pending/:id/approve', auth, requireAdmin, async (req, res) => {
         )
       }
       try { await sequelize.query(`DELETE FROM cadastros_pendentes WHERE vendedorId = :vid`, { replacements: { vid: id } }) } catch (_) {}
+      try { await sequelize.query(`DELETE FROM cadastros_pendentes WHERE id = :id`, { replacements: { id } }) } catch (_) {}
       return res.json({ success: true, vendorId: id })
     }
 
     // Caso não exista vendedor, tenta criar a partir do cadastro pendente
-    const [cpRows] = await sequelize.query(`SELECT * FROM cadastros_pendentes WHERE vendedorId = :vid LIMIT 1`, { replacements: { vid: id } })
-    const cp = Array.isArray(cpRows) ? cpRows[0] : cpRows
+    let [cpRows] = await sequelize.query(`SELECT * FROM cadastros_pendentes WHERE vendedorId = :vid LIMIT 1`, { replacements: { vid: id } })
+    let cp = Array.isArray(cpRows) ? cpRows[0] : cpRows
+    if (!cp) {
+      const [cpRowsById] = await sequelize.query(`SELECT * FROM cadastros_pendentes WHERE id = :id LIMIT 1`, { replacements: { id } })
+      cp = Array.isArray(cpRowsById) ? cpRowsById[0] : cpRowsById
+    }
     if (!cp) {
       return res.status(404).json({ success: false, message: 'Cadastro pendente não encontrado' })
     }
@@ -945,6 +951,7 @@ router.post('/pending/:id/approve', auth, requireAdmin, async (req, res) => {
 
     // Remove pendência
     try { await sequelize.query(`DELETE FROM cadastros_pendentes WHERE vendedorId = :vid`, { replacements: { vid: id } }) } catch (_) {}
+    try { await sequelize.query(`DELETE FROM cadastros_pendentes WHERE id = :id`, { replacements: { id } }) } catch (_) {}
     return res.json({ success: true, vendorId: vendNew?.id })
   } catch (err) {
     console.error('Erro ao aprovar cadastro pendente:', err)

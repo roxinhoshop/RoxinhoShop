@@ -1,7 +1,17 @@
 // Configuração global de API com fallback automático e variável central
 (function(){
-  // Ajuste: deixe vazio para usar window.location.origin via fallback
-  const CONFIG_API_BASE = '';
+  // Ajuste dinâmico: em desenvolvimento local, se o frontend não estiver na porta 3000,
+  // direciona a API para http://localhost:3000 (onde o backend roda por padrão).
+  const CONFIG_API_BASE = (() => {
+    try {
+      const loc = window.location || {};
+      const host = String(loc.hostname || '').toLowerCase();
+      const port = String(loc.port || '');
+      const isLocal = host === 'localhost' || host === '127.0.0.1';
+      if (isLocal && port !== '3000') return 'http://localhost:3000';
+    } catch (_) {}
+    return '';
+  })();
 
   try {
     // Respeita valor já definido externamente, senão usa a constante acima

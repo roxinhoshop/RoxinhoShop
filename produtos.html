@@ -72,19 +72,7 @@
                         </button>
                     </div>
 
-                    <!-- Filtro de Marcas (seletor) -->
-                    <div class="secao-filtro">
-                        <div class="cabecalho-secao">
-                            <h4>Marcas</h4>
-                            <i class="fas fa-chevron-up icone-expandir"></i>
-                        </div>
-                        <div class="conteudo-secao">
-                            <label for="seletorMarca">Filtrar por marca</label>
-                            <select id="seletorMarca" class="seletor-marca">
-                                <option value="">Todas as Marcas</option>
-                            </select>
-                        </div>
-                    </div>
+                    <!-- (Removido) Filtro de Marcas: duplicava informação e será descontinuado -->
 
                     <!-- Seletor de Plataforma -->
                     <div class="secao-filtro">
@@ -135,8 +123,21 @@
 
                     <!-- Filtro de Avaliação -->
                     <div class="secao-filtro">
-                        <div class="rotulo-avaliacao">Avaliação: <span id="valorAvaliacao">0</span> estrelas</div>
-                        <input type="range" id="filtroAvaliacao" min="0" max="5" value="0" step="0.5">
+                        <div class="cabecalho-secao">
+                            <h4>Estrela</h4>
+                            <i class="fas fa-chevron-up icone-expandir"></i>
+                        </div>
+                        <div class="conteudo-secao">
+                            <div class="rotulo-avaliacao">Filtrar por estrelas</div>
+                            <div class="avaliacao-estrelas" id="grupoAvaliacao" aria-label="Filtrar por estrelas">
+                              <i class="fas fa-star" data-valor="1" title="1 estrela"></i>
+                              <i class="fas fa-star" data-valor="2" title="2 estrelas"></i>
+                              <i class="fas fa-star" data-valor="3" title="3 estrelas"></i>
+                              <i class="fas fa-star" data-valor="4" title="4 estrelas"></i>
+                              <i class="fas fa-star" data-valor="5" title="5 estrelas"></i>
+                              <button type="button" class="btn-limpar-avaliacao" id="limparAvaliacao" title="Limpar filtro de avaliação">Limpar</button>
+                            </div>
+                        </div>
                     </div>
 
                     
@@ -159,27 +160,14 @@
                                 <option value="preco-asc">Preço crescente</option>
                                 <option value="preco-desc">Preço decrescente</option>
                                 <option value="avaliacao">Melhor avaliação</option>
-                                <option value="desconto">Maior desconto</option>
                                 <option value="avaliacoes">Mais avaliações</option>
                                 <option value="nome">Nome A-Z</option>
                             </select>
                         </div>
 
-                        <div class="grupo-exibir">
-                            <label for="seletorExibir">
-                                Exibir:
-                            </label>
-                            <select id="seletorExibir" class="seletor-exibir">
-                                <option value="12">12 por página</option>
-                                <option value="24">24 por página</option>
-                                <option value="36">36 por página</option>
-                                <option value="48">48 por página</option>
-                            </select>
-                        </div>
+                        
 
-                        <div class="contador-produtos">
-                            <span class="numero" id="contadorResultados">0</span> produtos
-                        </div>
+                        
 
                         <button class="botao-alternar-filtros" id="alternarFiltros" aria-controls="barraFiltros" aria-expanded="false" title="Mostrar/ocultar filtros">
                             <i class="fas fa-sliders-h"></i>

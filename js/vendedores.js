@@ -377,34 +377,34 @@
     }
   }
 
-  function onAcao(e) {
-    if (state.readonly) return;
-    const btn = e.currentTarget;
-    const acao = btn.getAttribute('data-acao');
-    const id = decodeURIComponent(btn.getAttribute('data-id') || '');
-    const item = state.todos.find(v => v.id === id);
-    if (!item) return;
-    if (acao === 'editar') abrirModal(item, 'editar');
-    else if (acao === 'inspecionar') abrirModal(item, 'inspecionar');
-    else if (acao === 'desativar') (state.backend ? atualizarStatusAPI(item, 'inativo') : atualizarStatusLocal(item, 'inativo'));
-    else if (acao === 'ativar') (state.backend ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
-    else if (acao === 'aprovar') (state.backend ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
-    else if (acao === 'rejeitar') {
-      const confirmar = window.sitePopup
-        ? window.sitePopup.confirm('Tem certeza que deseja rejeitar este vendedor?', 'Confirmar')
-        : Promise.resolve(window.confirm('Tem certeza que deseja rejeitar este vendedor?'));
-      confirmar.then(ok => {
-        if (!ok) return;
-        if (state.backend) {
-          // Marca como inativo para remover a pendência e depois exclui o vendedor
-          atualizarStatusAPI(item, 'inativo').then(() => excluirVendorAPIDirect(item));
-        } else {
-          recusarCadastroLocal(item);
-        }
-      });
-    }
-    else if (acao === 'excluir' && state.backend) excluirVendorAPI(item);
+function onAcao(e) {
+  if (state.readonly) return;
+  const btn = e.currentTarget;
+  const acao = btn.getAttribute('data-acao');
+  const id = decodeURIComponent(btn.getAttribute('data-id') || '');
+  const item = state.todos.find(v => v.id === id);
+  if (!item) return;
+  if (acao === 'editar') abrirModal(item, 'editar');
+  else if (acao === 'inspecionar') abrirModal(item, 'inspecionar');
+  else if (acao === 'desativar') (state.backend && isNumericId(item.id) ? atualizarStatusAPI(item, 'inativo') : atualizarStatusLocal(item, 'inativo'));
+  else if (acao === 'ativar') (state.backend && isNumericId(item.id) ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
+  else if (acao === 'aprovar') (state.backend && isNumericId(item.id) ? atualizarStatusAPI(item, 'ativo') : atualizarStatusLocal(item, 'ativo'));
+  else if (acao === 'rejeitar') {
+    const confirmar = window.sitePopup
+      ? window.sitePopup.confirm('Tem certeza que deseja rejeitar este vendedor?', 'Confirmar')
+      : Promise.resolve(window.confirm('Tem certeza que deseja rejeitar este vendedor?'));
+    confirmar.then(ok => {
+      if (!ok) return;
+      if (state.backend && isNumericId(item.id)) {
+        // Marca como inativo para remover a pendência e depois exclui o vendedor
+        atualizarStatusAPI(item, 'inativo').then(() => excluirVendorAPIDirect(item));
+      } else {
+        recusarCadastroLocal(item);
+      }
+    });
   }
+  else if (acao === 'excluir') { if (state.backend && isNumericId(item.id)) excluirVendorAPI(item); else recusarCadastroLocal(item); }
+}
 
   function atualizarStatusLocal(item, novo) {
     if (state.readonly) return;
@@ -417,10 +417,15 @@
     render();
   }
 
-  async function atualizarStatusAPI(item, novo) {
-    const API_BASE = window.API_BASE || window.location.origin;
-    try {
-      const headers = { 'Content-Type': 'application/json' };
+async function atualizarStatusAPI(item, novo) {
+  const API_BASE = window.API_BASE || window.location.origin;
+  // IDs não numéricos representam cadastros locais; roteia para fluxo local
+  if (!isNumericId(item.id)) {
+    atualizarStatusLocal(item, novo);
+    return;
+  }
+  try {
+    const headers = { 'Content-Type': 'application/json' };
       try {
         if (typeof window.createDevAdminToken === 'function') {
           const tok = await window.createDevAdminToken();
@@ -625,43 +630,43 @@
     } catch (_) {}
   }
 
-  function renderBannerCadastro() {
-    try {
-      ensureBannerContainer();
-      const cont = EL.bannerCadastro;
-      if (!cont) return;
-      const pend = state.todos.find(v => (v.status || 'ativo') === 'pendente');
-      if (!pend) { cont.style.display = 'none'; return; }
-      const nomeLoja = (pend.nomeLoja || (pend.extras && pend.extras.nomeLoja) || '') || (pend.nome || '—');
-      const nameEl = cont.querySelector('#bannerNomeLoja');
-      if (nameEl) nameEl.textContent = nomeLoja ? `— ${nomeLoja}` : '';
-      cont.style.display = '';
-      const btnAceitar = cont.querySelector('#bannerAceitar');
-      const btnRecusar = cont.querySelector('#bannerRecusar');
-      if (btnAceitar && !btnAceitar.__bound) {
-        btnAceitar.__bound = true;
-        btnAceitar.addEventListener('click', () => {
-          (state.backend ? atualizarStatusAPI(pend, 'ativo') : atualizarStatusLocal(pend, 'ativo'));
+function renderBannerCadastro() {
+  try {
+    ensureBannerContainer();
+    const cont = EL.bannerCadastro;
+    if (!cont) return;
+    const pend = state.todos.find(v => (v.status || 'ativo') === 'pendente');
+    if (!pend) { cont.style.display = 'none'; return; }
+    const nomeLoja = (pend.nomeLoja || (pend.extras && pend.extras.nomeLoja) || '') || (pend.nome || '—');
+    const nameEl = cont.querySelector('#bannerNomeLoja');
+    if (nameEl) nameEl.textContent = nomeLoja ? `— ${nomeLoja}` : '';
+    cont.style.display = '';
+    const btnAceitar = cont.querySelector('#bannerAceitar');
+    const btnRecusar = cont.querySelector('#bannerRecusar');
+    if (btnAceitar && !btnAceitar.__bound) {
+      btnAceitar.__bound = true;
+      btnAceitar.addEventListener('click', () => {
+        (state.backend && isNumericId(pend.id) ? atualizarStatusAPI(pend, 'ativo') : atualizarStatusLocal(pend, 'ativo'));
+      });
+    }
+    if (btnRecusar && !btnRecusar.__bound) {
+      btnRecusar.__bound = true;
+      btnRecusar.addEventListener('click', () => {
+        const confirmar = window.sitePopup
+          ? window.sitePopup.confirm('Tem certeza que deseja recusar este cadastro?', 'Confirmar')
+          : Promise.resolve(window.confirm('Tem certeza que deseja recusar este cadastro?'));
+        confirmar.then(ok => {
+          if (!ok) return;
+          if (state.backend && isNumericId(pend.id)) {
+            atualizarStatusAPI(pend, 'inativo').then(() => excluirVendorAPIDirect(pend));
+          } else {
+            recusarCadastroLocal(pend);
+          }
         });
-      }
-      if (btnRecusar && !btnRecusar.__bound) {
-        btnRecusar.__bound = true;
-        btnRecusar.addEventListener('click', () => {
-          const confirmar = window.sitePopup
-            ? window.sitePopup.confirm('Tem certeza que deseja recusar este cadastro?', 'Confirmar')
-            : Promise.resolve(window.confirm('Tem certeza que deseja recusar este cadastro?'));
-          confirmar.then(ok => {
-            if (!ok) return;
-            if (state.backend) {
-              atualizarStatusAPI(pend, 'inativo').then(() => excluirVendorAPIDirect(pend));
-            } else {
-              recusarCadastroLocal(pend);
-            }
-          });
-        });
-      }
-    } catch (_) {}
-  }
+      });
+    }
+  } catch (_) {}
+}
   function fecharModal() {
     idEditando = null;
     if (EL.modal) {
@@ -671,18 +676,18 @@
     }
     try { document.body.classList.remove('modal-aberto'); } catch (_) {}
   }
-  function salvarEdicaoAtual() {
-    if (state.readonly) return;
-    if (!idEditando) return;
-    const nomeExib = (EL.editarNome && EL.editarNome.value || '').trim();
-    const cpf = (EL.editarCPF && EL.editarCPF.value || '').replace(/\D+/g, '');
-    const status = EL.editarStatus ? EL.editarStatus.value : undefined;
-    if (state.backend) {
-      salvarEdicaoAPI(idEditando, { nomeExib, cpf, status });
-    } else {
-      const extras = obterExtras(idEditando);
-      if (!extras) return;
-      if (nomeExib) { extras.nome = nomeExib; } else { delete extras.nome; }
+function salvarEdicaoAtual() {
+  if (state.readonly) return;
+  if (!idEditando) return;
+  const nomeExib = (EL.editarNome && EL.editarNome.value || '').trim();
+  const cpf = (EL.editarCPF && EL.editarCPF.value || '').replace(/\D+/g, '');
+  const status = EL.editarStatus ? EL.editarStatus.value : undefined;
+  if (state.backend && isNumericId(idEditando)) {
+    salvarEdicaoAPI(idEditando, { nomeExib, cpf, status });
+  } else {
+    const extras = obterExtras(idEditando);
+    if (!extras) return;
+    if (nomeExib) { extras.nome = nomeExib; } else { delete extras.nome; }
       if (cpf) { extras.documento = cpf; }
       if (typeof status !== 'undefined') { extras.status = status; }
       salvarExtras(idEditando, extras);
@@ -736,15 +741,20 @@
     }
   }
 
-  async function excluirVendorAPI(item) {
-    const API_BASE = window.API_BASE || window.location.origin;
-    const confirmar = window.sitePopup
-      ? window.sitePopup.confirm('Tem certeza que deseja excluir este vendedor?', 'Confirmar')
-      : Promise.resolve(window.confirm('Tem certeza que deseja excluir este vendedor?'));
-    const ok = await confirmar;
-    if (!ok) return;
-    try {
-      const headers = {};
+async function excluirVendorAPI(item) {
+  const API_BASE = window.API_BASE || window.location.origin;
+  const confirmar = window.sitePopup
+    ? window.sitePopup.confirm('Tem certeza que deseja excluir este vendedor?', 'Confirmar')
+    : Promise.resolve(window.confirm('Tem certeza que deseja excluir este vendedor?'));
+  const ok = await confirmar;
+  if (!ok) return;
+  // IDs não numéricos: tratar como pendência local
+  if (!isNumericId(item.id)) {
+    recusarCadastroLocal(item);
+    return;
+  }
+  try {
+    const headers = {};
       try {
         if (typeof window.createDevAdminToken === 'function') {
           const tok = await window.createDevAdminToken();
@@ -780,10 +790,15 @@
   }
 
   // Exclusão direta sem confirmação (usada na recusa)
-  async function excluirVendorAPIDirect(item) {
-    const API_BASE = window.API_BASE || window.location.origin;
-    try {
-      const headers = {};
+async function excluirVendorAPIDirect(item) {
+  const API_BASE = window.API_BASE || window.location.origin;
+  // IDs não numéricos: tratar como pendência local
+  if (!isNumericId(item.id)) {
+    recusarCadastroLocal(item);
+    return;
+  }
+  try {
+    const headers = {};
       try {
         if (typeof window.createDevAdminToken === 'function') {
           const tok = await window.createDevAdminToken();
@@ -834,6 +849,12 @@
   }
   function salvarExtras(email, extras) {
     try { localStorage.setItem('vendor:pending:' + email, JSON.stringify(extras)); } catch (_) {}
+  }
+
+  // Helper: verifica se ID é numérico para chamadas de API
+  function isNumericId(id) {
+    const s = String(id || '').trim();
+    return /^\d+$/.test(s);
   }
 
   // Utils

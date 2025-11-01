@@ -1,75 +1,92 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 5534;
-const ROOT = process.cwd();
+const root = process.cwd();
+const port = process.env.PREVIEW_PORT ? Number(process.env.PREVIEW_PORT) : 3012;
 
-const MIME = {
+const mime = {
   '.html': 'text/html; charset=utf-8',
-  '.htm': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
-  '.mjs': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
-  '.map': 'application/octet-stream'
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
 };
 
-function send(res, status, headers, body) {
-  res.writeHead(status, headers);
-  res.end(body);
-}
-
 function safeJoin(base, target) {
-  const p = path.posix.normalize('/' + target).replace(/^\/+/, '');
-  return path.join(base, p);
+  const targetPath = path.join(base, target);
+  const resolved = path.resolve(targetPath);
+  if (!resolved.startsWith(path.resolve(base))) return null;
+  return resolved;
 }
 
 const server = http.createServer((req, res) => {
   try {
-    const urlPath = decodeURIComponent(req.url.split('?')[0] || '/');
-    let filePath = urlPath;
-    if (filePath === '/' || filePath === '/index') filePath = '/index.html';
-    const abs = safeJoin(ROOT, filePath);
-    fs.stat(abs, (err, stat) => {
+    const parsed = url.parse(req.url);
+    let pathname = decodeURI(parsed.pathname || '/');
+    if (pathname === '/') pathname = '/index.html';
+    const filePath = safeJoin(root, pathname);
+    if (!filePath) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    fs.stat(filePath, (err, stats) => {
       if (err) {
-        send(res, 404, { 'Content-Type': 'text/plain; charset=utf-8' }, '404 Not Found');
-        return;
-      }
-      if (stat.isDirectory()) {
-        const fallback = path.join(abs, 'index.html');
-        fs.readFile(fallback, (e2, data2) => {
-          if (e2) {
-            send(res, 403, { 'Content-Type': 'text/plain; charset=utf-8' }, '403 Forbidden');
-            return;
-          }
-          send(res, 200, { 'Content-Type': MIME['.html'] || 'text/html; charset=utf-8' }, data2);
-        });
-        return;
-      }
-      const ext = path.extname(abs).toLowerCase();
-      const type = MIME[ext] || 'application/octet-stream';
-      fs.readFile(abs, (e, data) => {
-        if (e) {
-          send(res, 500, { 'Content-Type': 'text/plain; charset=utf-8' }, '500 Internal Server Error');
-          return;
+        // Try directory index
+        const dirIndex = safeJoin(filePath, 'index.html');
+        if (dirIndex) {
+          fs.stat(dirIndex, (err2, stats2) => {
+            if (!err2 && stats2.isFile()) {
+              const ext = path.extname(dirIndex).toLowerCase();
+              res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
+              fs.createReadStream(dirIndex).pipe(res);
+            } else {
+              res.writeHead(404);
+              res.end('Not Found');
+            }
+          });
+        } else {
+          res.writeHead(404);
+          res.end('Not Found');
         }
-        send(res, 200, { 'Content-Type': type }, data);
-      });
+        return;
+      }
+      if (stats.isDirectory()) {
+        const indexPath = path.join(filePath, 'index.html');
+        fs.stat(indexPath, (err3, stats3) => {
+          if (!err3 && stats3.isFile()) {
+            const ext = path.extname(indexPath).toLowerCase();
+            res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
+            fs.createReadStream(indexPath).pipe(res);
+          } else {
+            res.writeHead(403);
+            res.end('Directory listing forbidden');
+          }
+        });
+      } else if (stats.isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
+        fs.createReadStream(filePath).pipe(res);
+      } else {
+        res.writeHead(404);
+        res.end('Not Found');
+      }
     });
   } catch (e) {
-    send(res, 500, { 'Content-Type': 'text/plain; charset=utf-8' }, '500 Internal Server Error');
+    res.writeHead(500);
+    res.end('Internal Server Error');
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Static preview server running at http://localhost:${PORT}/`);
+server.listen(port, () => {
+  console.log(`Preview server running at http://localhost:${port}/`);
 });
 

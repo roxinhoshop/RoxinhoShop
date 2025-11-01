@@ -1,6 +1,6 @@
 // Configuração global de API com fallback automático e variável central
 (function(){
-  // Base fixa: todas as rotas de API vão para o backend em produção
+  // Ajuste: deixe vazio para usar window.location.origin via fallback
   const CONFIG_API_BASE = '';
 
   try {

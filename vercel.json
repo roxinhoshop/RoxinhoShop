@@ -4,6 +4,18 @@
     { 
       "source": "/api/(.*)", 
       "destination": "http://sd-br1.blazebr.com:26365/api/$1" 
+    },
+    { 
+      "source": "/auth/(.*)", 
+      "destination": "http://sd-br1.blazebr.com:26365/auth/$1" 
+    },
+    { 
+      "source": "/cadastro", 
+      "destination": "http://sd-br1.blazebr.com:26365/cadastro" 
+    },
+    { 
+      "source": "/login", 
+      "destination": "http://sd-br1.blazebr.com:26365/login" 
     }
   ],
   "cleanUrls": true,
